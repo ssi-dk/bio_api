@@ -1,10 +1,5 @@
 from abc import ABC
 
-try:
-    from persistence.bifrost_sample_template import bifrost_sample_template
-except ImportError:
-    from bio_api.persistence.bifrost_sample_template import bifrost_sample_template
-
 
 class Metadata(ABC):
     isolate_id: str or None
@@ -205,33 +200,3 @@ class Sequence():
     @sequence_type.setter
     def sequence_type(self, sequence_type: int):
         self.sample_doc['categories']['cgmlst']['report']['data']['sequence_type'] = sequence_type
-
-
-if __name__ == '__main__':
-    print("The next line show the field_mapping attribute of the Sequence class:")
-    print(Sequence.field_mapping)
-    print("Now we instantiate a Sequence without any arguments to the constructor.")
-    sequence = Sequence()
-    print("The newly created Sequence instance currently looks like:")
-    print(sequence.as_dict())
-    print("Now we set the sequence_id and print it.")
-    sequence.sequence_id = 'test_sequence_id'
-    print(sequence.sequence_id)
-    print("Now we set isolate_id and print it.")
-    sequence.isolate_id = 'test_isolate_id'
-    print(sequence.isolate_id)
-    print("Now we set owner and print it.")
-    sequence.owner = 'test_sequence_owner'
-    print(sequence.owner)
-    print("Now we set species and print it.")
-    sequence.species = 'test_sequence_species'
-    print(sequence.species)
-    print("Now we set sequence_type and print it.")
-    sequence.sequence_type = 11
-    print(sequence.sequence_type)
-    print("Now we print the whole Sequence again as a dict")
-    print(sequence.as_dict())
-    print()
-    print("Next, we'll create a Sequence from a sample dict.")
-    sequence = Sequence.from_bifrost_sample(sample_doc=bifrost_sample_template)
-    print(sequence.as_dict())

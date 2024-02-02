@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from fastapi import FastAPI
 from pandas import DataFrame, read_table
 
-from persistence import mongo
+import mongo
 from tree_maker import make_tree
 from qstat import consume_qstat
 

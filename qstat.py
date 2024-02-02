@@ -4,7 +4,7 @@ import datetime
 import pymongo
 from pymongo import InsertOne, DeleteMany, ReplaceOne, UpdateOne
 
-from persistence import mongo
+import mongo
 
 from aio_pika import connect_robust
 from aio_pika.patterns import RPC
