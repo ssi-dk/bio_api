@@ -9,21 +9,10 @@ WORKDIR /app
 
 # Install libraries for ReporTree - see https://github.com/insapathogenomics/ReporTree#installation-with-conda
 # RUN conda install -c etetoolkit -c anaconda -c bioconda python=3.8 biopython=1.77 pandas=1.1.3 numpy=1.19.2 grapetree=2.1 treecluster=1.0.3 ete3 scikit-learn cgmlst-dists git --yes
-RUN conda install pandas scipy git
-RUN conda install -c bioconda cgmlst-dists
-RUN conda install -c conda-forge aio-pika
+RUN conda install -f requirements.txt
 
 WORKDIR /app/ReporTree/
 ENV PATH="/app/ReporTree:${PATH}"
-
-# Install FastAPI
-RUN conda install -c conda-forge fastapi
-
-# Install Uvicorn
-RUN conda install "uvicorn[standard]"
-
-# Install PyMongo
-RUN conda install pymongo
 
 # Install code for REST interface
 WORKDIR /app
