@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+#    rabbitmq:
+#      image: rabbitmq
+#      healthcheck:
+#        test: [ "CMD", "rabbitmqctl", "status"]
+#        interval: 5s
+#        timeout: 20s
+#        retries: 5
+  
+#    hpc_dispatcher:
+#      volumes:
+#        - ./hpc_dispatcher:/app
+#      build: hpc_dispatcher
+#      stdin_open: true
+#      tty: true
+#      depends_on:
+#        rabbitmq:
+#          condition: service_healthy
+   
+#   mongo:
+#     image: mongo:4.4 # Computerome runs 4.2.8
+#     volumes:
+#       - ./data/mongo4:/data/db
+#       - ./dumps/mongo:/dumps
+#       - ./scripts/mongo:/scripts
+
+  bio_api:
+    build: .
+    volumes:
+      - ./tmp:/tmp
+      - .:/app
+    ports:
+      - "8001:8001"
+    tty: true
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
+    # depends_on:
+    #   rabbitmq:
+    #     condition: service_healthy
+    #   hpc_dispatcher:
+    #     condition: service_started
+    #   mongo:
+    #     condition: service_started
+
+  test_client:
+    build: ./test_client
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+      - ./rt_runs:/rt_runs
+      - ./test_data:/mnt/test_data
+    ports:
+      - "8000:8000"
+    tty: true
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    depends_on:
+      bio_api:
+        condition: service_started
+      # mongo:
+      #   condition: service_started
+      # rabbitmq:
+      #   condition: service_healthy
+
