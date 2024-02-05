@@ -13,7 +13,7 @@ from pandas import DataFrame, read_table
 
 import mongo
 from tree_maker import make_tree
-from qstat import consume_qstat
+# from qstat import consume_qstat
 
 app = FastAPI()
 # mongo_connection = getenv('MONGO_CONNECTION')
@@ -165,4 +165,4 @@ async def list_unfinished_hpc_jobs():
 def startup():
     loop = asyncio.get_event_loop()
     # use the same loop to consume
-    asyncio.ensure_future(consume_qstat(loop))
+    # asyncio.ensure_future(consume_qstat(loop))
