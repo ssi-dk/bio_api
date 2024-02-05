@@ -45,18 +45,13 @@ services:
 
   test_client:
     build: ./test_client
-    command: python manage.py runserver 0.0.0.0:8000
+    command: pytest
     volumes:
       - .:/code
-      - ./rt_runs:/rt_runs
-      - ./test_data:/mnt/test_data
+      - ./test_data:/test_data
     ports:
       - "8000:8000"
     tty: true
-    environment:
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
     depends_on:
       bio_api:
         condition: service_started
