@@ -47,10 +47,7 @@ services:
     build: ./test_client
     command: pytest
     volumes:
-      - .:/code
-      - ./test_data:/test_data
-    ports:
-      - "8000:8000"
+      - ./test_client:/app
     tty: true
     depends_on:
       bio_api:

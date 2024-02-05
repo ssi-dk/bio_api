@@ -1,6 +1,6 @@
 import requests
 
-base_url = 'bio_api:7000'
+base_url = 'http://bio_api:8001'
 
 def hello_world():
     url = base_url + '/'
