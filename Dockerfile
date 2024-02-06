@@ -18,8 +18,8 @@ RUN mkdir /data
 VOLUME /data
 
 # Document which ports are exposed
-EXPOSE 7000
+# EXPOSE 7000
 
 # Start Uvicorn and listen on port
 WORKDIR /app
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7000", "--reload"]
+# ENTRYPOINT ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7000", "--reload"]

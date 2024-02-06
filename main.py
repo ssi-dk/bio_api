@@ -5,7 +5,6 @@ from io import StringIO
 from pathlib import Path
 import traceback
 import asyncio
-import json
 
 from pydantic import BaseModel
 from fastapi import FastAPI
@@ -126,43 +125,3 @@ async def hc_tree(rq: HCTreeCalcRequest):
         response['error'] = str(e)
         print(traceback.format_exc())
     return response
-
-@app.get("/hpc_jobs/list/all/")
-async def list_all_hpc_jobs():
-    mongo_cursor = mongo_api.find_all_jobs()
-    # timestamp only exists in mongodb, all other values come from the qstat command
-    header_list = ["timestamp", "job_id", "name", "username", "time_use", "s", "queue"]
-    job_list = []
-    for job in mongo_cursor:
-        job_list.append(
-            [ job[key] for key in header_list ])
-
-    response = {
-        "header_list": header_list,
-        "job_list": job_list
-        }
-
-    return response
-
-@app.get("/hpc_jobs/list/unfinished/")
-async def list_unfinished_hpc_jobs():
-    mongo_cursor = mongo_api.find_unfinished_jobs()
-    # timestamp only exists in mongodb, all other values come from the qstat command
-    header_list = ["timestamp", "job_id", "name", "username", "time_use", "s", "queue"]
-    job_list = []
-    for job in mongo_cursor:
-        job_list.append(
-            [ job[key] for key in header_list ])
-
-    response = {
-        "header_list": header_list,
-        "job_list": job_list
-        }
-
-    return response
-
-@app.on_event('startup')
-def startup():
-    loop = asyncio.get_event_loop()
-    # use the same loop to consume
-    # asyncio.ensure_future(consume_qstat(loop))
