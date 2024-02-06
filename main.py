@@ -29,9 +29,12 @@ class ProcessingRequest(BaseModel):
         super().__init__( **kwargs)
         self.id = uuid.uuid4()
 
-class DistanceMatrixRequest(ProcessingRequest):
-     sequence_ids: list
+class DMFromIdsRequest(ProcessingRequest):
+    sequence_ids: list
 
+class DMFromProfilesRequest(BaseModel):
+    headers: list
+    profiles: dict
 
 class HCTreeCalcRequest(ProcessingRequest):
     """Represents a REST request for a tree calculation based on hierarchical clustering.
@@ -86,8 +89,18 @@ async def dist_mat_from_allele_profile(allele_mx:DataFrame, job_id: uuid.UUID):
 def root():
     return {"message": "Hello World"}
 
+@app.post("/v1/distance_matrix/from_allele_profiles")
+async def dist_mat_from_allele_profiles(rq: DMFromProfilesRequest):
+    print("Requested distance matrix from allele profile")
+    print(f"Header count :{len(rq.headers)}")
+    print(f"Profile count :{len(rq.profiles)}")
+
+    return {
+        "status": "OK",
+        }
+
 @app.post("/distance_matrix/from_ids")
-async def dist_mat_from_ids(rq: DistanceMatrixRequest):
+async def dist_mat_from_ids(rq: DMFromIdsRequest):
     """If this code is at some point going to be used in a context where the sample 'name' cannot be
     guaranteed to be unique, one way of getting around it would be to implement a namespace structure with
     dots as separators, like <sample_name>.ssi.dk
@@ -95,7 +108,7 @@ async def dist_mat_from_ids(rq: DistanceMatrixRequest):
     print("Requesting distance matrix with these ids:")
     print(rq.sequence_ids)
     try:
-        mongo_cursor = mongo_api.get_sequences(rq.sequence_ids)
+        mongo_cursor = None #mongo_api.get_sequences(rq.sequence_ids)
     except mongo.MongoAPIError as e:
         return {
         "job_id": rq.id,
