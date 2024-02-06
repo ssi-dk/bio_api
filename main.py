@@ -90,7 +90,7 @@ def root():
     return {"message": "Hello World"}
 
 @app.post("/v1/distance_matrix/from_allele_profiles")
-async def dist_mat_from_allele_profiles(rq: DMFromProfilesRequest):
+async def dist_mat_from_allele_profiles_rq(rq: DMFromProfilesRequest):
     print("Requested distance matrix from allele profile")
     print(f"Header count :{len(rq.headers)}")
     print(f"Profile count :{len(rq.profiles)}")
