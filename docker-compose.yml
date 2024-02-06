@@ -45,7 +45,6 @@ services:
 
   test_client:
     build: ./test_client
-    command: pytest
     volumes:
       - ./test_client:/app
     tty: true
