@@ -95,6 +95,8 @@ async def dist_mat_from_allele_profiles_rq(rq: DMFromProfilesRequest):
     print(f"Header count :{len(rq.headers)}")
     print(f"Profile count :{len(rq.profiles)}")
 
+    # Faktisk er det meste allerede implementeret i dist_mat_from_allele_profile.
+
     return {
         "status": "OK",
         }
