@@ -106,11 +106,14 @@ async def dmx_from_request(rq: DMFromProfilesRequest):
         dict_keys_set = set(profile.keys())
         assert dict_keys_set == rq.loci
 
-    df = DataFrame.from_dict(rq.profiles, 'index', dtype=str)
-    print(df)
-
+    allele_mx_df = DataFrame.from_dict(rq.profiles, 'index', dtype=str)
+    print("Allele matrix:")
+    print(allele_mx_df)
+    job_id = uuid.uuid4()
+    dist_mx_df: DataFrame = await dist_mat_from_allele_profile(allele_mx_df, job_id)
     return {
-        "status": "OK",
+        "job_id": job_id,
+        "distance_matrix": dist_mx_df.to_dict(orient='tight')
         }
 
 @app.post("/distance_matrix/from_ids")
