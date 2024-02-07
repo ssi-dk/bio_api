@@ -60,13 +60,6 @@ async def allele_mx_from_bifrost_mongo(mongo_cursor):
         full_dict[mongo.get_sequence_id(mongo_item)] = row
     return DataFrame.from_dict(full_dict, 'index', dtype=str)
 
-async def allele_mx_from_request(request:DMFromProfilesRequest):
-    # Generate an allele matrix with all the allele profiles from a DMFromProfilesRequest.
-    for profile in request.profiles.values():
-        dict_keys_set = set(profile.keys())
-        assert dict_keys_set == request.loci
-    return DataFrame.from_dict(request.profiles, 'index', dtype=str)
-
 async def dist_mat_from_allele_profile(allele_mx:DataFrame, job_id: uuid.UUID):
     print("Allele mx:")
     print(allele_mx)
@@ -107,7 +100,13 @@ async def dmx_from_request(rq: DMFromProfilesRequest):
 
     # Faktisk er det meste allerede implementeret i dist_mat_from_allele_profile.
     # Men først skal vi have lavet en DataFrame:
-    df = await allele_mx_from_request(rq)
+
+    # TODO should probably be a validate function in the DMFromProfilesRequest class
+    for profile in rq.profiles.values():
+        dict_keys_set = set(profile.keys())
+        assert dict_keys_set == rq.loci
+
+    df = DataFrame.from_dict(rq.profiles, 'index', dtype=str)
     print(df)
 
     return {
