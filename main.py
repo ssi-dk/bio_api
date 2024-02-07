@@ -33,7 +33,7 @@ class DMFromIdsRequest(ProcessingRequest):
     sequence_ids: list
 
 class DMFromProfilesRequest(BaseModel):
-    headers: list
+    loci: list
     profiles: dict
 
 class HCTreeCalcRequest(ProcessingRequest):
@@ -89,10 +89,10 @@ async def dist_mat_from_allele_profile(allele_mx:DataFrame, job_id: uuid.UUID):
 def root():
     return {"message": "Hello World"}
 
-@app.post("/v1/distance_matrix/from_allele_profiles")
-async def dist_mat_from_allele_profiles_rq(rq: DMFromProfilesRequest):
+@app.post("/v1/distance_matrix/from_profiles")
+async def dmx_from_profiles_rq(rq: DMFromProfilesRequest):
     print("Requested distance matrix from allele profile")
-    print(f"Header count :{len(rq.headers)}")
+    print(f"Locus count :{len(rq.loci)}")
     print(f"Profile count :{len(rq.profiles)}")
 
     # Faktisk er det meste allerede implementeret i dist_mat_from_allele_profile.
