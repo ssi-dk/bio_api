@@ -99,6 +99,7 @@ async def dmx_from_request(rq: DMFromProfilesRequest):
     print(f"Profile count :{len(rq.profiles)}")
 
     # Faktisk er det meste allerede implementeret i dist_mat_from_allele_profile.
+    # Men først skal vi have lavet en DataFrame.
 
     return {
         "status": "OK",
