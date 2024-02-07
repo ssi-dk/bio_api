@@ -89,8 +89,11 @@ async def dist_mat_from_allele_profile(allele_mx:DataFrame, job_id: uuid.UUID):
 def root():
     return {"message": "Hello World"}
 
-@app.post("/v1/distance_matrix/from_profiles")
-async def dmx_from_profiles_rq(rq: DMFromProfilesRequest):
+@app.post("/v1/distance_matrix/from_request")
+async def dmx_from_request(rq: DMFromProfilesRequest):
+    """
+    Return a distance matrix from allele profiles that are included directly in the request
+    """
     print("Requested distance matrix from allele profile")
     print(f"Locus count :{len(rq.loci)}")
     print(f"Profile count :{len(rq.profiles)}")

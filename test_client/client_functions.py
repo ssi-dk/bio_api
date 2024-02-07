@@ -7,8 +7,8 @@ def call_hello_world():
     rest_response = requests.get(url)
     return rest_response
 
-def call_dmx_from_profiles(loci:list, profiles:dict):
-    url = base_url + '/v1/distance_matrix/from_profiles'
+def call_dmx_from_request(loci:list, profiles:dict):
+    url = base_url + '/v1/distance_matrix/from_request'
     rest_response = requests.post(
         url,
         json={
