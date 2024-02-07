@@ -33,7 +33,7 @@ class DMFromIdsRequest(ProcessingRequest):
     sequence_ids: list
 
 class DMFromProfilesRequest(BaseModel):
-    loci: list
+    loci: set
     profiles: dict
 
 class HCTreeCalcRequest(ProcessingRequest):
@@ -59,6 +59,13 @@ async def allele_mx_from_bifrost_mongo(mongo_cursor):
         assert row_allele_names == allele_names
         full_dict[mongo.get_sequence_id(mongo_item)] = row
     return DataFrame.from_dict(full_dict, 'index', dtype=str)
+
+async def allele_mx_from_request(request:DMFromProfilesRequest):
+    # Generate an allele matrix with all the allele profiles from a DMFromProfilesRequest.
+    for profile in request.profiles.values():
+        dict_keys_set = set(profile.keys())
+        assert dict_keys_set == request.loci
+    return DataFrame.from_dict(request.profiles, 'index', dtype=str)
 
 async def dist_mat_from_allele_profile(allele_mx:DataFrame, job_id: uuid.UUID):
     print("Allele mx:")
@@ -95,11 +102,13 @@ async def dmx_from_request(rq: DMFromProfilesRequest):
     Return a distance matrix from allele profiles that are included directly in the request
     """
     print("Requested distance matrix from allele profile")
-    print(f"Locus count :{len(rq.loci)}")
-    print(f"Profile count :{len(rq.profiles)}")
+    print(f"Locus count: {len(rq.loci)}")
+    print(f"Profile count: {len(rq.profiles)}")
 
     # Faktisk er det meste allerede implementeret i dist_mat_from_allele_profile.
-    # Men først skal vi have lavet en DataFrame.
+    # Men først skal vi have lavet en DataFrame:
+    df = await allele_mx_from_request(rq)
+    print(df)
 
     return {
         "status": "OK",
