@@ -17,3 +17,13 @@ def call_dmx_from_request(loci:list, profiles:dict):
             }
     )
     return rest_response
+
+def call_dmx_from_local_file(file_name: str):
+    url = base_url + '/v1/distance_matrix/from_local_file'
+    rest_response = requests.post(
+        url,
+        json={
+            'file_name': file_name
+            }
+    )
+    return rest_response

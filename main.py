@@ -38,7 +38,7 @@ class DMFromProfilesRequest(BaseModel):
     profiles: dict
 
 class DMFromLocalFileRequest(BaseModel):
-    filename: str
+    file_name: str
 
 class HCTreeCalcRequest(ProcessingRequest):
     """Represents a REST request for a tree calculation based on hierarchical clustering.
@@ -89,6 +89,29 @@ async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: uuid.UUID):
     print(df)
     return df
 
+async def dist_mx_from_local_file(file_name: str):
+    print(f"File name: {file_name}")
+    file_path = Path(DATADIR, file_name)
+    sp = await asyncio.create_subprocess_shell(f"ls -l {file_path}",
+    # sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {file_path}")
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE)
+    stdout, stderr = await sp.communicate()
+
+    await sp.wait()
+    if sp.returncode != 0:
+        errmsg = (f"Could not run cgmlst-dists on {str(file_path)}!")
+        raise OSError(errmsg + "\n\n" + stderr.decode('utf-8'))
+
+    output = StringIO(stdout.decode('utf-8'))
+    print( output)
+    # df = read_table(StringIO(stdout.decode('utf-8')))
+    # df.rename(columns = {"cgmlst-dists": "ids"}, inplace = True)
+    # df = df.set_index('ids')
+    # print("df from cgmlst-dists:")
+    # print(df)
+    return output
+
 @app.get("/")
 def root():
     return {"message": "Hello World"}
@@ -118,17 +141,16 @@ async def dmx_from_request(rq: DMFromProfilesRequest):
         "distance_matrix": dist_mx_df.to_dict(orient='tight')
         }
 
-# @app.post("/v1/distance_matrix/from_local_file")
-# async def dmx_from_local_file(rq: DMFromLocalFileRequest):
-#     """
-#     Return a distance matrix from allele profiles defined in a local tsv file in the Bio API container
-#     """
-#     job_id = uuid.uuid4()
-#     dist_mx_df: DataFrame = ...
-#     return {
-#         "job_id": job_id,
-#         "distance_matrix": dist_mx_df.to_dict(orient='tight')
-#         }
+@app.post("/v1/distance_matrix/from_local_file")
+async def dmx_from_local_file(rq: DMFromLocalFileRequest):
+    """
+    Return a distance matrix from allele profiles defined in a local tsv file in the Bio API container
+    """
+    dist_mx_df: DataFrame = await dist_mx_from_local_file(rq.file_name)
+    return {
+        "distance_matrix": dist_mx_df
+        # "distance_matrix": dist_mx_df.to_dict(orient='tight')
+        }
 
 #^^^ NEW
 
