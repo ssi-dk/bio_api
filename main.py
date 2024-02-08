@@ -102,13 +102,12 @@ async def dist_mx_from_local_file(file_name: str):
         errmsg = (f"Could not run cgmlst-dists on {str(file_path)}!")
         raise OSError(errmsg + "\n\n" + stderr.decode('utf-8'))
 
-    output = StringIO(stdout.decode('utf-8'))
     df = read_table(StringIO(stdout.decode('utf-8')))
     df.rename(columns = {"cgmlst-dists": "ids"}, inplace = True)
     df = df.set_index('ids')
     print("df from cgmlst-dists:")
     print(df)
-    return output
+    return df
 
 @app.get("/")
 def root():
@@ -146,8 +145,7 @@ async def dmx_from_local_file(rq: DMFromLocalFileRequest):
     """
     dist_mx_df: DataFrame = await dist_mx_from_local_file(rq.file_name)
     return {
-        "distance_matrix": dist_mx_df
-        # "distance_matrix": dist_mx_df.to_dict(orient='tight')
+        "distance_matrix": dist_mx_df.to_dict(orient='tight')
         }
 
 #^^^ NEW
