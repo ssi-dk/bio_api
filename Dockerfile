@@ -10,12 +10,8 @@ WORKDIR /app
 RUN mamba install --file requirements_general.txt
 RUN mamba install -c bioconda --file requirements_bioconda.txt
 
-# Define volumes
-RUN mkdir /test_data
-VOLUME /test_data
-
-RUN mkdir /data
 VOLUME /data
+VOLUME /tmp
 
 # Document which ports are exposed
 # EXPOSE 7000

@@ -162,3 +162,4 @@ cython_debug/
 # My own additions
 *_example.py
 tmp/
+data/

@@ -29,8 +29,9 @@ services:
   bio_api:
     build: .
     volumes:
-      - ./tmp:/tmp
       - .:/app
+      - ./data:/data
+      - ./tmp:/tmp
     ports:
       - "8001:8001"
     tty: true

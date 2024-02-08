@@ -7,9 +7,3 @@ COPY . /app/
 WORKDIR /app
 
 RUN python -m pip install -r requirements.txt
-
-# Define volumes
-RUN mkdir /test_data
-VOLUME /test_data
-
-# ENTRYPOINT [ "pytest" ]
