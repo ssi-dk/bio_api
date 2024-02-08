@@ -92,8 +92,7 @@ async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: uuid.UUID):
 async def dist_mx_from_local_file(file_name: str):
     print(f"File name: {file_name}")
     file_path = Path(DATADIR, file_name)
-    sp = await asyncio.create_subprocess_shell(f"ls -l {file_path}",
-    # sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {file_path}")
+    sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {file_path}",
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE)
     stdout, stderr = await sp.communicate()
@@ -104,12 +103,11 @@ async def dist_mx_from_local_file(file_name: str):
         raise OSError(errmsg + "\n\n" + stderr.decode('utf-8'))
 
     output = StringIO(stdout.decode('utf-8'))
-    print( output)
-    # df = read_table(StringIO(stdout.decode('utf-8')))
-    # df.rename(columns = {"cgmlst-dists": "ids"}, inplace = True)
-    # df = df.set_index('ids')
-    # print("df from cgmlst-dists:")
-    # print(df)
+    df = read_table(StringIO(stdout.decode('utf-8')))
+    df.rename(columns = {"cgmlst-dists": "ids"}, inplace = True)
+    df = df.set_index('ids')
+    print("df from cgmlst-dists:")
+    print(df)
     return output
 
 @app.get("/")
