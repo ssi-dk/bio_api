@@ -19,6 +19,7 @@ app = FastAPI()
 # mongo_api = mongo.MongoAPI(mongo_connection)
 
 TMPDIR = getenv('TMPDIR', '/tmp')
+DATADIR = getenv('DATADIR', '/data')
 
 
 class ProcessingRequest(BaseModel):
@@ -35,6 +36,9 @@ class DMFromIdsRequest(ProcessingRequest):
 class DMFromProfilesRequest(BaseModel):
     loci: set
     profiles: dict
+
+class DMFromLocalFileRequest(BaseModel):
+    filename: str
 
 class HCTreeCalcRequest(ProcessingRequest):
     """Represents a REST request for a tree calculation based on hierarchical clustering.
@@ -60,7 +64,7 @@ async def allele_mx_from_bifrost_mongo(mongo_cursor):
         full_dict[mongo.get_sequence_id(mongo_item)] = row
     return DataFrame.from_dict(full_dict, 'index', dtype=str)
 
-async def dist_mat_from_allele_profile(allele_mx:DataFrame, job_id: uuid.UUID):
+async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: uuid.UUID):
     print("Allele mx:")
     print(allele_mx)
     # save allele matrix to a file that cgmlst-dists can use for input
@@ -108,25 +112,19 @@ async def dmx_from_request(rq: DMFromProfilesRequest):
 
     allele_mx_df = DataFrame.from_dict(rq.profiles, 'index', dtype=str)
     job_id = uuid.uuid4()
-    dist_mx_df: DataFrame = await dist_mat_from_allele_profile(allele_mx_df, job_id)
+    dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
     return {
         "job_id": job_id,
         "distance_matrix": dist_mx_df.to_dict(orient='tight')
         }
 
 # @app.post("/v1/distance_matrix/from_local_file")
-# async def dmx_from_local_file(rq: DMFromProfilesRequest):
+# async def dmx_from_local_file(rq: DMFromLocalFileRequest):
 #     """
 #     Return a distance matrix from allele profiles defined in a local tsv file in the Bio API container
 #     """
-#     print("Requested distance matrix from local file")
-#     print(f"Locus count: {len(rq.loci)}")
-#     print(f"Profile count: {len(rq.profiles)}")
-
-#     #TODO reuse as much as possible between distance matrix functions
-#     allele_mx_df = DataFrame.from_dict(rq.profiles, 'index', dtype=str)
 #     job_id = uuid.uuid4()
-#     dist_mx_df: DataFrame = await dist_mat_from_allele_profile(allele_mx_df, job_id)
+#     dist_mx_df: DataFrame = ...
 #     return {
 #         "job_id": job_id,
 #         "distance_matrix": dist_mx_df.to_dict(orient='tight')
@@ -156,7 +154,7 @@ async def dist_mat_from_ids(rq: DMFromIdsRequest):
         "job_id": rq.id,
         "error": e
         }
-    dist_mx_df: DataFrame = await dist_mat_from_allele_profile(allele_mx_df, rq.id)
+    dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, rq.id)
     return {
         "job_id": rq.id,
         "distance_matrix": dist_mx_df.to_dict(orient='tight')
