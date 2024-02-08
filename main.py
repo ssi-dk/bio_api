@@ -89,6 +89,11 @@ async def dist_mat_from_allele_profile(allele_mx:DataFrame, job_id: uuid.UUID):
 def root():
     return {"message": "Hello World"}
 
+def validate_profiles(loci: set, profiles:dict):
+    for profile in profiles.values():
+        dict_keys_set = set(profile.keys())
+        assert dict_keys_set == loci
+
 @app.post("/v1/distance_matrix/from_request")
 async def dmx_from_request(rq: DMFromProfilesRequest):
     """
@@ -98,13 +103,8 @@ async def dmx_from_request(rq: DMFromProfilesRequest):
     print(f"Locus count: {len(rq.loci)}")
     print(f"Profile count: {len(rq.profiles)}")
 
-    # Faktisk er det meste allerede implementeret i dist_mat_from_allele_profile.
-    # Men først skal vi have lavet en DataFrame:
-
-    # TODO should probably be a validate function in the DMFromProfilesRequest class
-    for profile in rq.profiles.values():
-        dict_keys_set = set(profile.keys())
-        assert dict_keys_set == rq.loci
+    validate_profiles(rq.loci, rq.profiles)
+    print("Profiles validated")
 
     allele_mx_df = DataFrame.from_dict(rq.profiles, 'index', dtype=str)
     job_id = uuid.uuid4()
@@ -113,6 +113,26 @@ async def dmx_from_request(rq: DMFromProfilesRequest):
         "job_id": job_id,
         "distance_matrix": dist_mx_df.to_dict(orient='tight')
         }
+
+# @app.post("/v1/distance_matrix/from_local_file")
+# async def dmx_from_local_file(rq: DMFromProfilesRequest):
+#     """
+#     Return a distance matrix from allele profiles defined in a local tsv file in the Bio API container
+#     """
+#     print("Requested distance matrix from local file")
+#     print(f"Locus count: {len(rq.loci)}")
+#     print(f"Profile count: {len(rq.profiles)}")
+
+#     #TODO reuse as much as possible between distance matrix functions
+#     allele_mx_df = DataFrame.from_dict(rq.profiles, 'index', dtype=str)
+#     job_id = uuid.uuid4()
+#     dist_mx_df: DataFrame = await dist_mat_from_allele_profile(allele_mx_df, job_id)
+#     return {
+#         "job_id": job_id,
+#         "distance_matrix": dist_mx_df.to_dict(orient='tight')
+#         }
+
+#^^^ NEW
 
 @app.post("/distance_matrix/from_ids")
 async def dist_mat_from_ids(rq: DMFromIdsRequest):
