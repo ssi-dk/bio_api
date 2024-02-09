@@ -158,7 +158,7 @@ async def dist_mat_from_ids(rq: DMFromIdsRequest):
     print("Requesting distance matrix with these ids:")
     print(rq.sequence_ids)
     try:
-        mongo_cursor = None #mongo_api.get_sequences(rq.sequence_ids)
+        mongo_cursor = mongo_api.get_sequences(rq.sequence_ids)
     except mongo.MongoAPIError as e:
         return {
         "job_id": rq.id,
