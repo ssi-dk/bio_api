@@ -154,26 +154,27 @@ async def dmx_from_mongodb(rq: DMXFromMongoIsdRequest):
     """
     Return a distance matrix from allele profiles defined in MongoDB documents
     """
-    print("Requesting distance matrix with these ids:")
-    print(rq.sequence_ids)
     try:
-        mongo_cursor = mongo_api.get_sequences(rq.sequence_ids)
+        mongo_cursor = await mongo_api.get_field_data(
+            collection=rq.collection,
+            path_elements=rq.path_elements,
+            mongo_ids=rq.mongo_ids
+        )
     except mongo.MongoAPIError as e:
         return {
-        "job_id": rq.id,
         "error": str(e)
         }
-    try:
-        allele_mx_df: DataFrame = await allele_mx_from_bifrost_mongo(mongo_cursor)
-    except StopIteration as e:
-        return {
-        "job_id": rq.id,
-        "error": e
-        }
-    dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, rq.id)
+    # try:
+    #     allele_mx_df: DataFrame = await allele_mx_from_bifrost_mongo(mongo_cursor)
+    # except StopIteration as e:
+    #     return {
+    #     "job_id": rq.id,
+    #     "error": e
+    #     }
+    # dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, rq.id)
     return {
         "job_id": rq.id,
-        "distance_matrix": dist_mx_df.to_dict(orient='tight')
+        #"distance_matrix": dist_mx_df.to_dict(orient='tight')
         }
 
 #^^^ NEW
