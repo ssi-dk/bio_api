@@ -24,7 +24,6 @@ def get_sequence_id(structure: dict):
 def get_alleles(structure: dict):
     # TODO: use glom? https://github.com/mahmoud/glom
     all_alleles:dict = structure['categories']['cgmlst']['report']['alleles']
-    # Reduce the number of loci processed by cgmlst-dists to prevent it from running out of memory on laptop
     my_alleles = dict()
     for locus in all_alleles.keys():
         my_alleles[locus] = all_alleles[locus]
