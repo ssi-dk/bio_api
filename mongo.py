@@ -16,24 +16,6 @@ SEQUENCE_FIELD_MAPPING: dict = {
     'fastq_path_pair': 'categories.paired_reads.summary.data',
 }
 
-LOCUS_START_NUMBER = 32000
-LOCUS_END_NUMBER = 33000
-
-# Handy shortcuts when importing JSON data into Python code
-true = True
-false = False
-null = None
-
-def BinData(integer, string):
-    """"Dummy function - can be used when importing a MongoDB document as a hardcoded Python dict"""
-    return string
-
-def ISODate(date_str: str):
-    """"Can be used when importing a MongoDB document as a hardcoded dict in Python.
-    Input format: 2020-01-04T13:03:00Z"""
-    return date(date_str)
-
-
 def get_sequence_id(structure: dict):
     # TODO: use glom? https://github.com/mahmoud/glom
     return structure['categories']['sample_info']['summary']['sofi_sequence_id']
@@ -45,9 +27,7 @@ def get_alleles(structure: dict):
     # Reduce the number of loci processed by cgmlst-dists to prevent it from running out of memory on laptop
     my_alleles = dict()
     for locus in all_alleles.keys():
-        locus_number = int(locus[-5:])
-        if LOCUS_START_NUMBER < locus_number < LOCUS_END_NUMBER:
-            my_alleles[locus] = all_alleles[locus]
+        my_alleles[locus] = all_alleles[locus]
     return my_alleles
 
 def profile_diffs(other_profile:dict, ref_profile, unknowns_are_diffs:bool=True):
