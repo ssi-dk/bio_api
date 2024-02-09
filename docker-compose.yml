@@ -1,6 +1,12 @@
 version: "3.9"
 
-services:
+services:   
+  mongodb:
+    image: mongo:4.4
+    volumes:
+      - ./data/mongodb:/data/db
+      - ./dumps/mongodb:/dumps
+
 #    rabbitmq:
 #      image: rabbitmq
 #      healthcheck:
@@ -18,13 +24,6 @@ services:
 #      depends_on:
 #        rabbitmq:
 #          condition: service_healthy
-   
-#   mongo:
-#     image: mongo:4.4 # Computerome runs 4.2.8
-#     volumes:
-#       - ./data/mongo4:/data/db
-#       - ./dumps/mongo:/dumps
-#       - ./scripts/mongo:/scripts
 
   bio_api:
     build: .
@@ -36,12 +35,12 @@ services:
       - "8001:8001"
     tty: true
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
-    # depends_on:
+    depends_on:
+        mongodb:
+          condition: service_started
     #   rabbitmq:
     #     condition: service_healthy
     #   hpc_dispatcher:
-    #     condition: service_started
-    #   mongo:
     #     condition: service_started
 
   test_client:
@@ -52,7 +51,7 @@ services:
     depends_on:
       bio_api:
         condition: service_started
-      # mongo:
+      # mongodb:
       #   condition: service_started
       # rabbitmq:
       #   condition: service_healthy
