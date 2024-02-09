@@ -15,8 +15,7 @@ from tree_maker import make_tree
 # from qstat import consume_qstat
 
 app = FastAPI()
-# mongo_connection = getenv('MONGO_CONNECTION')
-# mongo_api = mongo.MongoAPI(mongo_connection)
+mongo_api = mongo.MongoAPI(getenv('MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test'))
 
 TMPDIR = getenv('TMPDIR', '/tmp')
 DATADIR = getenv('DATADIR', '/data')

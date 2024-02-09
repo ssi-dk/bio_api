@@ -16,14 +16,6 @@ SEQUENCE_FIELD_MAPPING: dict = {
     'fastq_path_pair': 'categories.paired_reads.summary.data',
 }
 
-SEQUENCE_INDEXES: dict = (
-    'owner',
-    'sequence_id',
-    'sample_id',
-    'species',
-    'sequence_type',
-)
-
 LOCUS_START_NUMBER = 32000
 LOCUS_END_NUMBER = 33000
 
@@ -89,16 +81,10 @@ class MongoAPI:
     def __init__(self,
         connection_string: str,
         sequence_field_mapping: dict=None,
-        sequence_indexes: dict=None
     ):
         self.connection = pymongo.MongoClient(connection_string)
         self.db = self.connection.get_database()
         self.sequence_field_mapping: dict = sequence_field_mapping or SEQUENCE_FIELD_MAPPING
-        self.sequence_indexes:dict = sequence_indexes or SEQUENCE_INDEXES
-        for key in self.sequence_indexes:
-            index_field = self.sequence_field_mapping[key]
-            print(f"Ensuring index on {index_field}")
-            self.db.samples.create_index(index_field)
 
     # Get samples from MongoDB object ids
     def get_samples(
