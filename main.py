@@ -34,11 +34,11 @@ class DMXFromMongoIsdRequest(ProcessingRequest):
     path_elements: list
     mongo_ids: set
 
-class DMFromProfilesRequest(BaseModel):
+class DMXFromProfilesRequest(BaseModel):
     loci: set
     profiles: dict
 
-class DMFromLocalFileRequest(BaseModel):
+class DMXFromLocalFileRequest(BaseModel):
     file_name: str
 
 class HCTreeCalcRequest(ProcessingRequest):
@@ -120,7 +120,7 @@ def validate_profiles(loci: set, profiles:dict):
         assert dict_keys_set == loci
 
 @app.post("/v1/distance_matrix/from_request")
-async def dmx_from_request(rq: DMFromProfilesRequest):
+async def dmx_from_request(rq: DMXFromProfilesRequest):
     """
     Return a distance matrix from allele profiles that are included directly in the request
     """
@@ -140,7 +140,7 @@ async def dmx_from_request(rq: DMFromProfilesRequest):
         }
 
 @app.post("/v1/distance_matrix/from_local_file")
-async def dmx_from_local_file(rq: DMFromLocalFileRequest):
+async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
     """
     Return a distance matrix from allele profiles defined in a local tsv file in the Bio API container
     """
