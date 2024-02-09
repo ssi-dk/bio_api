@@ -29,8 +29,10 @@ class ProcessingRequest(BaseModel):
         super().__init__( **kwargs)
         self.id = uuid.uuid4()
 
-class DMFromIdsRequest(ProcessingRequest):
-    sequence_ids: list
+class DMXFromMongoIsdRequest(ProcessingRequest):
+    collection: str
+    path_elements: list
+    mongo_ids: set
 
 class DMFromProfilesRequest(BaseModel):
     loci: set
@@ -147,13 +149,10 @@ async def dmx_from_local_file(rq: DMFromLocalFileRequest):
         "distance_matrix": dist_mx_df.to_dict(orient='tight')
         }
 
-#^^^ NEW
-
-@app.post("/distance_matrix/from_ids")
-async def dist_mat_from_ids(rq: DMFromIdsRequest):
-    """If this code is at some point going to be used in a context where the sample 'name' cannot be
-    guaranteed to be unique, one way of getting around it would be to implement a namespace structure with
-    dots as separators, like <sample_name>.ssi.dk
+@app.post("/v1/distance_matrix/from_mongo_ids")
+async def dmx_from_mongodb(rq: DMXFromMongoIsdRequest):
+    """
+    Return a distance matrix from allele profiles defined in MongoDB documents
     """
     print("Requesting distance matrix with these ids:")
     print(rq.sequence_ids)
@@ -176,6 +175,8 @@ async def dist_mat_from_ids(rq: DMFromIdsRequest):
         "job_id": rq.id,
         "distance_matrix": dist_mx_df.to_dict(orient='tight')
         }
+
+#^^^ NEW
 
 @app.post("/tree/hc/")
 async def hc_tree(rq: HCTreeCalcRequest):
