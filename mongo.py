@@ -64,6 +64,18 @@ class MongoAPI:
         self.connection = pymongo.MongoClient(connection_string)
         self.db = self.connection.get_database()
         self.sequence_field_mapping: dict = sequence_field_mapping or SEQUENCE_FIELD_MAPPING
+    
+    async def get_field_data(
+            self,
+            collection:str,
+            mongo_ids:set,
+            field_path:str,
+        ):
+        mongo_cursor = self.db[collection].find(
+            {'_id': {'$in': mongo_ids}},
+            {field_path: True}
+            )
+        return mongo_cursor
 
     # Get samples from MongoDB object ids
     def get_samples(
@@ -141,18 +153,6 @@ class MongoAPI:
         )
 
         return self.db.samples.aggregate(pipeline)
-
-    async def get_field_data(
-            self,
-            collection:str,
-            mongo_ids:set,
-            field_path:str,
-        ):
-        mongo_cursor = self.db[collection].find(
-            {'_id': {'$in': mongo_ids}},
-            {field_path: True}
-            )
-        return mongo_cursor
 
     def get_sequences(self, sequence_ids:list):
         # Get sequences from sequence ids
