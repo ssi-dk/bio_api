@@ -180,7 +180,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     # dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, rq.id)
     return {
         "message": "It worked!",
-        "profile_count": profile_count
+        "profile_count": profile_count,
         #"distance_matrix": dist_mx_df.to_dict(orient='tight')
         }
 

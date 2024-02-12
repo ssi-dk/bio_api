@@ -57,11 +57,14 @@ class MongoAPIError(Exception):
     pass
 
 
-def strs2ObjectIds(strings: list):
+def strs2ObjectIds(id_strings: list):
     """
     Converts a list of strings to a set of ObjectIds
     """
-    return {ObjectId(s) for s in strings}
+    output = set()
+    for id_str in id_strings:
+        output.add(ObjectId(id_str))
+    return output
 
 class MongoAPI:
     def __init__(self,
@@ -78,10 +81,10 @@ class MongoAPI:
             mongo_ids:list,
             field_path:str,
         ):
-        filter = {'_id': {'$in': mongo_ids}}
-        document_count = self.db[collection].count_documents(filter)
+        filter = {'_id': {'$in': strs2ObjectIds(mongo_ids)}}
+        #document_count = self.db[collection].count_documents(filter)
         cursor = self.db[collection].find(filter, {field_path: True})
-        return document_count, cursor
+        return 42, cursor
 
     # Get samples from MongoDB object ids
     def get_samples(
