@@ -31,8 +31,8 @@ class ProcessingRequest(BaseModel):
 
 class DMXFromMongoDBRequest(BaseModel):
     collection: str
-    # mongo_ids: set
-    # field_path: str
+    mongo_ids: list
+    field_path: str
 
 class DMXFromProfilesRequest(BaseModel):
     loci: set

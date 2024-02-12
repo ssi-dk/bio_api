@@ -28,12 +28,14 @@ def call_dmx_from_local_file(file_name: str):
     )
     return rest_response
 
-def call_dmx_from_mongodb(collection:str, mongo_ids:set, field_path:str):
+def call_dmx_from_mongodb(collection:str, mongo_ids:list, field_path:str):
     url = base_url + '/v1/distance_matrix/from_mongodb'
     rest_response = requests.post(
         url,
         json={
-            'collection': collection
+            'collection': collection,
+            'field_path': field_path,
+            'mongo_ids': ['a', 'b', 'c']
             }
     )
     return rest_response
