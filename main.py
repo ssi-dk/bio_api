@@ -149,7 +149,7 @@ async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
         "distance_matrix": dist_mx_df.to_dict(orient='tight')
         }
 
-@app.post("/v1/distance_matrix/from_mongo_ids")
+@app.post("/v1/distance_matrix/from_mongodb")
 async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     """
     Return a distance matrix from allele profiles defined in MongoDB documents
