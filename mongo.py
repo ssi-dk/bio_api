@@ -142,6 +142,18 @@ class MongoAPI:
 
         return self.db.samples.aggregate(pipeline)
 
+    async def get_field_data(
+            self,
+            collection:str,
+            mongo_ids:set,
+            field_path:str,
+        ):
+        mongo_cursor = self.db[collection].find(
+            {'_id': {'$in': mongo_ids}},
+            {field_path: True}
+            )
+        return mongo_cursor
+
     def get_sequences(self, sequence_ids:list):
         # Get sequences from sequence ids
         list_length = len(sequence_ids)

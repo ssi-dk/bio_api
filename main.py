@@ -29,10 +29,10 @@ class ProcessingRequest(BaseModel):
         super().__init__( **kwargs)
         self.id = uuid.uuid4()
 
-class DMXFromMongoIsdRequest(ProcessingRequest):
+class DMXFromMongoDBRequest(ProcessingRequest):
     collection: str
-    path_elements: list
     mongo_ids: set
+    field_path: str
 
 class DMXFromProfilesRequest(BaseModel):
     loci: set
@@ -150,20 +150,23 @@ async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
         }
 
 @app.post("/v1/distance_matrix/from_mongo_ids")
-async def dmx_from_mongodb(rq: DMXFromMongoIsdRequest):
+async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     """
     Return a distance matrix from allele profiles defined in MongoDB documents
     """
-    try:
-        mongo_cursor = await mongo_api.get_field_data(
-            collection=rq.collection,
-            path_elements=rq.path_elements,
-            mongo_ids=rq.mongo_ids
+    mongo_cursor = await mongo_api.get_field_data(
+        collection=rq.collection,
+        mongo_ids=rq.mongo_ids,
+        path_elements=rq.field_path,
         )
-    except mongo.MongoAPIError as e:
+    actual_document_count = mongo_cursor.count_documents()
+    if len(rq.mongo_ids) != actual_document_count:
         return {
-        "error": str(e)
+            'job_id': rq.id,
+            'status': 'error',
+            'error_msg:': f"Could not find the requested number of sequences. Requested: {rq.mongo_ids}, found: {actual_document_count}"
         }
+
     # try:
     #     allele_mx_df: DataFrame = await allele_mx_from_bifrost_mongo(mongo_cursor)
     # except StopIteration as e:
