@@ -163,3 +163,4 @@ cython_debug/
 *_example.py
 tmp/
 data/
+dumps/
