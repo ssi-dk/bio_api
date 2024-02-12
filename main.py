@@ -157,7 +157,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     mongo_cursor = await mongo_api.get_field_data(
         collection=rq.collection,
         mongo_ids=rq.mongo_ids,
-        path_elements=rq.field_path,
+        field_path=rq.field_path,
         )
     actual_document_count = mongo_cursor.count_documents()
     if len(rq.mongo_ids) != actual_document_count:
