@@ -154,18 +154,19 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     """
     Return a distance matrix from allele profiles defined in MongoDB documents
     """
-    mongo_cursor = await mongo_api.get_field_data(
-        collection=rq.collection,
-        mongo_ids=rq.mongo_ids,
-        field_path=rq.field_path,
-        )
-    actual_document_count = mongo_cursor.count_documents()
-    if len(rq.mongo_ids) != actual_document_count:
-        return {
-            'job_id': rq.id,
-            'status': 'error',
-            'error_msg:': f"Could not find the requested number of sequences. Requested: {rq.mongo_ids}, found: {actual_document_count}"
-        }
+    # TODO: 'Cursor' object has no attribute 'count_documents'
+    # mongo_cursor = await mongo_api.get_field_data(
+    #     collection=rq.collection,
+    #     mongo_ids=rq.mongo_ids,
+    #     field_path=rq.field_path,
+    #     )
+    # actual_document_count = mongo_cursor.count_documents()
+    # if len(rq.mongo_ids) != actual_document_count:
+    #     return {
+    #         'job_id': rq.id,
+    #         'status': 'error',
+    #         'error_msg:': f"Could not find the requested number of sequences. Requested: {rq.mongo_ids}, found: {actual_document_count}"
+    #     }
 
     # try:
     #     allele_mx_df: DataFrame = await allele_mx_from_bifrost_mongo(mongo_cursor)
@@ -176,7 +177,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     #     }
     # dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, rq.id)
     return {
-        "job_id": rq.id,
+        "message": "It worked!",
         #"distance_matrix": dist_mx_df.to_dict(orient='tight')
         }
 
