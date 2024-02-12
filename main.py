@@ -15,7 +15,9 @@ from tree_maker import make_tree
 # from qstat import consume_qstat
 
 app = FastAPI()
-mongo_api = mongo.MongoAPI(getenv('MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test'))
+connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
+print(f"Connection string: {connection_string}")
+mongo_api = mongo.MongoAPI(connection_string)
 
 TMPDIR = getenv('TMPDIR', '/tmp')
 DATADIR = getenv('DATADIR', '/data')
@@ -154,7 +156,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     """
     Return a distance matrix from allele profiles defined in MongoDB documents
     """
-    mongo_cursor = await mongo_api.get_field_data(
+    profile_count, cursor = await mongo_api.get_field_data(
         collection=rq.collection,
         field_path=rq.field_path,
         mongo_ids=rq.mongo_ids
@@ -178,6 +180,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     # dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, rq.id)
     return {
         "message": "It worked!",
+        "profile_count": profile_count
         #"distance_matrix": dist_mx_df.to_dict(orient='tight')
         }
 

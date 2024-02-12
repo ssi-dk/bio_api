@@ -75,14 +75,13 @@ class MongoAPI:
     async def get_field_data(
             self,
             collection:str,
-            mongo_ids:set,
+            mongo_ids:list,
             field_path:str,
         ):
-        mongo_cursor = self.db[collection].find(
-            {'_id': {'$in': strs2ObjectIds(mongo_ids)}},
-            {field_path: True}
-            )
-        return mongo_cursor
+        filter = {'_id': {'$in': mongo_ids}}
+        document_count = self.db[collection].count_documents(filter)
+        cursor = self.db[collection].find(filter, {field_path: True})
+        return document_count, cursor
 
     # Get samples from MongoDB object ids
     def get_samples(

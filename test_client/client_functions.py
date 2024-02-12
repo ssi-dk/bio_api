@@ -38,4 +38,4 @@ def call_dmx_from_mongodb(collection:str, field_path:str, mongo_ids:list):
             'mongo_ids': mongo_ids
             }
     )
-    return rest_response
+    return rest_response.json()
