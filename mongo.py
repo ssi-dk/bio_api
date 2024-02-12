@@ -4,6 +4,7 @@ from datetime import date
 from pathlib import Path
 
 import pymongo
+from bson.objectid import ObjectId
 
 #TODO Make this a configurable item somehow.
 SEQUENCE_FIELD_MAPPING: dict = {
@@ -56,6 +57,12 @@ class MongoAPIError(Exception):
     pass
 
 
+def strs2ObjectIds(strings: list):
+    """
+    Converts a list of strings to a set of ObjectIds
+    """
+    return {ObjectId(s) for s in strings}
+
 class MongoAPI:
     def __init__(self,
         connection_string: str,
@@ -72,7 +79,7 @@ class MongoAPI:
             field_path:str,
         ):
         mongo_cursor = self.db[collection].find(
-            {'_id': {'$in': mongo_ids}},
+            {'_id': {'$in': strs2ObjectIds(mongo_ids)}},
             {field_path: True}
             )
         return mongo_cursor
