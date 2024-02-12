@@ -154,12 +154,12 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     """
     Return a distance matrix from allele profiles defined in MongoDB documents
     """
+    mongo_cursor = await mongo_api.get_field_data(
+        collection=rq.collection,
+        field_path=rq.field_path,
+        mongo_ids=rq.mongo_ids
+        )
     # TODO: 'Cursor' object has no attribute 'count_documents'
-    # mongo_cursor = await mongo_api.get_field_data(
-    #     collection=rq.collection,
-    #     mongo_ids=rq.mongo_ids,
-    #     field_path=rq.field_path,
-    #     )
     # actual_document_count = mongo_cursor.count_documents()
     # if len(rq.mongo_ids) != actual_document_count:
     #     return {
