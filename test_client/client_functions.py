@@ -35,7 +35,7 @@ def call_dmx_from_mongodb(collection:str, mongo_ids:list, field_path:str):
         json={
             'collection': collection,
             'field_path': field_path,
-            'mongo_ids': ['a', 'b', 'c']
+            'mongo_ids': ['6565e8ee4a2ab7276967b8a0']
             }
     )
     return rest_response
