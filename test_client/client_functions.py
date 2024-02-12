@@ -33,9 +33,7 @@ def call_dmx_from_mongodb(collection:str, mongo_ids:set, field_path:str):
     rest_response = requests.post(
         url,
         json={
-            'collection': collection,
-            'mongo_ids': mongo_ids,
-            'field_path': field_path
+            'collection': collection
             }
     )
     return rest_response

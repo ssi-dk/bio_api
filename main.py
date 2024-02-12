@@ -29,10 +29,10 @@ class ProcessingRequest(BaseModel):
         super().__init__( **kwargs)
         self.id = uuid.uuid4()
 
-class DMXFromMongoDBRequest(ProcessingRequest):
+class DMXFromMongoDBRequest(BaseModel):
     collection: str
-    mongo_ids: set
-    field_path: str
+    # mongo_ids: set
+    # field_path: str
 
 class DMXFromProfilesRequest(BaseModel):
     loci: set
