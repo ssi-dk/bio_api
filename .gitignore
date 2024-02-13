@@ -164,4 +164,3 @@ cython_debug/
 tmp/
 data/
 dumps/
-allele_matrices/
