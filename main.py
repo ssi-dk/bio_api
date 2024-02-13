@@ -126,6 +126,9 @@ async def dmx_from_request(rq: DMXFromProfilesRequest):
     """
     Return a distance matrix from allele profiles that are included directly in the request
     """
+    # TODO: turn this into a decorator that can be applied to all API requests
+    job_id = uuid.uuid4()
+    
     print("Requested distance matrix from allele profile")
     print(f"Locus count: {len(rq.loci)}")
     print(f"Profile count: {len(rq.profiles)}")
@@ -134,7 +137,6 @@ async def dmx_from_request(rq: DMXFromProfilesRequest):
     print("Profiles validated")
 
     allele_mx_df = DataFrame.from_dict(rq.profiles, 'index', dtype=str)
-    job_id = uuid.uuid4()
     dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
     return {
         "job_id": job_id,
