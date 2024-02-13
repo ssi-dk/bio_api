@@ -61,9 +61,9 @@ def strs2ObjectIds(id_strings: list):
     """
     Converts a list of strings to a set of ObjectIds
     """
-    output = set()
+    output = list()
     for id_str in id_strings:
-        output.add(ObjectId(id_str))
+        output.append(ObjectId(id_str))
     return output
 
 class MongoAPI:
@@ -82,9 +82,9 @@ class MongoAPI:
             field_path:str,
         ):
         filter = {'_id': {'$in': strs2ObjectIds(mongo_ids)}}
-        #document_count = self.db[collection].count_documents(filter)
+        document_count = self.db[collection].count_documents(filter)
         cursor = self.db[collection].find(filter, {field_path: True})
-        return 42, cursor
+        return document_count, cursor
 
     # Get samples from MongoDB object ids
     def get_samples(
