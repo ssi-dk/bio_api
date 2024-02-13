@@ -31,6 +31,7 @@ services:
       - .:/app
       - ./data:/data
       - ./test_input:/test_input
+      - ./allele_matrices:/allele_matrices
     ports:
       - "8001:8001"
     tty: true

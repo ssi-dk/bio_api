@@ -20,7 +20,7 @@ print(f"Connection string: {connection_string}")
 mongo_api = mongo.MongoAPI(connection_string)
 
 TEST_INPUT_DIR = getenv('BIO_API_TEST_INPUT_DIR', '/test_input')
-ALLELE_MX_DIR = getenv('BIO_API_DATA_DIR', '/data')
+ALLELE_MX_DIR = getenv('BIO_API_ALLELE_MX_DIR', '/allele_matrices')
 
 
 class ProcessingRequest(BaseModel):
