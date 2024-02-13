@@ -76,7 +76,7 @@ async def allele_mx_from_mongodb(cursor, field_path: str):
 
     value = first_mongo_item
     for path_element in field_path.split('.'):
-        value = value.get(path_element)
+        value = value[path_element]
     
     allele_profile = value
     df = DataFrame.from_dict(allele_profile, 'index', dtype=str)
