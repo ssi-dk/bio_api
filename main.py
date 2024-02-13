@@ -92,7 +92,7 @@ async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: uuid.UUID):
     print(df)
     return df
 
-async def dist_mx_from_local_file(file_name: str):
+async def calculate_dmx_from_file(file_name: str):
     print(f"File name: {file_name}")
     file_path = Path(DATADIR, file_name)
     sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {file_path}",
@@ -146,7 +146,7 @@ async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
     """
     Return a distance matrix from allele profiles defined in a local tsv file in the Bio API container
     """
-    dist_mx_df: DataFrame = await dist_mx_from_local_file(rq.file_name)
+    dist_mx_df: DataFrame = await calculate_dmx_from_file(rq.file_name)
     return {
         "distance_matrix": dist_mx_df.to_dict(orient='tight')
         }
@@ -169,14 +169,14 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
                 f"Requested: {str(len(rq.mongo_ids))}, found: {str(profile_count)}"
         }
 
-    # try:
-    #     allele_mx_df: DataFrame = await allele_mx_from_bifrost_mongo(mongo_cursor)
-    # except StopIteration as e:
-    #     return {
-    #     "job_id": rq.id,
-    #     "error": e
-    #     }
-    # dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, rq.id)
+    try:
+        allele_mx_df: DataFrame = await allele_mx_from_bifrost_mongo(cursor)
+    except StopIteration as e:
+        return {
+        "job_id": rq.id,
+        "error": e
+        }
+    dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, rq.id)
     return {
         'status': 'OK',
         "profile_count": profile_count,
