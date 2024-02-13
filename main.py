@@ -41,7 +41,7 @@ class DMXFromProfilesRequest(BaseModel):
     profiles: dict
 
 class DMXFromLocalFileRequest(BaseModel):
-    file_name: str
+    file_path: str
 
 class HCTreeCalcRequest(ProcessingRequest):
     """Represents a REST request for a tree calculation based on hierarchical clustering.
@@ -92,9 +92,7 @@ async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: uuid.UUID):
     print(df)
     return df
 
-async def calculate_dmx_from_file(file_name: str):
-    print(f"File name: {file_name}")
-    file_path = Path(GENERATED_MX_DIR, file_name)
+async def calculate_dmx_from_file(file_path: str):
     sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {file_path}",
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE)
@@ -148,7 +146,7 @@ async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
     """
     Return a distance matrix from allele profiles defined in a local tsv file in the Bio API container
     """
-    dist_mx_df: DataFrame = await calculate_dmx_from_file(rq.file_name)
+    dist_mx_df: DataFrame = await calculate_dmx_from_file(rq.file_path)
     return {
         "distance_matrix": dist_mx_df.to_dict(orient='tight')
         }

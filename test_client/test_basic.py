@@ -18,8 +18,8 @@ def test_dmx_from_request():
     )
     assert result.status_code == 200
 
-# def test_dmx_from_local_file():
-#     result = client_functions.call_dmx_from_local_file(
-#         file_name = 'BN_alleles_export.tsv'
-#     )
-#     assert result.status_code == 200
+def test_dmx_from_local_file():
+    result = client_functions.call_dmx_from_local_file(
+        file_path = 'test_input/BN_alleles_export.tsv'
+    )
+    assert result.status_code == 200
