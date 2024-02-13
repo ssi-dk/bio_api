@@ -71,18 +71,18 @@ async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: uuid.UUID):
     print("Allele mx:")
     print(allele_mx)
     # save allele matrix to a file that cgmlst-dists can use for input
-    allele_mx_path = Path(DATA_DIR, f'allele_matrix_{job_id.hex}.tsv')
-    with open(allele_mx_path, 'w') as allele_mx_file_obj:
+    allele_mx_filepath = Path(DATA_DIR, f'allele_matrix_{job_id.hex}.tsv')
+    with open(allele_mx_filepath, 'w') as allele_mx_file_obj:
         allele_mx_file_obj.write("ID")  # Without an initial string in first line cgmlst-dists will fail!
         allele_mx.to_csv(allele_mx_file_obj, index = True, header=True, sep ="\t")
-    sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {str(allele_mx_path)}",
+    sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {str(allele_mx_filepath)}",
     stdout=asyncio.subprocess.PIPE,
     stderr=asyncio.subprocess.PIPE)
     stdout, stderr = await sp.communicate()
 
     await sp.wait()
     if sp.returncode != 0:
-        errmsg = (f"Could not run cgmlst-dists on {str(allele_mx_path)}!")
+        errmsg = (f"Could not run cgmlst-dists on {str(allele_mx_filepath)}!")
         raise OSError(errmsg + "\n\n" + stderr.decode('utf-8'))
 
     df = read_table(StringIO(stdout.decode('utf-8')))
