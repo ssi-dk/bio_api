@@ -20,7 +20,7 @@ print(f"Connection string: {connection_string}")
 mongo_api = mongo.MongoAPI(connection_string)
 
 TEST_INPUT_DIR = getenv('BIO_API_TEST_INPUT_DIR', '/test_input')
-DATA_DIR = getenv('BIO_API_DATA_DIR', '/data')
+ALLELE_MX_DIR = getenv('BIO_API_DATA_DIR', '/data')
 
 
 class ProcessingRequest(BaseModel):
@@ -71,7 +71,7 @@ async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: uuid.UUID):
     print("Allele mx:")
     print(allele_mx)
     # save allele matrix to a file that cgmlst-dists can use for input
-    allele_mx_filepath = Path(DATA_DIR, f'allele_matrix_{job_id.hex}.tsv')
+    allele_mx_filepath = Path(ALLELE_MX_DIR, f'allele_matrix_{job_id.hex}.tsv')
     with open(allele_mx_filepath, 'w') as allele_mx_file_obj:
         allele_mx_file_obj.write("ID")  # Without an initial string in first line cgmlst-dists will fail!
         allele_mx.to_csv(allele_mx_file_obj, index = True, header=True, sep ="\t")
@@ -94,7 +94,7 @@ async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: uuid.UUID):
 
 async def calculate_dmx_from_file(file_name: str):
     print(f"File name: {file_name}")
-    file_path = Path(DATA_DIR, file_name)
+    file_path = Path(ALLELE_MX_DIR, file_name)
     sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {file_path}",
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE)
