@@ -74,12 +74,16 @@ async def allele_mx_from_mongodb(cursor, field_path: str):
     except StopIteration:
         raise
 
+    full_dict = dict()
+
     value = first_mongo_item
     for path_element in field_path.split('.'):
         value = value[path_element]
     
+    sequence_id = 'my_arbitrary_id'
     allele_profile = value
-    df = DataFrame.from_dict(allele_profile, 'index', dtype=str)
+    full_dict[sequence_id] = allele_profile
+    df = DataFrame.from_dict(full_dict, 'index', dtype=str)
     print(df)
     return df
 
