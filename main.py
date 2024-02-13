@@ -67,6 +67,22 @@ async def allele_mx_from_bifrost_mongo(mongo_cursor):
         full_dict[mongo.get_sequence_id(mongo_item)] = row
     return DataFrame.from_dict(full_dict, 'index', dtype=str)
 
+async def allele_mx_from_mongodb(cursor, field_path: str):
+    # Generate an allele matrix with all the allele profiles from the mongo cursor.
+    try:
+        first_mongo_item = next(cursor)
+    except StopIteration:
+        raise
+
+    value = first_mongo_item
+    for path_element in field_path.split('.'):
+        value = value.get(path_element)
+    
+    allele_profile = value
+    df = DataFrame.from_dict(allele_profile, 'index', dtype=str)
+    print(df)
+    return df
+
 async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: uuid.UUID):
     print("Allele mx:")
     print(allele_mx)
@@ -146,9 +162,11 @@ async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
     """
     Return a distance matrix from allele profiles defined in a local tsv file in the Bio API container
     """
+    job_id = uuid.uuid4()
     dist_mx_df: DataFrame = await calculate_dmx_from_file(rq.file_path)
     return {
-        "distance_matrix": dist_mx_df.to_dict(orient='tight')
+        'job_id': job_id,
+        'distance_matrix': dist_mx_df.to_dict(orient='tight')
         }
 
 @app.post("/v1/distance_matrix/from_mongodb")
@@ -156,6 +174,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     """
     Return a distance matrix from allele profiles defined in MongoDB documents
     """
+    job_id = uuid.uuid4()
     profile_count, cursor = await mongo_api.get_field_data(
         collection=rq.collection,
         field_path=rq.field_path,
@@ -170,16 +189,19 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
         }
 
     try:
-        allele_mx_df: DataFrame = await allele_mx_from_bifrost_mongo(cursor)
+        allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, rq.field_path)
+    # If we did not find anything in MongoDB we'll get a StopIteration exception
     except StopIteration as e:
         return {
-        "job_id": rq.id,
-        "error": e
+        'job_id': job_id,
+        'status': 'ERROR',
+        'error_msg': e
         }
-    dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, rq.id)
+    # dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, rq.id)
     return {
+        'job_id': job_id,
         'status': 'OK',
-        "profile_count": profile_count,
+        'profile_count': profile_count,
         #"distance_matrix": dist_mx_df.to_dict(orient='tight')
         }
 
