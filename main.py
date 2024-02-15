@@ -76,7 +76,7 @@ def hoist(dict_element, field_path:str):
             dict_element = dict_element[path_element]
     return dict_element
 
-async def allele_mx_from_mongodb(cursor, profile_field_path: str):
+async def allele_mx_from_mongodb(cursor, seqid_field_path: str, profile_field_path: str):
     # Generate an allele matrix with all the allele profiles from the mongo cursor.
     try:
         first_mongo_item = next(cursor)
@@ -85,7 +85,7 @@ async def allele_mx_from_mongodb(cursor, profile_field_path: str):
 
     full_dict = dict()
     
-    sequence_id = 'my_arbitrary_id'
+    sequence_id = hoist(first_mongo_item, seqid_field_path)
     allele_profile = hoist(first_mongo_item, profile_field_path)
     full_dict[sequence_id] = allele_profile
     df = DataFrame.from_dict(full_dict, 'index', dtype=str)
@@ -198,7 +198,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
         }
 
     try:
-        allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, rq.profile_field_path)
+        allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, rq.seqid_field_path, rq.profile_field_path)
     # If we did not find anything in MongoDB we'll get a StopIteration exception
     except StopIteration as e:
         return {
