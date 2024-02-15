@@ -67,6 +67,14 @@ async def allele_mx_from_bifrost_mongo(mongo_cursor):
         full_dict[mongo.get_sequence_id(mongo_item)] = row
     return DataFrame.from_dict(full_dict, 'index', dtype=str)
 
+def hoist(dict_element, field_path:str):
+    """
+    'Hoists' a deep dictionary element up to the surface :-)
+    """
+    for path_element in field_path.split('.'):
+            dict_element = dict_element[path_element]
+    return dict_element
+
 async def allele_mx_from_mongodb(cursor, field_path: str):
     # Generate an allele matrix with all the allele profiles from the mongo cursor.
     try:
@@ -75,13 +83,9 @@ async def allele_mx_from_mongodb(cursor, field_path: str):
         raise
 
     full_dict = dict()
-
-    value = first_mongo_item
-    for path_element in field_path.split('.'):
-        value = value[path_element]
     
     sequence_id = 'my_arbitrary_id'
-    allele_profile = value
+    allele_profile = hoist(first_mongo_item, field_path)
     full_dict[sequence_id] = allele_profile
     df = DataFrame.from_dict(full_dict, 'index', dtype=str)
     print(df)
