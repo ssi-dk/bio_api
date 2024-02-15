@@ -198,16 +198,9 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
                 f"Requested: {str(len(rq.mongo_ids))}, found: {str(profile_count)}"
         }
 
-    try:
-        allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, rq.seqid_field_path, rq.profile_field_path)
-    # If we did not find anything in MongoDB we'll get a StopIteration exception
-    except StopIteration as e:
-        return {
-        'job_id': job_id,
-        'status': 'ERROR',
-        'error_msg': e
-        }
-    # dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, rq.id)
+    allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, rq.seqid_field_path, rq.profile_field_path)
+    # ERROR: row 3 had 559 cols, expected 4000
+    # dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
     return {
         'job_id': job_id,
         'status': 'OK',
