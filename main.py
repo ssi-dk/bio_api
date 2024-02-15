@@ -78,16 +78,18 @@ def hoist(dict_element, field_path:str):
 
 async def allele_mx_from_mongodb(cursor, seqid_field_path: str, profile_field_path: str):
     # Generate an allele matrix with all the allele profiles from the mongo cursor.
-    try:
-        first_mongo_item = next(cursor)
-    except StopIteration:
-        raise
 
     full_dict = dict()
-    
-    sequence_id = hoist(first_mongo_item, seqid_field_path)
-    allele_profile = hoist(first_mongo_item, profile_field_path)
-    full_dict[sequence_id] = allele_profile
+
+    try:
+        while True:
+            mongo_item = next(cursor)
+            sequence_id = hoist(mongo_item, seqid_field_path)
+            allele_profile = hoist(mongo_item, profile_field_path)
+            full_dict[sequence_id] = allele_profile
+    except StopIteration:
+        pass
+
     df = DataFrame.from_dict(full_dict, 'index', dtype=str)
     print(df)
     return df
