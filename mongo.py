@@ -77,9 +77,9 @@ class MongoAPI:
     
     async def get_field_data(
             self,
-            collection:str,
-            mongo_ids:list,
-            field_paths:list,
+            collection:str,   # MongoDB collection
+            mongo_ids:list,   # List of MongoDB ObjectIds as str
+            field_paths:list, # List of field paths in dotted notation: ['some.example.field1', 'some.other.example.field2']
         ):
         filter = {'_id': {'$in': strs2ObjectIds(mongo_ids)}}
         document_count = self.db[collection].count_documents(filter)
