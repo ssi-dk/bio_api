@@ -79,11 +79,11 @@ class MongoAPI:
             self,
             collection:str,
             mongo_ids:list,
-            field_path:str,
+            field_paths:list,
         ):
         filter = {'_id': {'$in': strs2ObjectIds(mongo_ids)}}
         document_count = self.db[collection].count_documents(filter)
-        cursor = self.db[collection].find(filter, {field_path: True})
+        cursor = self.db[collection].find(filter, {field_path: True for field_path in field_paths})
         return document_count, cursor
 
     # Get samples from MongoDB object ids

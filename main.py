@@ -185,7 +185,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     job_id = uuid.uuid4()
     profile_count, cursor = await mongo_api.get_field_data(
         collection=rq.collection,
-        field_path=rq.profile_field_path,
+        field_paths=[rq.profile_field_path],
         mongo_ids=rq.mongo_ids
         )
     
