@@ -91,7 +91,6 @@ async def allele_mx_from_mongodb(cursor, seqid_field_path: str, profile_field_pa
         pass
 
     df = DataFrame.from_dict(full_dict, 'index', dtype=str)
-    print(df)
     return df
 
 async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: uuid.UUID):
