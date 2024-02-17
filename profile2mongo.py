@@ -8,7 +8,7 @@ print(f"Connection string: {connection_string}")
 #mongo_api = mongo.MongoAPI(connection_string)
 
 df = read_csv('test_input/example.tsv', sep='\t')
-mongo_doc = df[['Main Key', 'Second']].assign(
-    Aggregated_Data=df.set_index(['Main Key', 'Second']).to_dict(orient='records')
+mongo_doc = df[['Main Key']].assign(
+    Aggregated_Data=df.set_index(['Main Key']).to_dict(orient='records')
     )
 print(mongo_doc)
