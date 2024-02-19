@@ -6,16 +6,19 @@ import mongo
 
 connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
 print(f"Connection string: {connection_string}")
-#mongo_api = mongo.MongoAPI(connection_string)
+mongo_api = mongo.MongoAPI(connection_string)
 
 def profile2mongo(filename):
     df = read_csv(filename, sep='\t')
     df = df[['ID']].assign(
                     profile=df.set_index(['ID']).to_dict(orient='records')
     )
+    object_ids = list()
     for _index, row in df.iterrows():
         # Each rows' to_dict() will be a MongoDB document
-        print(row.to_dict())
+        result = mongo_api.db.samples.insert_one(row.to_dict())
+        assert result.acknowledged == True
+        print(result)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
