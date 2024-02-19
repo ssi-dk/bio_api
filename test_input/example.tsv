@@ -1,5 +1,5 @@
-ID	Column A	Column B	Column C	Column D	Column E
-First	Value 1	Value 2	Value 3	Value 4	Value 5
-Second	Value 6	Value 7	Value 8	Value 9	Value 10
-Third	Value 11	Value 12	Value 13	Value 14	Value 15
-Fourth	Value 16	Value 17	Value 18	Value 19	Value 20
+ID	Locus_A	Locus_B	Locus_C	Locus_D	Locus_E
+First_id	allele_a1	allele_b1	allele_c1	allele_d1	allele_e1
+Second_id	allele_a1	-	allele_c2	allele_d3	allele_e2
+Third_id	allele_a2	allele_b2	allele_c2	allele_d2	allele_e1
+Fourth_id	allele_a3	allele_b3	allele_c3	allele_d3	-
