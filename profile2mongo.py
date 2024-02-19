@@ -18,7 +18,7 @@ def profile2mongo(filename):
         # Each rows' to_dict() will be a MongoDB document
         result = mongo_api.db.samples.insert_one(row.to_dict())
         assert result.acknowledged == True
-        print(result)
+        print(result.inserted_id)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
