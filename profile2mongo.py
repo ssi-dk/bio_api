@@ -13,7 +13,6 @@ def profile2mongo(filename):
     df = df[['ID']].assign(
                     profile=df.set_index(['ID']).to_dict(orient='records')
     )
-    object_ids = list()
     for _index, row in df.iterrows():
         # Each rows' to_dict() will be a MongoDB document
         result = mongo_api.db.samples.insert_one(row.to_dict())
