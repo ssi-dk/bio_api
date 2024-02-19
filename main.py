@@ -19,8 +19,8 @@ connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/
 print(f"Connection string: {connection_string}")
 mongo_api = mongo.MongoAPI(connection_string)
 
-TMPDIR = getenv('TMPDIR', '/tmp')
-DATADIR = getenv('DATADIR', '/data')
+MANUAL_MX_DIR = getenv('BIO_API_TEST_INPUT_DIR', '/test_input')
+GENERATED_MX_DIR = getenv('BIO_API_DATA_DIR', '/data')
 
 
 class ProcessingRequest(BaseModel):
@@ -33,15 +33,16 @@ class ProcessingRequest(BaseModel):
 
 class DMXFromMongoDBRequest(BaseModel):
     collection: str
+    seqid_field_path: str
+    profile_field_path: str
     mongo_ids: list
-    field_path: str
 
 class DMXFromProfilesRequest(BaseModel):
     loci: set
     profiles: dict
 
 class DMXFromLocalFileRequest(BaseModel):
-    file_name: str
+    file_path: str
 
 class HCTreeCalcRequest(ProcessingRequest):
     """Represents a REST request for a tree calculation based on hierarchical clustering.
@@ -67,22 +68,47 @@ async def allele_mx_from_bifrost_mongo(mongo_cursor):
         full_dict[mongo.get_sequence_id(mongo_item)] = row
     return DataFrame.from_dict(full_dict, 'index', dtype=str)
 
+def hoist(dict_element, field_path:str):
+    """
+    'Hoists' a deep dictionary element up to the surface :-)
+    """
+    for path_element in field_path.split('.'):
+            dict_element = dict_element[path_element]
+    return dict_element
+
+async def allele_mx_from_mongodb(cursor, seqid_field_path: str, profile_field_path: str):
+    # Generate an allele matrix with all the allele profiles from the mongo cursor.
+
+    full_dict = dict()
+
+    try:
+        while True:
+            mongo_item = next(cursor)
+            sequence_id = hoist(mongo_item, seqid_field_path)
+            allele_profile = hoist(mongo_item, profile_field_path)
+            full_dict[sequence_id] = allele_profile
+    except StopIteration:
+        pass
+
+    df = DataFrame.from_dict(full_dict, 'index', dtype=str)
+    return df
+
 async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: uuid.UUID):
     print("Allele mx:")
     print(allele_mx)
     # save allele matrix to a file that cgmlst-dists can use for input
-    allele_mx_path = Path(TMPDIR, f'allele_matrix_{job_id.hex}.tsv')
-    with open(allele_mx_path, 'w') as allele_mx_file_obj:
+    allele_mx_filepath = Path(GENERATED_MX_DIR, f'allele_matrix_{job_id.hex}.tsv')
+    with open(allele_mx_filepath, 'w') as allele_mx_file_obj:
         allele_mx_file_obj.write("ID")  # Without an initial string in first line cgmlst-dists will fail!
         allele_mx.to_csv(allele_mx_file_obj, index = True, header=True, sep ="\t")
-    sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {str(allele_mx_path)}",
+    sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {str(allele_mx_filepath)}",
     stdout=asyncio.subprocess.PIPE,
     stderr=asyncio.subprocess.PIPE)
     stdout, stderr = await sp.communicate()
 
     await sp.wait()
     if sp.returncode != 0:
-        errmsg = (f"Could not run cgmlst-dists on {str(allele_mx_path)}!")
+        errmsg = (f"Could not run cgmlst-dists on {str(allele_mx_filepath)}!")
         raise OSError(errmsg + "\n\n" + stderr.decode('utf-8'))
 
     df = read_table(StringIO(stdout.decode('utf-8')))
@@ -92,9 +118,7 @@ async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: uuid.UUID):
     print(df)
     return df
 
-async def dist_mx_from_local_file(file_name: str):
-    print(f"File name: {file_name}")
-    file_path = Path(DATADIR, file_name)
+async def calculate_dmx_from_file(file_path: str):
     sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {file_path}",
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE)
@@ -126,6 +150,9 @@ async def dmx_from_request(rq: DMXFromProfilesRequest):
     """
     Return a distance matrix from allele profiles that are included directly in the request
     """
+    # TODO: turn this into a decorator that can be applied to all API requests
+    job_id = uuid.uuid4()
+    
     print("Requested distance matrix from allele profile")
     print(f"Locus count: {len(rq.loci)}")
     print(f"Profile count: {len(rq.profiles)}")
@@ -134,7 +161,6 @@ async def dmx_from_request(rq: DMXFromProfilesRequest):
     print("Profiles validated")
 
     allele_mx_df = DataFrame.from_dict(rq.profiles, 'index', dtype=str)
-    job_id = uuid.uuid4()
     dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
     return {
         "job_id": job_id,
@@ -146,9 +172,11 @@ async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
     """
     Return a distance matrix from allele profiles defined in a local tsv file in the Bio API container
     """
-    dist_mx_df: DataFrame = await dist_mx_from_local_file(rq.file_name)
+    job_id = uuid.uuid4()
+    dist_mx_df: DataFrame = await calculate_dmx_from_file(rq.file_path)
     return {
-        "distance_matrix": dist_mx_df.to_dict(orient='tight')
+        'job_id': job_id,
+        'distance_matrix': dist_mx_df.to_dict(orient='tight')
         }
 
 @app.post("/v1/distance_matrix/from_mongodb")
@@ -156,31 +184,27 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     """
     Return a distance matrix from allele profiles defined in MongoDB documents
     """
+    job_id = uuid.uuid4()
     profile_count, cursor = await mongo_api.get_field_data(
         collection=rq.collection,
-        field_path=rq.field_path,
+        field_paths=[rq.seqid_field_path, rq.profile_field_path],
         mongo_ids=rq.mongo_ids
         )
-    # TODO: 'Cursor' object has no attribute 'count_documents'
-    # actual_document_count = mongo_cursor.count_documents()
-    # if len(rq.mongo_ids) != actual_document_count:
-    #     return {
-    #         'job_id': rq.id,
-    #         'status': 'error',
-    #         'error_msg:': f"Could not find the requested number of sequences. Requested: {rq.mongo_ids}, found: {actual_document_count}"
-    #     }
+    
+    if len(rq.mongo_ids) != profile_count:
+        return {
+            'status': 'ERROR',
+            'error_msg:': "Could not find the requested number of sequences. " + \
+                f"Requested: {str(len(rq.mongo_ids))}, found: {str(profile_count)}"
+        }
 
-    # try:
-    #     allele_mx_df: DataFrame = await allele_mx_from_bifrost_mongo(mongo_cursor)
-    # except StopIteration as e:
-    #     return {
-    #     "job_id": rq.id,
-    #     "error": e
-    #     }
-    # dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, rq.id)
+    allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, rq.seqid_field_path, rq.profile_field_path)
+    # ERROR: row 3 had 559 cols, expected 4000
+    # dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
     return {
-        "message": "It worked!",
-        "profile_count": profile_count,
+        'job_id': job_id,
+        'status': 'OK',
+        'profile_count': profile_count,
         #"distance_matrix": dist_mx_df.to_dict(orient='tight')
         }
 

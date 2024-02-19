@@ -18,24 +18,29 @@ def call_dmx_from_request(loci:list, profiles:dict):
     )
     return rest_response
 
-def call_dmx_from_local_file(file_name: str):
+def call_dmx_from_local_file(file_path: str):
     url = base_url + '/v1/distance_matrix/from_local_file'
     rest_response = requests.post(
         url,
         json={
-            'file_name': file_name
+            'file_path': file_path
             }
     )
     return rest_response
 
-def call_dmx_from_mongodb(collection:str, field_path:str, mongo_ids:list):
+def call_dmx_from_mongodb(
+    collection:str,
+    seqid_field_path: str,
+    profile_field_path:str,
+    mongo_ids:list):
     url = base_url + '/v1/distance_matrix/from_mongodb'
     rest_response = requests.post(
         url,
         json={
             'collection': collection,
-            'field_path': field_path,
+            'seqid_field_path': seqid_field_path,
+            'profile_field_path': profile_field_path,
             'mongo_ids': mongo_ids
             }
     )
-    return rest_response.json()
+    return rest_response
