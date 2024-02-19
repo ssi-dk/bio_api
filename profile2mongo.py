@@ -15,9 +15,25 @@ def profile2mongo(filename):
     )
     for _index, row in df.iterrows():
         # Each rows' to_dict() will be a MongoDB document
-        result = mongo_api.db.samples.insert_one(row.to_dict())
-        assert result.acknowledged == True
-        print(result.inserted_id)
+        document = row.to_dict()
+        print(document['ID'])
+        for key, value in document['profile'].items():
+            converted = None
+            try:
+                converted = int(value)
+            except ValueError:
+                print(f"Key {key}: value {value} could not cenvert.")
+            if converted:
+                try: 
+                    assert type(value) == type(converted)
+                    print(f"{key}: {type(value)} == {type(converted)}")
+                except AssertionError:
+                    print(f"{key}: value {value} has a problem:")
+                    print(f"Original type is {type(value)}, converted type is {type(converted)}.")
+        print()
+        # result = mongo_api.db.samples.insert_one(document)
+        # assert result.acknowledged == True
+        # print(result.inserted_id)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
