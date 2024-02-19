@@ -21,12 +21,12 @@ def profile2mongo(filename):
         # Make sure that all numberish values are ints
         for key, value in document['profile'].items():
             try:
-                value = int(value)
+                document['profile'][key] = int(value)
             except ValueError:
                 pass
-        # result = mongo_api.db.samples.insert_one(document)
-        # assert result.acknowledged == True
-        # print(result.inserted_id)
+        result = mongo_api.db.samples.insert_one(document)
+        assert result.acknowledged == True
+        print(result.inserted_id)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
