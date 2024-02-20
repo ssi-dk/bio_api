@@ -13,6 +13,7 @@ def profile2mongo(filename):
     df = df[['ID']].assign(
                     profile=df.set_index(['ID']).to_dict(orient='records')
     )
+    inserted_ids = list()
     for _index, row in df.iterrows():
 
         # Each rows' to_dict() will be a MongoDB document
@@ -24,9 +25,11 @@ def profile2mongo(filename):
                 document['profile'][key] = int(value)
             except ValueError:
                 pass
+
         result = mongo_api.db.samples.insert_one(document)
         assert result.acknowledged == True
-        print(result.inserted_id)
+        inserted_ids.append(str(result.inserted_id))
+    return inserted_ids
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -36,4 +39,6 @@ if __name__ == '__main__':
 
     parser.add_argument('filename')
     args = parser.parse_args()
-    profile2mongo(args.filename)
+    inserted_ids = profile2mongo(args.filename)
+    print("These are the _id strings of the created MongoDB documents:")
+    print(inserted_ids)
