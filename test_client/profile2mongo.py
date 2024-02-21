@@ -8,7 +8,7 @@ connection = pymongo.MongoClient(connection_string)
 db = connection.get_database()
 print(f"Connection string: {connection_string}")
 
-def profile2mongo(filename):
+def profile2mongo(filename: str, collection: str):
     df = read_csv(filename, sep='\t')
     df = df[['ID']].assign(
                     profile=df.set_index(['ID']).to_dict(orient='records')
@@ -26,7 +26,7 @@ def profile2mongo(filename):
             except ValueError:
                 pass
 
-        result = db.samples.insert_one(document)
+        result = db[collection].insert_one(document)
         assert result.acknowledged == True
         inserted_ids.append(str(result.inserted_id))
     return inserted_ids

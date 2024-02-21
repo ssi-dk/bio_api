@@ -3,7 +3,7 @@ import pytest
 import client_functions
 from profile2mongo import profile2mongo
 
-mongo_ids = profile2mongo('input_data/BN_alleles_export_5.tsv')
+mongo_ids = profile2mongo('input_data/BN_alleles_export_5.tsv', 'test_samples')
 
 def test_dmx_from_mongodb():
     result = client_functions.call_dmx_from_mongodb(
