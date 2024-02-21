@@ -1,12 +1,12 @@
 from os import getenv
 from pandas import read_csv
 import argparse
-
-import mongo
+import pymongo
 
 connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
+connection = pymongo.MongoClient(connection_string)
+db = connection.get_database()
 print(f"Connection string: {connection_string}")
-mongo_api = mongo.MongoAPI(connection_string)
 
 def profile2mongo(filename):
     df = read_csv(filename, sep='\t')
@@ -26,7 +26,7 @@ def profile2mongo(filename):
             except ValueError:
                 pass
 
-        result = mongo_api.db.samples.insert_one(document)
+        result = db.samples.insert_one(document)
         assert result.acknowledged == True
         inserted_ids.append(str(result.inserted_id))
     return inserted_ids
