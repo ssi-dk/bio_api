@@ -31,7 +31,7 @@ services:
     volumes:
       - .:/app
       - ./data:/data
-      - ./test_input:/test_input
+      - ./test_client/input_data:/input_data
     ports:
       - "8001:8001"
     tty: true
