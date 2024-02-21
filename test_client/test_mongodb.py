@@ -18,3 +18,5 @@ def test_dmx_from_mongodb():
     profile_field_path='profile',
     mongo_ids=mongo_ids)
     assert result.status_code == 200
+
+db['test_samples'].drop()
