@@ -3,12 +3,8 @@ from pandas import read_csv
 import argparse
 import pymongo
 
-connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
-connection = pymongo.MongoClient(connection_string)
-db = connection.get_database()
-print(f"Connection string: {connection_string}")
 
-def profile2mongo(filename: str, collection: str):
+def profile2mongo(db, filename: str, collection: str='samples'):
     df = read_csv(filename, sep='\t')
     df = df[['ID']].assign(
                     profile=df.set_index(['ID']).to_dict(orient='records')
@@ -39,6 +35,10 @@ if __name__ == '__main__':
 
     parser.add_argument('filename')
     args = parser.parse_args()
-    inserted_ids = profile2mongo(args.filename)
+    connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
+    connection = pymongo.MongoClient(connection_string)
+    db = connection.get_database()
+    print(f"Connection string: {connection_string}")
+    inserted_ids = profile2mongo(db, args.filename)
     print("These are the _id strings of the created MongoDB documents:")
     print(inserted_ids)
