@@ -74,3 +74,14 @@ def call_dmx_from_mongodb_plus_tree(
         return tree_response
     else:
         print(f"dmx endpoint returned {dmx_response.status_code}")
+
+def call_hc_tree(distances: dict, method: str):
+    url = base_url + '/v1/tree/hc'
+    response = requests.post(
+        url,
+        json={
+            'distances': distances,
+            'method': method
+        }
+    )
+    return response
