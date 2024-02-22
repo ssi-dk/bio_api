@@ -44,7 +44,7 @@ class DMXFromProfilesRequest(BaseModel):
 class DMXFromLocalFileRequest(BaseModel):
     file_path: str
 
-class HCTreeCalcRequest(ProcessingRequest):
+class HCTreeCalcRequest(BaseModel):
     """Represents a REST request for a tree calculation based on hierarchical clustering.
     """
     distances: dict
@@ -204,14 +204,12 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
         'job_id': job_id,
         'status': 'OK',
         'profile_count': profile_count,
-        'distance_matrix': dist_mx_df.to_dict(orient='tight')
+        'distance_matrix': dist_mx_df.to_dict(orient='index')
         }
 
-#^^^ NEW
-
-@app.post("/tree/hc/")
+@app.post("/v1/tree/hc/")
 async def hc_tree(rq: HCTreeCalcRequest):
-    response = {"job_id": rq.id, "method": rq.method}
+    response = {"method": rq.method}
     try:
         dist_df: DataFrame = DataFrame.from_dict(rq.distances, orient='index')
         tree = make_tree(dist_df, rq.method)
