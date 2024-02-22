@@ -1,5 +1,6 @@
 from bson.objectid import ObjectId
 from pathlib import Path
+from uuid import uuid4
 
 import pymongo
 from bson.objectid import ObjectId
@@ -20,6 +21,9 @@ class MongoAPI:
     ):
         self.connection = pymongo.MongoClient(connection_string)
         self.db = self.connection.get_database()
+    
+    async def create_job(self):
+        return uuid4()
     
     async def get_field_data(
             self,

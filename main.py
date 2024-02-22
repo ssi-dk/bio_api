@@ -150,7 +150,6 @@ async def dmx_from_request(rq: DMXFromProfilesRequest):
     """
     Return a distance matrix from allele profiles that are included directly in the request
     """
-    # TODO: turn this into a decorator that can be applied to all API requests
     job_id = uuid.uuid4()
     
     print("Requested distance matrix from allele profile")
@@ -184,7 +183,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     """
     Return a distance matrix from allele profiles defined in MongoDB documents
     """
-    job_id = uuid.uuid4()
+    job_id = await mongo_api.create_job()
     profile_count, cursor = await mongo_api.get_field_data(
         collection=rq.collection,
         field_paths=[rq.seqid_field_path, rq.profile_field_path],
