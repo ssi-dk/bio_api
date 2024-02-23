@@ -22,11 +22,20 @@ class MongoAPI:
         self.db = self.connection.get_database()
     
     async def create_job(self):
-        result = self.db['bio_api_jobs'].insert_one({
-            "created": datetime.datetime.now(tz=datetime.timezone.utc)
-        })
+        result = self.db['bio_api_jobs'].insert_one(
+            {'created_at': datetime.datetime.now(tz=datetime.timezone.utc)}
+        )
         assert result.acknowledged == True
         return str(result.inserted_id)
+    
+    async def mark_job_as_finished(self, job_id):
+        finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
+        result = self.db['bio_api_jobs'].update_one(
+            {'_id': ObjectId(job_id)},
+            {'$set': {'finished_at': finished_at}}
+        )
+        assert result.acknowledged == True
+        return finished_at
     
     async def get_field_data(
             self,

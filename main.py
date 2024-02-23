@@ -199,8 +199,10 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
 
     allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, rq.seqid_field_path, rq.profile_field_path)
     dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
+    finished_at = await mongo_api.mark_job_as_finished(job_id)
     return {
         'job_id': job_id,
+        'finished_at': finished_at,
         'status': 'OK',
         'profile_count': profile_count,
         'distance_matrix': dist_mx_df.to_dict(orient='index')
