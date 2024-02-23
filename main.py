@@ -186,7 +186,8 @@ async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
         status = "saved_to_mongodb"
     except DocumentTooLarge:
         status = "document_too_large"
-        print(f"Job {job_id}: result too large for saving in MongoDB!")
+        print(f"Job {job_id}: result too large for saving in MongoDB! Will save as Parquet file as plan B.")
+        dist_mx_df.to_parquet(path=f'/data/{job_id}.parquet')
     return {
         'job_id': job_id,
         'created_at': created_at,
