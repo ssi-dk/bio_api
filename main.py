@@ -162,7 +162,7 @@ async def dmx_from_request(rq: DMXFromProfilesRequest):
     allele_mx_df = DataFrame.from_dict(rq.profiles, 'index', dtype=str)
     dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
     dist_mx_dict = dist_mx_df.to_dict(orient='tight')
-    finished_at = await mongo_api.finish_job(job_id)
+    finished_at = await mongo_api.finish_job(job_id, dist_mx_dict)
     return {
         'job_id': job_id,
         'created_at': created_at,
@@ -178,7 +178,7 @@ async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
     job_id, created_at = await mongo_api.create_job()
     dist_mx_df: DataFrame = await calculate_dmx_from_file(rq.file_path)
     dist_mx_dict = dist_mx_df.to_dict(orient='tight')
-    finished_at = await mongo_api.finish_job(job_id)
+    finished_at = await mongo_api.finish_job(job_id, dist_mx_dict)
     return {
         'job_id': job_id,
         'created_at': created_at,
@@ -208,7 +208,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, rq.seqid_field_path, rq.profile_field_path)
     dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
     dist_mx_dict = dist_mx_df.to_dict(orient='tight')
-    finished_at = await mongo_api.finish_job(job_id)
+    finished_at = await mongo_api.finish_job(job_id, dist_mx_dict)
     return {
         'job_id': job_id,
         'created_at': created_at,

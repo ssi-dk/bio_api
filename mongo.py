@@ -29,11 +29,11 @@ class MongoAPI:
         assert result.acknowledged == True
         return (str(result.inserted_id), created_at)
     
-    async def finish_job(self, job_id):
+    async def finish_job(self, job_id, result):
         finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
         result = self.db['bio_api_jobs'].update_one(
             {'_id': ObjectId(job_id)},
-            {'$set': {'finished_at': finished_at}}
+            {'$set': {'finished_at': finished_at, 'result': result}}
         )
         assert result.acknowledged == True
         return finished_at
