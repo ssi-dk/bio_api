@@ -146,31 +146,6 @@ def validate_profiles(loci: set, profiles:dict):
         dict_keys_set = set(profile.keys())
         assert dict_keys_set == loci
 
-@app.post("/v1/distance_matrix/from_request")
-async def dmx_from_request(rq: DMXFromProfilesRequest):
-    """
-    Return a distance matrix from allele profiles that are included directly in the request
-    """
-    job_id, created_at = await mongo_api.create_job()
-    
-    print("Requested distance matrix from allele profile")
-    print(f"Locus count: {len(rq.loci)}")
-    print(f"Profile count: {len(rq.profiles)}")
-
-    validate_profiles(rq.loci, rq.profiles)
-    print("Profiles validated")
-
-    allele_mx_df = DataFrame.from_dict(rq.profiles, 'index', dtype=str)
-    dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
-    dist_mx_dict = dist_mx_df.to_dict(orient='index')
-    finished_at = await mongo_api.mark_job_as_finished(job_id)
-    return {
-        'job_id': job_id,
-        'created_at': created_at,
-        'finished_at': finished_at,
-        'distance_matrix': dist_mx_dict
-        }
-
 @app.post("/v1/distance_matrix/from_local_file")
 async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
     """
@@ -194,6 +169,31 @@ async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
         'finished_at': finished_at,
         'distance_matrix': dist_mx_dict,
         'status': status
+        }
+
+@app.post("/v1/distance_matrix/from_request")
+async def dmx_from_request(rq: DMXFromProfilesRequest):
+    """
+    Return a distance matrix from allele profiles that are included directly in the request
+    """
+    job_id, created_at = await mongo_api.create_job()
+    
+    print("Requested distance matrix from allele profile")
+    print(f"Locus count: {len(rq.loci)}")
+    print(f"Profile count: {len(rq.profiles)}")
+
+    validate_profiles(rq.loci, rq.profiles)
+    print("Profiles validated")
+
+    allele_mx_df = DataFrame.from_dict(rq.profiles, 'index', dtype=str)
+    dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
+    dist_mx_dict = dist_mx_df.to_dict(orient='index')
+    finished_at = await mongo_api.mark_job_as_finished(job_id)
+    return {
+        'job_id': job_id,
+        'created_at': created_at,
+        'finished_at': finished_at,
+        'distance_matrix': dist_mx_dict
         }
 
 @app.post("/v1/distance_matrix/from_mongodb")
