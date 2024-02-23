@@ -2,6 +2,7 @@ from bson.objectid import ObjectId
 import datetime
 
 import pymongo
+from pymongo.errors import DocumentTooLarge
 from bson.objectid import ObjectId
 
 
@@ -29,14 +30,25 @@ class MongoAPI:
         assert result.acknowledged == True
         return (str(result.inserted_id), created_at)
     
-    async def finish_job(self, job_id, result):
+    async def mark_job_as_finished(self, job_id):
         finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
         result = self.db['bio_api_jobs'].update_one(
             {'_id': ObjectId(job_id)},
-            {'$set': {'finished_at': finished_at, 'result': result}}
+            {'$set': {'finished_at': finished_at}}
         )
         assert result.acknowledged == True
         return finished_at
+
+    async def write_result_to_job(self, job_id, result):
+        try:
+            result = self.db['bio_api_jobs'].update_one(
+                {'_id': ObjectId(job_id)},
+                {'$set': {'result': result}}
+            )
+            assert result.acknowledged == True
+            return 0
+        except DocumentTooLarge as e:
+            return e.with_traceback()
     
     async def get_field_data(
             self,
