@@ -150,7 +150,7 @@ async def dmx_from_request(rq: DMXFromProfilesRequest):
     """
     Return a distance matrix from allele profiles that are included directly in the request
     """
-    job_id = await mongo_api.create_job()
+    job_id, created_at = await mongo_api.create_job()
     
     print("Requested distance matrix from allele profile")
     print(f"Locus count: {len(rq.loci)}")
@@ -164,6 +164,7 @@ async def dmx_from_request(rq: DMXFromProfilesRequest):
     finished_at = await mongo_api.mark_job_as_finished(job_id)
     return {
         'job_id': job_id,
+        'created_at': created_at,
         'finished_at': finished_at,
         'distance_matrix': dist_mx_df.to_dict(orient='tight')
         }
@@ -173,11 +174,12 @@ async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
     """
     Return a distance matrix from allele profiles defined in a local tsv file in the Bio API container
     """
-    job_id = await mongo_api.create_job()
+    job_id, created_at = await mongo_api.create_job()
     dist_mx_df: DataFrame = await calculate_dmx_from_file(rq.file_path)
     finished_at = await mongo_api.mark_job_as_finished(job_id)
     return {
         'job_id': job_id,
+        'created_at': created_at,
         'finished_at': finished_at,
         'distance_matrix': dist_mx_df.to_dict(orient='tight')
         }
@@ -187,7 +189,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     """
     Return a distance matrix from allele profiles defined in MongoDB documents
     """
-    job_id = await mongo_api.create_job()
+    job_id, created_at = await mongo_api.create_job()
     profile_count, cursor = await mongo_api.get_field_data(
         collection=rq.collection,
         field_paths=[rq.seqid_field_path, rq.profile_field_path],
@@ -206,6 +208,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     finished_at = await mongo_api.mark_job_as_finished(job_id)
     return {
         'job_id': job_id,
+        'created_at': created_at,
         'finished_at': finished_at,
         'status': 'OK',
         'profile_count': profile_count,
