@@ -93,11 +93,11 @@ async def allele_mx_from_mongodb(cursor, seqid_field_path: str, profile_field_pa
     df = DataFrame.from_dict(full_dict, 'index', dtype=str)
     return df
 
-async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: uuid.UUID):
+async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: str):
     print("Allele mx:")
     print(allele_mx)
     # save allele matrix to a file that cgmlst-dists can use for input
-    allele_mx_filepath = Path(GENERATED_MX_DIR, f'allele_matrix_{job_id.hex}.tsv')
+    allele_mx_filepath = Path(GENERATED_MX_DIR, f'allele_matrix_{job_id}.tsv')
     with open(allele_mx_filepath, 'w') as allele_mx_file_obj:
         allele_mx_file_obj.write("ID")  # Without an initial string in first line cgmlst-dists will fail!
         allele_mx.to_csv(allele_mx_file_obj, index = True, header=True, sep ="\t")
@@ -150,7 +150,7 @@ async def dmx_from_request(rq: DMXFromProfilesRequest):
     """
     Return a distance matrix from allele profiles that are included directly in the request
     """
-    job_id = uuid.uuid4()
+    job_id = await mongo_api.create_job()
     
     print("Requested distance matrix from allele profile")
     print(f"Locus count: {len(rq.loci)}")
@@ -171,7 +171,7 @@ async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
     """
     Return a distance matrix from allele profiles defined in a local tsv file in the Bio API container
     """
-    job_id = uuid.uuid4()
+    job_id = await mongo_api.create_job()
     dist_mx_df: DataFrame = await calculate_dmx_from_file(rq.file_path)
     return {
         'job_id': job_id,

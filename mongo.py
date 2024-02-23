@@ -1,6 +1,5 @@
 from bson.objectid import ObjectId
-from pathlib import Path
-from uuid import uuid4
+import datetime
 
 import pymongo
 from bson.objectid import ObjectId
@@ -23,7 +22,11 @@ class MongoAPI:
         self.db = self.connection.get_database()
     
     async def create_job(self):
-        return uuid4()
+        result = self.db['bio_api_jobs'].insert_one({
+            "created": datetime.datetime.now(tz=datetime.timezone.utc)
+        })
+        assert result.acknowledged == True
+        return str(result.inserted_id)
     
     async def get_field_data(
             self,
