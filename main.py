@@ -161,12 +161,13 @@ async def dmx_from_request(rq: DMXFromProfilesRequest):
 
     allele_mx_df = DataFrame.from_dict(rq.profiles, 'index', dtype=str)
     dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
+    dist_mx_dict = dist_mx_df.to_dict(orient='tight')
     finished_at = await mongo_api.mark_job_as_finished(job_id)
     return {
         'job_id': job_id,
         'created_at': created_at,
         'finished_at': finished_at,
-        'distance_matrix': dist_mx_df.to_dict(orient='tight')
+        'distance_matrix': dist_mx_dict
         }
 
 @app.post("/v1/distance_matrix/from_local_file")
@@ -176,12 +177,13 @@ async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
     """
     job_id, created_at = await mongo_api.create_job()
     dist_mx_df: DataFrame = await calculate_dmx_from_file(rq.file_path)
+    dist_mx_dict = dist_mx_df.to_dict(orient='tight')
     finished_at = await mongo_api.mark_job_as_finished(job_id)
     return {
         'job_id': job_id,
         'created_at': created_at,
         'finished_at': finished_at,
-        'distance_matrix': dist_mx_df.to_dict(orient='tight')
+        'distance_matrix': dist_mx_dict
         }
 
 @app.post("/v1/distance_matrix/from_mongodb")
@@ -205,6 +207,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
 
     allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, rq.seqid_field_path, rq.profile_field_path)
     dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
+    dist_mx_dict = dist_mx_df.to_dict(orient='tight')
     finished_at = await mongo_api.mark_job_as_finished(job_id)
     return {
         'job_id': job_id,
@@ -212,7 +215,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
         'finished_at': finished_at,
         'status': 'OK',
         'profile_count': profile_count,
-        'distance_matrix': dist_mx_df.to_dict(orient='index')
+        'distance_matrix': dist_mx_dict
         }
 
 @app.post("/v1/tree/hc/")
