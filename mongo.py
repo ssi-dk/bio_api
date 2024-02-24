@@ -1,5 +1,5 @@
 from bson.objectid import ObjectId
-from pathlib import Path
+import datetime
 
 import pymongo
 from bson.objectid import ObjectId
@@ -21,6 +21,31 @@ class MongoAPI:
         self.connection = pymongo.MongoClient(connection_string)
         self.db = self.connection.get_database()
     
+    async def create_job(self):
+        created_at = datetime.datetime.now(tz=datetime.timezone.utc)
+        result = self.db['bio_api_jobs'].insert_one(
+            {'created_at': created_at}
+        )
+        assert result.acknowledged == True
+        return (str(result.inserted_id), created_at)
+
+    async def mark_job_as_finished(self, job_id):
+        finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
+        result = self.db['bio_api_jobs'].update_one(
+            {'_id': ObjectId(job_id)},
+            {'$set': {'finished_at': finished_at}}
+        )
+        assert result.acknowledged == True
+        return finished_at
+
+    # Might throw pymongo.errors.DocumentTooLarge
+    async def write_result_to_job(self, job_id, result):
+        result = self.db['bio_api_jobs'].update_one(
+            {'_id': ObjectId(job_id)},
+            {'$set': {'result': result}}
+        )
+        assert result.acknowledged == True
+
     async def get_field_data(
             self,
             collection:str,   # MongoDB collection

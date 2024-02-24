@@ -9,6 +9,7 @@ import asyncio
 from pydantic import BaseModel
 from fastapi import FastAPI
 from pandas import DataFrame, read_table
+from pymongo.errors import DocumentTooLarge
 
 import mongo
 from tree_maker import make_tree
@@ -93,11 +94,11 @@ async def allele_mx_from_mongodb(cursor, seqid_field_path: str, profile_field_pa
     df = DataFrame.from_dict(full_dict, 'index', dtype=str)
     return df
 
-async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: uuid.UUID):
+async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: str):
     print("Allele mx:")
     print(allele_mx)
     # save allele matrix to a file that cgmlst-dists can use for input
-    allele_mx_filepath = Path(GENERATED_MX_DIR, f'allele_matrix_{job_id.hex}.tsv')
+    allele_mx_filepath = Path(GENERATED_MX_DIR, f'allele_matrix_{job_id}.tsv')
     with open(allele_mx_filepath, 'w') as allele_mx_file_obj:
         allele_mx_file_obj.write("ID")  # Without an initial string in first line cgmlst-dists will fail!
         allele_mx.to_csv(allele_mx_file_obj, index = True, header=True, sep ="\t")
@@ -145,14 +146,38 @@ def validate_profiles(loci: set, profiles:dict):
         dict_keys_set = set(profile.keys())
         assert dict_keys_set == loci
 
+@app.post("/v1/distance_matrix/from_local_file")
+async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
+    """
+    Return a distance matrix from allele profiles defined in a local tsv file in the Bio API container
+    """
+    job_id, created_at = await mongo_api.create_job()
+    dist_mx_df: DataFrame = await calculate_dmx_from_file(rq.file_path)
+    dist_mx_dict = dist_mx_df.to_dict(orient='index')
+    finished_at = await mongo_api.mark_job_as_finished(job_id)
+    status = "calculation_completed"
+    try:
+        await mongo_api.write_result_to_job(job_id, dist_mx_dict)
+        status = "saved_to_mongodb"
+    except DocumentTooLarge:
+        status = "document_too_large"
+        print(f"Job {job_id}: result too large for saving in MongoDB! Will save as Parquet file as plan B.")
+        dist_mx_df.to_parquet(path=f'/data/{job_id}.parquet')
+    return {
+        'job_id': job_id,
+        'created_at': created_at,
+        'finished_at': finished_at,
+        'distance_matrix': dist_mx_dict,
+        'status': status
+        }
+
 @app.post("/v1/distance_matrix/from_request")
 async def dmx_from_request(rq: DMXFromProfilesRequest):
     """
     Return a distance matrix from allele profiles that are included directly in the request
     """
-    # TODO: turn this into a decorator that can be applied to all API requests
-    job_id = uuid.uuid4()
-    
+    job_id, created_at = await mongo_api.create_job()
+
     print("Requested distance matrix from allele profile")
     print(f"Locus count: {len(rq.loci)}")
     print(f"Profile count: {len(rq.profiles)}")
@@ -162,21 +187,13 @@ async def dmx_from_request(rq: DMXFromProfilesRequest):
 
     allele_mx_df = DataFrame.from_dict(rq.profiles, 'index', dtype=str)
     dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
-    return {
-        "job_id": job_id,
-        "distance_matrix": dist_mx_df.to_dict(orient='tight')
-        }
-
-@app.post("/v1/distance_matrix/from_local_file")
-async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
-    """
-    Return a distance matrix from allele profiles defined in a local tsv file in the Bio API container
-    """
-    job_id = uuid.uuid4()
-    dist_mx_df: DataFrame = await calculate_dmx_from_file(rq.file_path)
+    dist_mx_dict = dist_mx_df.to_dict(orient='index')
+    finished_at = await mongo_api.mark_job_as_finished(job_id)
     return {
         'job_id': job_id,
-        'distance_matrix': dist_mx_df.to_dict(orient='tight')
+        'created_at': created_at,
+        'finished_at': finished_at,
+        'distance_matrix': dist_mx_dict
         }
 
 @app.post("/v1/distance_matrix/from_mongodb")
@@ -184,7 +201,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     """
     Return a distance matrix from allele profiles defined in MongoDB documents
     """
-    job_id = uuid.uuid4()
+    job_id, created_at = await mongo_api.create_job()
     profile_count, cursor = await mongo_api.get_field_data(
         collection=rq.collection,
         field_paths=[rq.seqid_field_path, rq.profile_field_path],
@@ -200,11 +217,15 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
 
     allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, rq.seqid_field_path, rq.profile_field_path)
     dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
+    dist_mx_dict = dist_mx_df.to_dict(orient='index')
+    finished_at = await mongo_api.mark_job_as_finished(job_id)
     return {
         'job_id': job_id,
+        'created_at': created_at,
+        'finished_at': finished_at,
         'status': 'OK',
         'profile_count': profile_count,
-        'distance_matrix': dist_mx_df.to_dict(orient='index')
+        'distance_matrix': dist_mx_dict
         }
 
 @app.post("/v1/tree/hc/")
