@@ -139,7 +139,7 @@ async def calculate_dmx_from_file(file_path: str):
     print(df)
 
     table = pv.read_csv(BytesIO(stdout))
-    #pq.write_table(table, './dist1.parquet')
+    pq.write_table(table, '/data/dist1.parquet')
 
     return df
 
