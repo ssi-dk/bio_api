@@ -137,9 +137,9 @@ async def calculate_dmx_from_file(file_path: str):
     df = df.set_index('ids')
     print("df from cgmlst-dists:")
     print(df)
-
+    df.to_csv('/data/dist50.tsv', sep='\t')
     table = pv.read_csv(BytesIO(stdout))
-    pq.write_table(table, '/data/dist1.parquet')
+    pq.write_table(table, '/data/dist50.parquet')
 
     return df
 
