@@ -1,7 +1,7 @@
 from os import getenv
 import uuid
 from typing import Union
-from io import StringIO
+from io import StringIO, BytesIO
 from pathlib import Path
 import traceback
 import asyncio
@@ -10,6 +10,8 @@ from pydantic import BaseModel
 from fastapi import FastAPI
 from pandas import DataFrame, read_table
 from pymongo.errors import DocumentTooLarge
+import pyarrow.csv as pv
+import pyarrow.parquet as pq
 
 import mongo
 from tree_maker import make_tree
@@ -135,6 +137,10 @@ async def calculate_dmx_from_file(file_path: str):
     df = df.set_index('ids')
     print("df from cgmlst-dists:")
     print(df)
+
+    table = pv.read_csv(BytesIO(stdout))
+    #pq.write_table(table, './dist1.parquet')
+
     return df
 
 @app.get("/")
