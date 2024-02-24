@@ -28,7 +28,7 @@ class MongoAPI:
         )
         assert result.acknowledged == True
         return (str(result.inserted_id), created_at)
-    
+
     async def mark_job_as_finished(self, job_id):
         finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
         result = self.db['bio_api_jobs'].update_one(
@@ -45,7 +45,7 @@ class MongoAPI:
             {'$set': {'result': result}}
         )
         assert result.acknowledged == True
-    
+
     async def get_field_data(
             self,
             collection:str,   # MongoDB collection

@@ -177,7 +177,7 @@ async def dmx_from_request(rq: DMXFromProfilesRequest):
     Return a distance matrix from allele profiles that are included directly in the request
     """
     job_id, created_at = await mongo_api.create_job()
-    
+
     print("Requested distance matrix from allele profile")
     print(f"Locus count: {len(rq.loci)}")
     print(f"Profile count: {len(rq.profiles)}")
