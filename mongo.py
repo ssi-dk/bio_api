@@ -21,7 +21,7 @@ class MongoAPI:
         self.connection = pymongo.MongoClient(connection_string)
         self.db = self.connection.get_database()
     
-    async def create_job(self):
+    async def create_dmx_job(self):
         created_at = datetime.datetime.now(tz=datetime.timezone.utc)
         result = self.db['bio_api_jobs'].insert_one(
             {'created_at': created_at}
