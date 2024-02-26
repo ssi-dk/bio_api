@@ -6,8 +6,8 @@ import pymongo
 
 def profile2mongo(db, filename: str, collection: str='samples'):
     df = read_csv(filename, sep='\t')
-    df = df[['ID']].assign(
-                    profile=df.set_index(['ID']).to_dict(orient='records')
+    df = df[['name']].assign(
+                    profile=df.set_index(['name']).to_dict(orient='records')
     )
     inserted_ids = list()
     for _index, row in df.iterrows():
@@ -40,5 +40,5 @@ if __name__ == '__main__':
     db = connection.get_database()
     print(f"Connection string: {connection_string}")
     inserted_ids = profile2mongo(db, args.filename)
-    print("These are the _id strings of the created MongoDB documents:")
+    print("These are the _id strings of the MongoDB documents:")
     print(inserted_ids)
