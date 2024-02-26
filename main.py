@@ -158,22 +158,13 @@ async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
     Return a distance matrix from allele profiles defined in a local tsv file in the Bio API container
     """
     job_id, created_at = await mongo_api.create_job()
-    dist_mx_df: DataFrame = await calculate_dmx_from_file(rq.file_path)
-    dist_mx_dict = dist_mx_df.to_dict(orient='index')
+    await calculate_dmx_from_file(rq.file_path)
     finished_at = await mongo_api.mark_job_as_finished(job_id)
     status = "calculation_completed"
-    try:
-        await mongo_api.write_result_to_job(job_id, dist_mx_dict)
-        status = "saved_to_mongodb"
-    except DocumentTooLarge:
-        status = "document_too_large"
-        print(f"Job {job_id}: result too large for saving in MongoDB! Will save as Parquet file as plan B.")
-        dist_mx_df.to_parquet(path=f'/data/{job_id}.parquet')
     return {
         'job_id': job_id,
         'created_at': created_at,
         'finished_at': finished_at,
-        'distance_matrix': dist_mx_dict,
         'status': status
         }
 
