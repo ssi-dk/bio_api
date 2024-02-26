@@ -12,6 +12,14 @@ def profile2mongo(db, filename: str, collection: str='samples'):
     inserted_ids = list()
     for _index, row in df.iterrows():
 
+        # Check if document with given 'name' already exists, skip if true
+        existing_document = db[collection].find_one({'name': row['name']})
+        if existing_document:
+            _id = str(existing_document['_id'])
+            print(f"Document with name = '{row['name']}' already exists and has _id {_id}")
+            inserted_ids.append(_id)
+            continue
+
         # Each rows' to_dict() will be a MongoDB document
         document = row.to_dict()
 
