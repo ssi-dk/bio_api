@@ -4,6 +4,8 @@ import datetime
 import pymongo
 from bson.objectid import ObjectId
 
+from pydantic_classes import DMXFromLocalFileRequest, DMXFromMongoDBRequest, DMXFromProfilesRequest, HCTreeCalcRequest
+
 
 def strs2ObjectIds(id_strings: list):
     """
@@ -21,11 +23,16 @@ class MongoAPI:
         self.connection = pymongo.MongoClient(connection_string)
         self.db = self.connection.get_database()
     
-    async def create_dmx_job(self):
+    async def create_dmx_job(self, rq:DMXFromMongoDBRequest):
         created_at = datetime.datetime.now(tz=datetime.timezone.utc)
-        result = self.db['bio_api_jobs'].insert_one(
-            {'created_at': created_at}
-        )
+        result = self.db['bio_api_jobs'].insert_one({
+            'created_at': created_at,
+            'status': 'new',
+            'collection': rq.collection,
+            'seqid_field_path': rq.seqid_field_path,
+            'profile_field_path': rq.profile_field_path,
+            'mongo_ids': rq.mongo_ids
+            })
         assert result.acknowledged == True
         return (str(result.inserted_id), created_at)
 

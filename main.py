@@ -12,6 +12,8 @@ from pandas import DataFrame, read_table
 from pymongo.errors import DocumentTooLarge
 
 import mongo
+
+from pydantic_classes import DMXFromLocalFileRequest, DMXFromMongoDBRequest, DMXFromProfilesRequest, HCTreeCalcRequest
 from tree_maker import make_tree
 # from qstat import consume_qstat
 
@@ -22,40 +24,6 @@ mongo_api = mongo.MongoAPI(connection_string)
 
 MANUAL_MX_DIR = getenv('BIO_API_TEST_INPUT_DIR', '/test_input')
 GENERATED_MX_DIR = getenv('BIO_API_DATA_DIR', '/data')
-
-
-class ProcessingRequest(BaseModel):
-    id: Union[None, uuid.UUID]
-    timeout: int = 2
-
-    def __init__(self, **kwargs):
-        super().__init__( **kwargs)
-        self.id = uuid.uuid4()
-
-class DMXFromMongoDBRequest(BaseModel):
-    """
-    collection: collection to find sequences in
-    seqid_field_path: field path in dotted notation which contains the 'sequence id' the user wants to see
-    profile_field_path: field path in dotted notation which contains the cgMLST allele profiles
-    mongo_ids: the  _id strings for the desired sequence documents
-    """
-    collection: str
-    seqid_field_path: str
-    profile_field_path: str
-    mongo_ids: list
-
-class DMXFromProfilesRequest(BaseModel):
-    loci: set
-    profiles: dict
-
-class DMXFromLocalFileRequest(BaseModel):
-    file_path: str
-
-class HCTreeCalcRequest(BaseModel):
-    """Represents a REST request for a tree calculation based on hierarchical clustering.
-    """
-    distances: dict
-    method: str
 
 
 async def allele_mx_from_bifrost_mongo(mongo_cursor):
@@ -207,7 +175,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     """
     Return a distance matrix from allele profiles defined in MongoDB documents
     """
-    job_id, created_at = await mongo_api.create_dmx_job()
+    job_id, created_at = await mongo_api.create_dmx_job(rq)
     profile_count, cursor = await mongo_api.get_field_data(
         collection=rq.collection,
         field_paths=[rq.seqid_field_path, rq.profile_field_path],
