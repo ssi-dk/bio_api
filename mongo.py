@@ -25,7 +25,7 @@ class MongoAPI:
     
     async def create_dmx_job(self, rq:DMXFromMongoDBRequest):
         created_at = datetime.datetime.now(tz=datetime.timezone.utc)
-        result = self.db['bio_api_jobs'].insert_one({
+        result = self.db['dmx_jobs'].insert_one({
             'created_at': created_at,
             'status': 'new',
             'collection': rq.collection,
@@ -40,7 +40,7 @@ class MongoAPI:
         finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
         result = self.db['bio_api_jobs'].update_one(
             {'_id': ObjectId(job_id)},
-            {'$set': {'finished_at': finished_at}}
+            {'$set': {'status': 'finished', 'finished_at': finished_at}}
         )
         assert result.acknowledged == True
         return finished_at

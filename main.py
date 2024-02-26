@@ -175,7 +175,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     """
     Return a distance matrix from allele profiles defined in MongoDB documents
     """
-    job_id, created_at = await mongo_api.create_dmx_job(rq)
+    dmx_job_id, created_at = await mongo_api.create_dmx_job(rq)
     profile_count, cursor = await mongo_api.get_field_data(
         collection=rq.collection,
         field_paths=[rq.seqid_field_path, rq.profile_field_path],
@@ -190,14 +190,13 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
         }
 
     allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, rq.seqid_field_path, rq.profile_field_path)
-    dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
+    dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, dmx_job_id)
     dist_mx_dict = dist_mx_df.to_dict(orient='index')
-    finished_at = await mongo_api.mark_job_as_finished(job_id)
+    finished_at = await mongo_api.mark_job_as_finished(dmx_job_id)
     return {
-        'job_id': job_id,
+        'dmx_job_id': dmx_job_id,
         'created_at': created_at,
         'finished_at': finished_at,
-        'status': 'OK',
         'profile_count': profile_count,
         'distance_matrix': dist_mx_dict
         }
