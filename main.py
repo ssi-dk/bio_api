@@ -149,7 +149,8 @@ async def calculate_dmx_from_file(file_path: str):
     pq.write_table(table, parquet_file)
 
     # Read the file with Pandas and see what we've got
-    #df = read_parquet
+    df = read_parquet(parquet_file)
+    print(df)
 
     return input_filename
 
