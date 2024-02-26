@@ -8,7 +8,7 @@ import asyncio
 
 from pydantic import BaseModel
 from fastapi import FastAPI
-from pandas import DataFrame, read_table
+from pandas import DataFrame, read_table, read_parquet
 from pymongo.errors import DocumentTooLarge
 import pyarrow.csv as pv
 import pyarrow.parquet as pq
@@ -132,16 +132,26 @@ async def calculate_dmx_from_file(file_path: str):
         errmsg = (f"Could not run cgmlst-dists on {str(file_path)}!")
         raise OSError(errmsg + "\n\n" + stderr.decode('utf-8'))
 
-    df = read_table(StringIO(stdout.decode('utf-8')))
-    df.rename(columns = {"cgmlst-dists": "ids"}, inplace = True)
-    df = df.set_index('ids')
-    print("df from cgmlst-dists:")
-    print(df)
-    df.to_csv('/data/dist50.tsv', sep='\t')
-    table = pv.read_csv(BytesIO(stdout))
-    pq.write_table(table, '/data/dist50.parquet')
+    # Old Pandas code
+    # df = read_table(StringIO(stdout.decode('utf-8')))
+    # df.rename(columns = {"cgmlst-dists": "ids"}, inplace = True)
+    # df = df.set_index('ids')
+    # print("df from cgmlst-dists:")
+    # print(df)
+    # df.to_csv('/data/dist50.tsv', sep='\t')
 
-    return df
+    # Write to parquet file
+    input_filename = Path(file_path).parts[-1]
+    print(f"Input filename: {input_filename}")
+    parquet_file = Path('/data', str(input_filename) + '.parquet')
+    print(f"Parquet file: {parquet_file}")
+    table = pv.read_csv(BytesIO(stdout))
+    pq.write_table(table, parquet_file)
+
+    # Read the file with Pandas and see what we've got
+    #df = read_parquet
+
+    return input_filename
 
 @app.get("/")
 def root():
@@ -158,14 +168,15 @@ async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
     Return a distance matrix from allele profiles defined in a local tsv file in the Bio API container
     """
     job_id, created_at = await mongo_api.create_job()
-    await calculate_dmx_from_file(rq.file_path)
+    filename = await calculate_dmx_from_file(rq.file_path)
     finished_at = await mongo_api.mark_job_as_finished(job_id)
     status = "calculation_completed"
     return {
         'job_id': job_id,
         'created_at': created_at,
         'finished_at': finished_at,
-        'status': status
+        'status': status,
+        'filename': filename
         }
 
 @app.post("/v1/distance_matrix/from_request")
