@@ -1,11 +1,15 @@
 from bson.objectid import ObjectId
 import datetime
+from os import getenv
 
+from pydantic import BaseModel
 import pymongo
 from bson.objectid import ObjectId
+from pathlib import Path
 
 from pydantic_classes import DMXFromLocalFileRequest, DMXFromMongoDBRequest, DMXFromProfilesRequest, HCTreeCalcRequest
 
+DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 
 def strs2ObjectIds(id_strings: list):
     """
@@ -63,3 +67,40 @@ class MongoAPI:
         document_count = self.db[collection].count_documents(filter)
         cursor = self.db[collection].find(filter, {field_path: True for field_path in field_paths})
         return document_count, cursor
+
+
+class DistanceCalculation(BaseModel):
+    created_at: datetime.datetime or None
+    finished_at: datetime.datetime or None
+    status: str
+    my_collection: str = 'dist_calculations'
+    seq_collection: str
+    seqid_field_path: str
+    profile_field_path: str
+    seq_mongo_ids: list
+    id: str or None
+    folder: Path or None
+
+    def __init__(self, seq_collection, seqid_field_path, profile_field_path, seq_mongo_ids):
+        self.seq_collection = seq_collection
+        self.seqid_field_path = seqid_field_path
+        self.profile_field_path = profile_field_path
+        self.seq_mongo_ids = seq_mongo_ids
+        self.status = 'new'
+    
+    async def _init_save(self, mongo:MongoAPI):
+        self.created_at = datetime.datetime.now(tz=datetime.timezone.utc)
+        result = mongo.db[self.my_collection].insert_one({
+            'created_at': self.created_at,
+            'status': self.status,
+            'seq_collection': self.seq_collection,
+            'seqid_field_path': self.seqid_field_path,
+            'profile_field_path': self.profile_field_path,
+            'seq_mongo_ids': self.seq_mongo_ids
+            })
+        assert result.acknowledged == True
+        self.id = str(result.inserted_id)
+
+        self.folder = Path(DMX_DIR, self.id)
+        self.folder.mkdir()
+        return (self.id)
