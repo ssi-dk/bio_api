@@ -188,7 +188,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
                 f"Requested: {str(len(rq.mongo_ids))}, found: {str(profile_count)}"
         }
 
-    # Ud
+    # TODO: Ud
     allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, dc.seqid_field_path, dc.profile_field_path)
     
     # Save allele mx as tsv file in job folder
