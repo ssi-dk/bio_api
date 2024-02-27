@@ -61,8 +61,6 @@ async def allele_mx_from_mongodb(cursor, seqid_field_path: str, profile_field_pa
     return df
 
 async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: str):
-    print("Allele mx:")
-    print(allele_mx)
     # save allele matrix to a file that cgmlst-dists can use for input
     allele_mx_filepath = Path(DMX_DIR, f'allele_matrix_{job_id}.tsv')
     with open(allele_mx_filepath, 'w') as allele_mx_file_obj:
