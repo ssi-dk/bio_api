@@ -23,7 +23,7 @@ print(f"Connection string: {connection_string}")
 mongo_api = mongo.MongoAPI(connection_string)
 
 MANUAL_MX_DIR = getenv('BIO_API_TEST_INPUT_DIR', '/test_input')
-GENERATED_MX_DIR = getenv('BIO_API_DATA_DIR', '/data')
+DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 
 
 async def allele_mx_from_bifrost_mongo(mongo_cursor):
@@ -72,7 +72,7 @@ async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: str):
     print("Allele mx:")
     print(allele_mx)
     # save allele matrix to a file that cgmlst-dists can use for input
-    allele_mx_filepath = Path(GENERATED_MX_DIR, f'allele_matrix_{job_id}.tsv')
+    allele_mx_filepath = Path(DMX_DIR, f'allele_matrix_{job_id}.tsv')
     with open(allele_mx_filepath, 'w') as allele_mx_file_obj:
         allele_mx_file_obj.write("ID")  # Without an initial string in first line cgmlst-dists will fail!
         allele_mx.to_csv(allele_mx_file_obj, index = True, header=True, sep ="\t")

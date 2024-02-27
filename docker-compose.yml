@@ -6,7 +6,6 @@ services:
     volumes:
       - ./data/mongodb:/data/db
       - ./dumps/mongodb:/dumps
-      - ./test_input:/test_input
 
 #    rabbitmq:
 #      image: rabbitmq
@@ -30,7 +29,7 @@ services:
     build: .
     volumes:
       - .:/app
-      - ./data:/data
+      - ./dmx_data:/dmx_data
       - ./test_client/input_data:/input_data
     ports:
       - "8001:8001"
