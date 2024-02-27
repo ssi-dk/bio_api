@@ -194,11 +194,12 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, dc.seqid_field_path, dc.profile_field_path)
     
     # Save allele mx as tsv file in job folder
-    dc.save_dmx_as_tsv(cursor)
+    # TODO: allele_max_df should be part of the DistanceCalculation object
+    await dc.save_amx_as_tsv(allele_mx_df)
 
     dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, dc.id)
     dist_mx_dict = dist_mx_df.to_dict(orient='index')
-    dc.mark_as_finished()
+    # await dc.mark_as_finished()
     return {
         'dmx_job_id': dc.id,
         'created_at': dc.created_at,

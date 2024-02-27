@@ -122,11 +122,11 @@ class DistanceCalculation:
     
     async def mark_as_finished(self):
         result = self.conn.get_database()['dist_calculations'].update_one(
-            {'id': self.id}, {'finished_at': datetime.datetime.now(tz=datetime.timezone.utc)}
+            {'id': self.id}, {'$update': {'finished_at': datetime.datetime.now(tz=datetime.timezone.utc)}}
         )
         assert result.acknowledged == True
     
-    async def get_dmx_as_dataframe(self, cursor):
+    async def get_amx_as_dataframe(self, cursor):
         full_dict = dict()
         try:
             while True:
@@ -140,9 +140,14 @@ class DistanceCalculation:
         df = DataFrame.from_dict(full_dict, 'index', dtype=str)
         return df
     
-    async def save_dmx_as_tsv(self, cursor):
-        df = self.get_dmx_as_dataframe(cursor)
-         # ...
+    async def save_amx_as_tsv(self, allele_mx_df):
+        print("Allele mx as dataframe:")
+        print(allele_mx_df)
+        # Save allele matrix to a file that cgmlst-dists can use for input
+        allele_mx_filepath = Path(self.folder, self.id + '.amx.tsv')
+        with open(allele_mx_filepath, 'w') as allele_mx_file_obj:
+            allele_mx_file_obj.write("ID")  # Without an initial string in first line cgmlst-dists will fail!
+            allele_mx_df.to_csv(allele_mx_file_obj, index = True, header=True, sep ="\t")
         
     @classmethod
     def find(cls, conn: pymongo.MongoClient, id: str):
