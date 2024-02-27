@@ -192,7 +192,6 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, dc.seqid_field_path, dc.profile_field_path)
     
     # Save allele mx as tsv file in job folder
-    # TODO: allele_amx_as_tsv should be part of the DistanceCalculation class
     await dc.save_amx_as_tsv(allele_mx_df)
 
     # TODO: dist_mx_from_allele_df should be part of the DistanceCalculation class
