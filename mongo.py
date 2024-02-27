@@ -2,6 +2,7 @@ from bson.objectid import ObjectId
 import datetime
 from os import getenv
 from pathlib import Path
+from json import dump
 
 from pydantic import BaseModel
 import pymongo
@@ -144,10 +145,17 @@ class DistanceCalculation:
         print("Allele mx as dataframe:")
         print(allele_mx_df)
         # Save allele matrix to a file that cgmlst-dists can use for input
-        allele_mx_filepath = Path(self.folder, self.id + '.amx.tsv')
+        allele_mx_filepath = Path(self.folder, 'allele_matrix.tsv')
         with open(allele_mx_filepath, 'w') as allele_mx_file_obj:
             allele_mx_file_obj.write("ID")  # Without an initial string in first line cgmlst-dists will fail!
             allele_mx_df.to_csv(allele_mx_file_obj, index = True, header=True, sep ="\t")
+    
+    async def save_dmx_as_json(self, dist_mx_dict):
+        print("Saving distance calculation as JSON")
+        dist_mx_filepath = Path(self.folder, 'distance_matrix.json')
+        with open(dist_mx_filepath, 'w') as dist_mx_file_obj:
+            dump(dist_mx_dict, dist_mx_file_obj)
+        
         
     @classmethod
     def find(cls, conn: pymongo.MongoClient, id: str):
