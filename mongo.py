@@ -96,8 +96,10 @@ class DistanceCalculation:
         self.seq_mongo_ids = seq_mongo_ids
         self.status = 'new'
         self.created_at = datetime.datetime.now(tz=datetime.timezone.utc)
+        self.finished_at = None
         result = self.conn.get_database()['dist_calculations'].insert_one({
             'created_at': self.created_at,
+            'finished_at': self.finished_at,
             'status': self.status,
             'seq_collection': self.seq_collection,
             'seqid_field_path': self.seqid_field_path,
@@ -109,3 +111,18 @@ class DistanceCalculation:
 
         self.folder = Path(DMX_DIR, self.id)
         self.folder.mkdir()
+    
+    @classmethod
+    def find(cls, conn: pymongo.MongoClient, id: str):
+        db = conn.get_database()
+        doc = db['dist_calculations'].find_one({'_id': id})
+        return cls(
+            conn,
+            seq_collection=doc['seq_collection'],
+            seq_field_path=doc['seq_field_path'],
+            profile_field_path=doc['profile_field_path'],
+            seq_mongo_ids=doc['seq_mongo_ids'],
+            status=doc['status'],
+            created_at=doc['created_at'],
+            finished_at=doc['finished_at']
+            )
