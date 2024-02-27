@@ -196,7 +196,8 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     await dc.save_amx_as_tsv(allele_mx_df)
 
     # TODO: dist_mx_from_allele_df should be part of the DistanceCalculation class
-    dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, dc.id)
+    # dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, dc.id)
+    dist_mx_df: DataFrame = await dc.dist_mx_from_allele_df()
     dist_mx_dict = dist_mx_df.to_dict(orient='index')
     await dc.save_dmx_as_json(dist_mx_dict)
     # await dc.mark_as_finished()
