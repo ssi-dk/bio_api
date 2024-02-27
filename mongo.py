@@ -69,11 +69,11 @@ class MongoAPI:
         return document_count, cursor
 
 
-class DistanceCalculation(BaseModel):
+class DistanceCalculation:
+    conn: pymongo.MongoClient
     created_at: datetime.datetime or None
     finished_at: datetime.datetime or None
     status: str
-    my_collection: str = 'dist_calculations'
     seq_collection: str
     seqid_field_path: str
     profile_field_path: str
@@ -81,16 +81,22 @@ class DistanceCalculation(BaseModel):
     id: str or None
     folder: Path or None
 
-    def __init__(self, seq_collection, seqid_field_path, profile_field_path, seq_mongo_ids):
+    def __init__(
+            self,
+            conn: pymongo.MongoClient,
+            seq_collection: str,
+            seqid_field_path: str,
+            profile_field_path: str,
+            seq_mongo_ids: list
+            ):
+        self.conn = conn
         self.seq_collection = seq_collection
         self.seqid_field_path = seqid_field_path
         self.profile_field_path = profile_field_path
         self.seq_mongo_ids = seq_mongo_ids
         self.status = 'new'
-    
-    async def _init_save(self, mongo:MongoAPI):
         self.created_at = datetime.datetime.now(tz=datetime.timezone.utc)
-        result = mongo.db[self.my_collection].insert_one({
+        result = self.conn.get_database()['dist_calculations'].insert_one({
             'created_at': self.created_at,
             'status': self.status,
             'seq_collection': self.seq_collection,
@@ -103,4 +109,3 @@ class DistanceCalculation(BaseModel):
 
         self.folder = Path(DMX_DIR, self.id)
         self.folder.mkdir()
-        return (self.id)

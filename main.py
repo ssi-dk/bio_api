@@ -175,6 +175,13 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     """
     Return a distance matrix from allele profiles defined in MongoDB documents
     """
+    dc = mongo.DistanceCalculation(
+            conn=mongo_api.connection,
+            seq_collection=rq.collection,
+            seqid_field_path=rq.seqid_field_path,
+            profile_field_path=rq.profile_field_path,
+            seq_mongo_ids=rq.mongo_ids
+    )
     dmx_job_id, created_at = await mongo_api.create_dmx_job(rq)
     profile_count, cursor = await mongo_api.get_field_data(
         collection=rq.collection,
