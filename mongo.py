@@ -112,6 +112,12 @@ class DistanceCalculation:
         self.folder = Path(DMX_DIR, self.id)
         self.folder.mkdir()
     
+    async def mark_as_finished(self):
+        result = self.conn.get_database()['dist_calculations'].update_one(
+            {'id': self.id}, {'finished_at': datetime.datetime.now(tz=datetime.timezone.utc)}
+        )
+        assert result.acknowledged == True
+    
     @classmethod
     def find(cls, conn: pymongo.MongoClient, id: str):
         db = conn.get_database()

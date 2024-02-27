@@ -182,11 +182,13 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
             profile_field_path=rq.profile_field_path,
             seq_mongo_ids=rq.mongo_ids
     )
-    dmx_job_id, created_at = await mongo_api.create_dmx_job(rq)
+
+    # dmx_job_id, created_at = await mongo_api.create_dmx_job(rq)
+    
     profile_count, cursor = await mongo_api.get_field_data(
-        collection=rq.collection,
-        field_paths=[rq.seqid_field_path, rq.profile_field_path],
-        mongo_ids=rq.mongo_ids
+        collection=dc.seq_collection,
+        field_paths=[dc.seqid_field_path, dc.profile_field_path],
+        mongo_ids=dc.seq_mongo_ids
         )
     
     if len(rq.mongo_ids) != profile_count:
@@ -196,14 +198,14 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
                 f"Requested: {str(len(rq.mongo_ids))}, found: {str(profile_count)}"
         }
 
-    allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, rq.seqid_field_path, rq.profile_field_path)
-    dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, dmx_job_id)
+    allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, dc.seqid_field_path, dc.profile_field_path)
+    dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, dc.id)
     dist_mx_dict = dist_mx_df.to_dict(orient='index')
-    finished_at = await mongo_api.mark_job_as_finished(dmx_job_id)
+    dc.mark_as_finished()
     return {
-        'dmx_job_id': dmx_job_id,
-        'created_at': created_at,
-        'finished_at': finished_at,
+        'dmx_job_id': dc.id,
+        'created_at': dc.created_at,
+        'finished_at': dc.finished_at,
         'profile_count': profile_count,
         'distance_matrix': dist_mx_dict
         }
