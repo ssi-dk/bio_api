@@ -165,6 +165,8 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     """
     Return a distance matrix from allele profiles defined in MongoDB documents
     """
+    
+    # Initialize DistanceCalculation object
     dc = mongo.DistanceCalculation(
             conn=mongo_api.connection,
             seq_collection=rq.collection,
@@ -172,15 +174,17 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
             profile_field_path=rq.profile_field_path,
             seq_mongo_ids=rq.mongo_ids
     )
-
-    # dmx_job_id, created_at = await mongo_api.create_dmx_job(rq)
     
+    # TODO: flyt til DistanceCalculation klassen
+    # Query MongoDB for the allele profiles
     profile_count, cursor = await mongo_api.get_field_data(
         collection=dc.seq_collection,
         field_paths=[dc.seqid_field_path, dc.profile_field_path],
         mongo_ids=dc.seq_mongo_ids
         )
     
+    # TODO: flyt til DistanceCalculation klassen
+    # Make sure we found all the requested profiles
     if len(rq.mongo_ids) != profile_count:
         return {
             'status': 'ERROR',
@@ -188,18 +192,21 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
                 f"Requested: {str(len(rq.mongo_ids))}, found: {str(profile_count)}"
         }
 
-    # TODO: Ud
+    # TODO: flyt til DistanceCalculation klassen
+    # Compile allele matrix from sequence documents
     allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, dc.seqid_field_path, dc.profile_field_path)
     
     # Save allele mx as tsv file in job folder
     await dc.save_amx_as_tsv(allele_mx_df)
 
-    # TODO: dist_mx_from_allele_df should be part of the DistanceCalculation class
-    # dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, dc.id)
+    # Calculate distance matrix
     dist_mx_df: DataFrame = await dc.dist_mx_from_allele_df()
     dist_mx_dict = dist_mx_df.to_dict(orient='index')
     await dc.save_dmx_as_json(dist_mx_dict)
+
+    # Mark job as finished
     # await dc.mark_as_finished()
+
     return {
         'dmx_job_id': dc.id,
         'created_at': dc.created_at,
