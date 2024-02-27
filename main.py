@@ -43,14 +43,6 @@ async def allele_mx_from_bifrost_mongo(mongo_cursor):
         full_dict[mongo.get_sequence_id(mongo_item)] = row
     return DataFrame.from_dict(full_dict, 'index', dtype=str)
 
-def hoist(dict_element, field_path:str):
-    """
-    'Hoists' a deep dictionary element up to the surface :-)
-    """
-    for path_element in field_path.split('.'):
-            dict_element = dict_element[path_element]
-    return dict_element
-
 async def allele_mx_from_mongodb(cursor, seqid_field_path: str, profile_field_path: str):
     # Generate an allele matrix with all the allele profiles from the mongo cursor.
 
@@ -59,8 +51,8 @@ async def allele_mx_from_mongodb(cursor, seqid_field_path: str, profile_field_pa
     try:
         while True:
             mongo_item = next(cursor)
-            sequence_id = hoist(mongo_item, seqid_field_path)
-            allele_profile = hoist(mongo_item, profile_field_path)
+            sequence_id = mongo.hoist(mongo_item, seqid_field_path)
+            allele_profile = mongo.hoist(mongo_item, profile_field_path)
             full_dict[sequence_id] = allele_profile
     except StopIteration:
         pass
@@ -198,7 +190,12 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
                 f"Requested: {str(len(rq.mongo_ids))}, found: {str(profile_count)}"
         }
 
+    # Ud
     allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, dc.seqid_field_path, dc.profile_field_path)
+    
+    # Save allele mx as tsv file in job folder
+    dc.save_dmx_as_tsv(cursor)
+
     dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, dc.id)
     dist_mx_dict = dist_mx_df.to_dict(orient='index')
     dc.mark_as_finished()
