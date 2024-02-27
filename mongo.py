@@ -1,15 +1,23 @@
 from bson.objectid import ObjectId
 import datetime
 from os import getenv
+from pathlib import Path
 
 from pydantic import BaseModel
 import pymongo
 from bson.objectid import ObjectId
-from pathlib import Path
-
+from pandas import DataFrame, read_table
 from pydantic_classes import DMXFromLocalFileRequest, DMXFromMongoDBRequest, DMXFromProfilesRequest, HCTreeCalcRequest
 
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
+
+def hoist(dict_element, field_path:str):
+    """
+    'Hoists' a deep dictionary element up to the surface :-)
+    """
+    for path_element in field_path.split('.'):
+            dict_element = dict_element[path_element]
+    return dict_element
 
 def strs2ObjectIds(id_strings: list):
     """
@@ -118,6 +126,24 @@ class DistanceCalculation:
         )
         assert result.acknowledged == True
     
+    async def get_dmx_as_dataframe(self, cursor):
+        full_dict = dict()
+        try:
+            while True:
+                mongo_item = next(cursor)
+                sequence_id = hoist(mongo_item, self.seqid_field_path)
+                allele_profile = hoist(mongo_item, self.profile_field_path)
+                full_dict[sequence_id] = allele_profile
+        except StopIteration:
+            pass
+
+        df = DataFrame.from_dict(full_dict, 'index', dtype=str)
+        return df
+    
+    async def save_dmx_as_tsv(self, cursor):
+        df = self.get_dmx_as_dataframe(cursor)
+         # ...
+        
     @classmethod
     def find(cls, conn: pymongo.MongoClient, id: str):
         db = conn.get_database()
