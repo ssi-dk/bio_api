@@ -205,7 +205,6 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
         'created_at': dc.created_at,
         'finished_at': dc.finished_at,
         'profile_count': profile_count,
-        'distance_matrix': dist_mx_dict
         }
 
 @app.post("/v1/tree/hc/")
