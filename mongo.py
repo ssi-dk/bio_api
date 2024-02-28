@@ -128,13 +128,13 @@ class DistanceCalculation:
     
     async def update_my_document(self, fields: dict):
         update_result = mongo_api.db['dist_calculations'].update_one(
-            {'id': self.id}, {'$set': fields}
+            {'_id': ObjectId(self.id)}, {'$set': fields}
         )
         assert update_result.acknowledged == True
     
     async def mark_as_finished(self):
         finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
-        self.update_my_document({'finished_at': finished_at})
+        await self.update_my_document({'finished_at': finished_at, 'status': 'finished'})
         return finished_at
     
     async def get_amx_as_dataframe(self, cursor):
