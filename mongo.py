@@ -198,6 +198,7 @@ class DistanceCalculation:
         await self.update_my_document({'finished_at': finished_at, 'status': 'finished'})
         return finished_at
     
+    # TODO Unused - remove?
     async def get_amx_as_dataframe(self, cursor):
         full_dict = dict()
         try:
