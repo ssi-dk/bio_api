@@ -87,7 +87,6 @@ print(f"Connection string: {connection_string}")
 mongo_api = MongoAPI(connection_string)
 
 class DistanceCalculation:
-    conn: pymongo.MongoClient
     created_at: datetime.datetime or None
     finished_at: datetime.datetime or None
     status: str
@@ -128,10 +127,12 @@ class DistanceCalculation:
         self.folder.mkdir()
     
     async def mark_as_finished(self):
-        result = self.conn.get_database()['dist_calculations'].update_one(
-            {'id': self.id}, {'$update': {'finished_at': datetime.datetime.now(tz=datetime.timezone.utc)}}
+        finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
+        update_result = mongo_api.db['dist_calculations'].update_one(
+            {'id': self.id}, {'$set': {'finished_at': finished_at}}
         )
-        assert result.acknowledged == True
+        assert update_result.acknowledged == True
+        return finished_at
     
     async def get_amx_as_dataframe(self, cursor):
         full_dict = dict()

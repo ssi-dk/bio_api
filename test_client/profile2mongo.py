@@ -12,7 +12,6 @@ def profile2mongo(db, filename: str, collection: str='samples', max_items:int=No
     )
     inserted_ids = list()
     for _index, row in df.iterrows():
-        print(max_items, _index)
         if max_items and (_index > max_items):
             print(f"Reached maximum of {max_items} items.")
             break

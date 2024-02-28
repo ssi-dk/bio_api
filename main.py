@@ -197,7 +197,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     await dc.save_dmx_as_json(dist_mx_dict)
 
     # Mark job as finished
-    # await dc.mark_as_finished()
+    dc.finished_at = await dc.mark_as_finished()
 
     return {
         'dmx_job_id': dc.id,
