@@ -184,7 +184,7 @@ class DistanceCalculation:
         df = DataFrame.from_dict(full_dict, 'index', dtype=str)
         return df
     
-    async def save_amx_as_tsv(self, allele_mx_df):
+    async def save_amx_df_as_tsv(self, allele_mx_df):
         # print("Allele mx as dataframe:")
         # print(allele_mx_df)
         # Save allele matrix to a file that cgmlst-dists can use for input

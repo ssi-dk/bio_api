@@ -187,7 +187,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     allele_mx_df: DataFrame = await dc.allele_df_from_mongodb_cursor(cursor)
     
     # Save allele mx as tsv file in job folder
-    await dc.save_amx_as_tsv(allele_mx_df)
+    await dc.save_amx_df_as_tsv(allele_mx_df)
 
     timed_msg("Calculate distance matrix")
     dist_mx_df: DataFrame = await dc.dist_mx_from_allele_tsv()
