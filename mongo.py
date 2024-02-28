@@ -154,6 +154,14 @@ class DistanceCalculation:
 
         df = DataFrame.from_dict(full_dict, 'index', dtype=str)
         return df
+
+    async def save_amx_df_as_tsv(self, allele_mx_df):
+        # print("Allele mx as dataframe:")
+        # print(allele_mx_df)
+        # Save allele matrix to a file that cgmlst-dists can use for input
+        with open(self.allele_mx_filepath, 'w') as allele_mx_file_obj:
+            allele_mx_file_obj.write("ID")  # Without an initial string in first line cgmlst-dists will fail!
+            allele_mx_df.to_csv(allele_mx_file_obj, index = True, header=True, sep ="\t")
     
     async def update_my_document(self, fields: dict):
         update_result = mongo_api.db['dist_calculations'].update_one(
@@ -183,14 +191,6 @@ class DistanceCalculation:
     @property
     def allele_mx_filepath(self):
         return str(Path(DMX_DIR, self.id, 'allele_matrix.tsv'))
-    
-    async def save_amx_df_as_tsv(self, allele_mx_df):
-        # print("Allele mx as dataframe:")
-        # print(allele_mx_df)
-        # Save allele matrix to a file that cgmlst-dists can use for input
-        with open(self.allele_mx_filepath, 'w') as allele_mx_file_obj:
-            allele_mx_file_obj.write("ID")  # Without an initial string in first line cgmlst-dists will fail!
-            allele_mx_df.to_csv(allele_mx_file_obj, index = True, header=True, sep ="\t")
     
     async def dmx_df_from_allele_tsv(self):
         sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {self.allele_mx_filepath}",
