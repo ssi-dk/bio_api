@@ -162,6 +162,24 @@ class DistanceCalculation:
         with open(self.allele_mx_filepath, 'w') as allele_mx_file_obj:
             allele_mx_file_obj.write("ID")  # Without an initial string in first line cgmlst-dists will fail!
             allele_mx_df.to_csv(allele_mx_file_obj, index = True, header=True, sep ="\t")
+
+    async def dmx_df_from_amx_tsv(self):
+        sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {self.allele_mx_filepath}",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE)
+        stdout, stderr = await sp.communicate()
+
+        await sp.wait()
+        if sp.returncode != 0:
+            errmsg = (f"Could not run cgmlst-dists on {self.allele_mx_filepath}!")
+            raise OSError(errmsg + "\n\n" + stderr.decode('utf-8'))
+
+        df = read_table(StringIO(stdout.decode('utf-8')))
+        df.rename(columns = {"cgmlst-dists": "ids"}, inplace = True)
+        df = df.set_index('ids')
+        # print("df from cgmlst-dists:")
+        # print(df)
+        return df
     
     async def update_my_document(self, fields: dict):
         update_result = mongo_api.db['dist_calculations'].update_one(
@@ -192,24 +210,6 @@ class DistanceCalculation:
     def allele_mx_filepath(self):
         return str(Path(DMX_DIR, self.id, 'allele_matrix.tsv'))
     
-    async def dmx_df_from_amx_tsv(self):
-        sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {self.allele_mx_filepath}",
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE)
-        stdout, stderr = await sp.communicate()
-
-        await sp.wait()
-        if sp.returncode != 0:
-            errmsg = (f"Could not run cgmlst-dists on {self.allele_mx_filepath}!")
-            raise OSError(errmsg + "\n\n" + stderr.decode('utf-8'))
-
-        df = read_table(StringIO(stdout.decode('utf-8')))
-        df.rename(columns = {"cgmlst-dists": "ids"}, inplace = True)
-        df = df.set_index('ids')
-        # print("df from cgmlst-dists:")
-        # print(df)
-        return df
-
     async def save_dmx_as_json(self, dist_mx_dict):
         print("Saving distance calculation as JSON")
         dist_mx_filepath = Path(self.folder, 'distance_matrix.json')
