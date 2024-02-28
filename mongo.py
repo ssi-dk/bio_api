@@ -192,7 +192,7 @@ class DistanceCalculation:
     def allele_mx_filepath(self):
         return str(Path(DMX_DIR, self.id, 'allele_matrix.tsv'))
     
-    async def dmx_df_from_allele_tsv(self):
+    async def dmx_df_from_amx_tsv(self):
         sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {self.allele_mx_filepath}",
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE)

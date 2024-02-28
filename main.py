@@ -190,7 +190,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     await dc.save_amx_df_as_tsv(allele_mx_df)
 
     timed_msg("Calculate distance matrix")
-    dist_mx_df: DataFrame = await dc.dmx_df_from_allele_tsv()
+    dist_mx_df: DataFrame = await dc.dmx_df_from_amx_tsv()
 
     timed_msg("Save distance matrix as JSON")
     dist_mx_dict = dist_mx_df.to_dict(orient='index')
