@@ -169,7 +169,7 @@ class DistanceCalculation:
         return profile_count, cursor
     
     # Generate an allele matrix with all the allele profiles from the mongo cursor
-    async def allele_df_from_mongodb_cursor(self, cursor):
+    async def amx_df_from_mongodb_cursor(self, cursor):
         full_dict = dict()
 
         try:

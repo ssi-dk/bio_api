@@ -184,7 +184,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
         }
 
     timed_msg("Compile allele matrix from sequence documents")
-    allele_mx_df: DataFrame = await dc.allele_df_from_mongodb_cursor(cursor)
+    allele_mx_df: DataFrame = await dc.amx_df_from_mongodb_cursor(cursor)
     
     # Save allele mx as tsv file in job folder
     await dc.save_amx_df_as_tsv(allele_mx_df)
