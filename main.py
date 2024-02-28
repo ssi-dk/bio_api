@@ -178,13 +178,8 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
             seq_mongo_ids=rq.mongo_ids
     )
     
-    # TODO: flyt til DistanceCalculation klassen
     timed_msg("Query MongoDB for the allele profiles")
-    profile_count, cursor = await mongo_api.get_field_data(
-        collection=dc.seq_collection,
-        field_paths=[dc.seqid_field_path, dc.profile_field_path],
-        mongo_ids=dc.seq_mongo_ids
-        )
+    profile_count, cursor = await dc.query_mongodb_for_allele_profiles()
     
     # TODO: flyt til DistanceCalculation klassen
     timed_msg("Make sure we found all the requested profiles")

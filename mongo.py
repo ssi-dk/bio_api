@@ -79,6 +79,9 @@ class MongoAPI:
         cursor = self.db[collection].find(filter, {field_path: True for field_path in field_paths})
         return document_count, cursor
 
+connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
+print(f"Connection string: {connection_string}")
+mongo_api = MongoAPI(connection_string)
 
 class DistanceCalculation:
     conn: pymongo.MongoClient
@@ -146,6 +149,16 @@ class DistanceCalculation:
     @property
     def allele_mx_filepath(self):
         return str(Path(DMX_DIR, self.id, 'allele_matrix.tsv'))
+    
+    async def query_mongodb_for_allele_profiles(self):
+        pass
+    # timed_msg("Query MongoDB for the allele profiles")
+        profile_count, cursor = await mongo_api.get_field_data(
+            collection=self.seq_collection,
+            field_paths=[self.seqid_field_path, self.profile_field_path],
+            mongo_ids=self.seq_mongo_ids
+            )
+        return profile_count, cursor
     
     async def save_amx_as_tsv(self, allele_mx_df):
         # print("Allele mx as dataframe:")
