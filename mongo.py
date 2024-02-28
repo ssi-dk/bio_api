@@ -126,6 +126,19 @@ class DistanceCalculation:
         self.folder = Path(DMX_DIR, self.id)
         self.folder.mkdir()
     
+    async def query_mongodb_for_allele_profiles(self):
+        profile_count, cursor = await mongo_api.get_field_data(
+            collection=self.seq_collection,
+            field_paths=[self.seqid_field_path, self.profile_field_path],
+            mongo_ids=self.seq_mongo_ids
+            )
+        if len(self.seq_mongo_ids) != profile_count:
+            raise MissingDataException(
+                "Could not find the requested number of sequences. " + \
+                f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(profile_count)}"
+            )
+        return profile_count, cursor
+    
     async def update_my_document(self, fields: dict):
         update_result = mongo_api.db['dist_calculations'].update_one(
             {'_id': ObjectId(self.id)}, {'$set': fields}
@@ -154,19 +167,6 @@ class DistanceCalculation:
     @property
     def allele_mx_filepath(self):
         return str(Path(DMX_DIR, self.id, 'allele_matrix.tsv'))
-    
-    async def query_mongodb_for_allele_profiles(self):
-        profile_count, cursor = await mongo_api.get_field_data(
-            collection=self.seq_collection,
-            field_paths=[self.seqid_field_path, self.profile_field_path],
-            mongo_ids=self.seq_mongo_ids
-            )
-        if len(self.seq_mongo_ids) != profile_count:
-            raise MissingDataException(
-                "Could not find the requested number of sequences. " + \
-                f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(profile_count)}"
-            )
-        return profile_count, cursor
     
     # Generate an allele matrix with all the allele profiles from the mongo cursor
     async def amx_df_from_mongodb_cursor(self, cursor):
