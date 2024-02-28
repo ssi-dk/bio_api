@@ -48,6 +48,7 @@ if __name__ == '__main__':
 
     parser.add_argument('filename')
     parser.add_argument('--max_items', type=int, help="Limit the number of items to process")
+    parser.add_argument('--dmx', help="Calculate dist matrix", action="store_true")
     args = parser.parse_args()
     connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
     connection = pymongo.MongoClient(connection_string)
@@ -59,8 +60,10 @@ if __name__ == '__main__':
     print("These are the _id strings of the MongoDB documents:")
     print(inserted_ids)
 
-    client_functions.call_dmx_from_mongodb(
-        collection='samples',
-        seqid_field_path='name',
-        profile_field_path='profile',
-        mongo_ids=inserted_ids)
+    if args.dmx:
+        print("--dmx option set; calculating distance matrix")
+        client_functions.call_dmx_from_mongodb(
+            collection='samples',
+            seqid_field_path='name',
+            profile_field_path='profile',
+            mongo_ids=inserted_ids)
