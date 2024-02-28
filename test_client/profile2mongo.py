@@ -55,7 +55,8 @@ if __name__ == '__main__':
     db = connection.get_database()
     print(f"Connection string: {connection_string}")
     print(f"Max items: {args.max_items}")
-    inserted_ids = profile2mongo(db, args.filename, max_items=int(args.max_items))
+    max_items = int(args.max_items) if args.max_items else None
+    inserted_ids = profile2mongo(db, args.filename, max_items=max_items)
     #inserted_ids = profile2mongo(db, args.filename)
     print("These are the _id strings of the MongoDB documents:")
     print(inserted_ids)
