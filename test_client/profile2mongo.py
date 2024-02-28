@@ -3,6 +3,7 @@ from pandas import read_csv
 import argparse
 import pymongo
 
+import client_functions
 
 def profile2mongo(db, filename: str, collection: str='samples', max_items:int=None):
     df = read_csv(filename, sep='\t')
@@ -57,3 +58,9 @@ if __name__ == '__main__':
     #inserted_ids = profile2mongo(db, args.filename)
     print("These are the _id strings of the MongoDB documents:")
     print(inserted_ids)
+
+    client_functions.call_dmx_from_mongodb(
+        collection='samples',
+        seqid_field_path='name',
+        profile_field_path='profile',
+        mongo_ids=inserted_ids)
