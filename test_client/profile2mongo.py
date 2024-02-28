@@ -4,13 +4,17 @@ import argparse
 import pymongo
 
 
-def profile2mongo(db, filename: str, collection: str='samples'):
+def profile2mongo(db, filename: str, collection: str='samples', max_items:int=None):
     df = read_csv(filename, sep='\t')
     df = df[['name']].assign(
                     profile=df.set_index(['name']).to_dict(orient='records')
     )
     inserted_ids = list()
     for _index, row in df.iterrows():
+        print(max_items, _index)
+        if max_items and (_index > max_items):
+            print(f"Reached maximum of {max_items} items.")
+            break
 
         # Check if document with given 'name' already exists, skip if true
         existing_document = db[collection].find_one({'name': row['name']})
@@ -42,11 +46,14 @@ if __name__ == '__main__':
     )
 
     parser.add_argument('filename')
+    parser.add_argument('--max_items', type=int, help="Limit the number of items to process")
     args = parser.parse_args()
     connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
     connection = pymongo.MongoClient(connection_string)
     db = connection.get_database()
     print(f"Connection string: {connection_string}")
-    inserted_ids = profile2mongo(db, args.filename)
+    print(f"Max items: {args.max_items}")
+    inserted_ids = profile2mongo(db, args.filename, max_items=int(args.max_items))
+    #inserted_ids = profile2mongo(db, args.filename)
     print("These are the _id strings of the MongoDB documents:")
     print(inserted_ids)
