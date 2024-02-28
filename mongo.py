@@ -31,6 +31,9 @@ def strs2ObjectIds(id_strings: list):
         output.append(ObjectId(id_str))
     return output
 
+class MissingDataException(Exception):
+    pass
+
 class MongoAPI:
     def __init__(self,
         connection_string: str,
@@ -151,12 +154,15 @@ class DistanceCalculation:
         return str(Path(DMX_DIR, self.id, 'allele_matrix.tsv'))
     
     async def query_mongodb_for_allele_profiles(self):
-        pass
-    # timed_msg("Query MongoDB for the allele profiles")
         profile_count, cursor = await mongo_api.get_field_data(
             collection=self.seq_collection,
             field_paths=[self.seqid_field_path, self.profile_field_path],
             mongo_ids=self.seq_mongo_ids
+            )
+        if len(self.seq_mongo_ids) != profile_count:
+            raise MissingDataException(
+                "Could not find the requested number of sequences. " + \
+                f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(profile_count)}"
             )
         return profile_count, cursor
     

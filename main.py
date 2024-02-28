@@ -179,15 +179,12 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     )
     
     timed_msg("Query MongoDB for the allele profiles")
-    profile_count, cursor = await dc.query_mongodb_for_allele_profiles()
-    
-    # TODO: flyt til DistanceCalculation klassen
-    timed_msg("Make sure we found all the requested profiles")
-    if len(rq.mongo_ids) != profile_count:
+    try:
+        profile_count, cursor = await dc.query_mongodb_for_allele_profiles()
+    except mongo.MissingDataException as e:
         return {
-            'status': 'ERROR',
-            'error_msg:': "Could not find the requested number of sequences. " + \
-                f"Requested: {str(len(rq.mongo_ids))}, found: {str(profile_count)}"
+            'status': 'error',
+            'error_msg:': str(e)
         }
 
     timed_msg("Compile allele matrix from sequence documents")
