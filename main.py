@@ -46,7 +46,7 @@ async def allele_mx_from_bifrost_mongo(mongo_cursor):
         full_dict[mongo.get_sequence_id(mongo_item)] = row
     return DataFrame.from_dict(full_dict, 'index', dtype=str)
 
-async def allele_mx_from_mongodb(cursor, seqid_field_path: str, profile_field_path: str):
+async def allele_df_from_mongodb_cursor(cursor, seqid_field_path: str, profile_field_path: str):
     # Generate an allele matrix with all the allele profiles from the mongo cursor.
 
     full_dict = dict()
@@ -192,7 +192,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
 
     # TODO: flyt til DistanceCalculation klassen
     timed_msg("Compile allele matrix from sequence documents")
-    allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, dc.seqid_field_path, dc.profile_field_path)
+    allele_mx_df: DataFrame = await allele_df_from_mongodb_cursor(cursor, dc.seqid_field_path, dc.profile_field_path)
     
     # Save allele mx as tsv file in job folder
     await dc.save_amx_as_tsv(allele_mx_df)
