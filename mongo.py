@@ -160,6 +160,22 @@ class DistanceCalculation:
             )
         return profile_count, cursor
     
+    # Generate an allele matrix with all the allele profiles from the mongo cursor
+    async def allele_df_from_mongodb_cursor(self, cursor):
+        full_dict = dict()
+
+        try:
+            while True:
+                mongo_item = next(cursor)
+                sequence_id = hoist(mongo_item, self.seqid_field_path)
+                allele_profile = hoist(mongo_item, self.profile_field_path)
+                full_dict[sequence_id] = allele_profile
+        except StopIteration:
+            pass
+
+        df = DataFrame.from_dict(full_dict, 'index', dtype=str)
+        return df
+    
     async def save_amx_as_tsv(self, allele_mx_df):
         # print("Allele mx as dataframe:")
         # print(allele_mx_df)

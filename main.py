@@ -190,9 +190,8 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
                 f"Requested: {str(len(rq.mongo_ids))}, found: {str(profile_count)}"
         }
 
-    # TODO: flyt til DistanceCalculation klassen
     timed_msg("Compile allele matrix from sequence documents")
-    allele_mx_df: DataFrame = await allele_df_from_mongodb_cursor(cursor, dc.seqid_field_path, dc.profile_field_path)
+    allele_mx_df: DataFrame = await dc.allele_df_from_mongodb_cursor(cursor)
     
     # Save allele mx as tsv file in job folder
     await dc.save_amx_as_tsv(allele_mx_df)
