@@ -180,6 +180,12 @@ class DistanceCalculation:
         # print("df from cgmlst-dists:")
         # print(df)
         return df
+
+    async def save_dmx_as_json(self, dist_mx_dict):
+        print("Saving distance calculation as JSON")
+        dist_mx_filepath = Path(self.folder, 'distance_matrix.json')
+        with open(dist_mx_filepath, 'w') as dist_mx_file_obj:
+            dump(dist_mx_dict, dist_mx_file_obj)
     
     async def update_my_document(self, fields: dict):
         update_result = mongo_api.db['dist_calculations'].update_one(
@@ -210,13 +216,6 @@ class DistanceCalculation:
     def allele_mx_filepath(self):
         return str(Path(DMX_DIR, self.id, 'allele_matrix.tsv'))
     
-    async def save_dmx_as_json(self, dist_mx_dict):
-        print("Saving distance calculation as JSON")
-        dist_mx_filepath = Path(self.folder, 'distance_matrix.json')
-        with open(dist_mx_filepath, 'w') as dist_mx_file_obj:
-            dump(dist_mx_dict, dist_mx_file_obj)
-        
-        
     @classmethod
     def find(cls, conn: pymongo.MongoClient, id: str):
         db = conn.get_database()
