@@ -19,9 +19,6 @@ from tree_maker import make_tree
 # from qstat import consume_qstat
 
 app = FastAPI()
-connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
-print(f"Connection string: {connection_string}")
-mongo_api = mongo.MongoAPI(connection_string)
 
 MANUAL_MX_DIR = getenv('BIO_API_TEST_INPUT_DIR', '/test_input')
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
@@ -118,13 +115,13 @@ async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
     """
     Return a distance matrix from allele profiles defined in a local tsv file in the Bio API container
     """
-    job_id, created_at = await mongo_api.create_dmx_job()
+    job_id, created_at = await mongo.mongo_api.create_dmx_job()
     dist_mx_df: DataFrame = await calculate_dmx_from_file(rq.file_path)
     dist_mx_dict = dist_mx_df.to_dict(orient='index')
-    finished_at = await mongo_api.mark_job_as_finished(job_id)
+    finished_at = await mongo.mongo_api.mark_job_as_finished(job_id)
     status = "calculation_completed"
     try:
-        await mongo_api.write_result_to_job(job_id, dist_mx_dict)
+        await mongo.mongo_api.write_result_to_job(job_id, dist_mx_dict)
         status = "saved_to_mongodb"
     except DocumentTooLarge:
         status = "document_too_large"
@@ -143,7 +140,7 @@ async def dmx_from_request(rq: DMXFromProfilesRequest):
     """
     Return a distance matrix from allele profiles that are included directly in the request
     """
-    job_id, created_at = await mongo_api.create_dmx_job()
+    job_id, created_at = await mongo.mongo_api.create_dmx_job()
 
     print("Requested distance matrix from allele profile")
     print(f"Locus count: {len(rq.loci)}")
@@ -155,7 +152,7 @@ async def dmx_from_request(rq: DMXFromProfilesRequest):
     allele_mx_df = DataFrame.from_dict(rq.profiles, 'index', dtype=str)
     dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
     dist_mx_dict = dist_mx_df.to_dict(orient='index')
-    finished_at = await mongo_api.mark_job_as_finished(job_id)
+    finished_at = await mongo.mongo_api.mark_job_as_finished(job_id)
     return {
         'job_id': job_id,
         'created_at': created_at,
@@ -171,7 +168,6 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     
     # Initialize DistanceCalculation object
     dc = mongo.DistanceCalculation(
-            conn=mongo_api.connection,
             seq_collection=rq.collection,
             seqid_field_path=rq.seqid_field_path,
             profile_field_path=rq.profile_field_path,

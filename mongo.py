@@ -100,13 +100,11 @@ class DistanceCalculation:
 
     def __init__(
             self,
-            conn: pymongo.MongoClient,
             seq_collection: str,
             seqid_field_path: str,
             profile_field_path: str,
             seq_mongo_ids: list
             ):
-        self.conn = conn
         self.seq_collection = seq_collection
         self.seqid_field_path = seqid_field_path
         self.profile_field_path = profile_field_path
@@ -114,7 +112,7 @@ class DistanceCalculation:
         self.status = 'new'
         self.created_at = datetime.datetime.now(tz=datetime.timezone.utc)
         self.finished_at = None
-        mongo_save = self.conn.get_database()['dist_calculations'].insert_one({
+        mongo_save = mongo_api.db['dist_calculations'].insert_one({
             'created_at': self.created_at,
             'finished_at': self.finished_at,
             'status': self.status,
