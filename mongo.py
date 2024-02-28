@@ -192,7 +192,7 @@ class DistanceCalculation:
             allele_mx_file_obj.write("ID")  # Without an initial string in first line cgmlst-dists will fail!
             allele_mx_df.to_csv(allele_mx_file_obj, index = True, header=True, sep ="\t")
     
-    async def dist_mx_from_allele_df(self):
+    async def dist_mx_from_allele_tsv(self):
         sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {self.allele_mx_filepath}",
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE)
