@@ -5,6 +5,7 @@ from io import StringIO
 from pathlib import Path
 import traceback
 import asyncio
+from datetime import datetime
 
 from pydantic import BaseModel
 from fastapi import FastAPI
@@ -25,6 +26,8 @@ mongo_api = mongo.MongoAPI(connection_string)
 MANUAL_MX_DIR = getenv('BIO_API_TEST_INPUT_DIR', '/test_input')
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 
+def timed_msg(msg: str):
+    print(datetime.now().isoformat(), msg)
 
 async def allele_mx_from_bifrost_mongo(mongo_cursor):
     # Generate an allele matrix with all the allele profiles from the mongo cursor.
@@ -176,7 +179,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     )
     
     # TODO: flyt til DistanceCalculation klassen
-    # Query MongoDB for the allele profiles
+    timed_msg("Query MongoDB for the allele profiles")
     profile_count, cursor = await mongo_api.get_field_data(
         collection=dc.seq_collection,
         field_paths=[dc.seqid_field_path, dc.profile_field_path],
@@ -184,7 +187,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
         )
     
     # TODO: flyt til DistanceCalculation klassen
-    # Make sure we found all the requested profiles
+    timed_msg("Make sure we found all the requested profiles")
     if len(rq.mongo_ids) != profile_count:
         return {
             'status': 'ERROR',
@@ -193,14 +196,16 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
         }
 
     # TODO: flyt til DistanceCalculation klassen
-    # Compile allele matrix from sequence documents
+    timed_msg("Compile allele matrix from sequence documents")
     allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, dc.seqid_field_path, dc.profile_field_path)
     
     # Save allele mx as tsv file in job folder
     await dc.save_amx_as_tsv(allele_mx_df)
 
-    # Calculate distance matrix
+    timed_msg("Calculate distance matrix")
     dist_mx_df: DataFrame = await dc.dist_mx_from_allele_df()
+
+    timed_msg("Save distance matrix as JSON")
     dist_mx_dict = dist_mx_df.to_dict(orient='index')
     await dc.save_dmx_as_json(dist_mx_dict)
 

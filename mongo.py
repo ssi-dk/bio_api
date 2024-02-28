@@ -148,8 +148,8 @@ class DistanceCalculation:
         return str(Path(DMX_DIR, self.id, 'allele_matrix.tsv'))
     
     async def save_amx_as_tsv(self, allele_mx_df):
-        print("Allele mx as dataframe:")
-        print(allele_mx_df)
+        # print("Allele mx as dataframe:")
+        # print(allele_mx_df)
         # Save allele matrix to a file that cgmlst-dists can use for input
         with open(self.allele_mx_filepath, 'w') as allele_mx_file_obj:
             allele_mx_file_obj.write("ID")  # Without an initial string in first line cgmlst-dists will fail!
@@ -169,8 +169,8 @@ class DistanceCalculation:
         df = read_table(StringIO(stdout.decode('utf-8')))
         df.rename(columns = {"cgmlst-dists": "ids"}, inplace = True)
         df = df.set_index('ids')
-        print("df from cgmlst-dists:")
-        print(df)
+        # print("df from cgmlst-dists:")
+        # print(df)
         return df
 
     async def save_dmx_as_json(self, dist_mx_dict):
