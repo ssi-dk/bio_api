@@ -138,6 +138,22 @@ class DistanceCalculation:
                 f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(profile_count)}"
             )
         return profile_count, cursor
+
+    # Generate an allele matrix with all the allele profiles from the mongo cursor
+    async def amx_df_from_mongodb_cursor(self, cursor):
+        full_dict = dict()
+
+        try:
+            while True:
+                mongo_item = next(cursor)
+                sequence_id = hoist(mongo_item, self.seqid_field_path)
+                allele_profile = hoist(mongo_item, self.profile_field_path)
+                full_dict[sequence_id] = allele_profile
+        except StopIteration:
+            pass
+
+        df = DataFrame.from_dict(full_dict, 'index', dtype=str)
+        return df
     
     async def update_my_document(self, fields: dict):
         update_result = mongo_api.db['dist_calculations'].update_one(
@@ -167,22 +183,6 @@ class DistanceCalculation:
     @property
     def allele_mx_filepath(self):
         return str(Path(DMX_DIR, self.id, 'allele_matrix.tsv'))
-    
-    # Generate an allele matrix with all the allele profiles from the mongo cursor
-    async def amx_df_from_mongodb_cursor(self, cursor):
-        full_dict = dict()
-
-        try:
-            while True:
-                mongo_item = next(cursor)
-                sequence_id = hoist(mongo_item, self.seqid_field_path)
-                allele_profile = hoist(mongo_item, self.profile_field_path)
-                full_dict[sequence_id] = allele_profile
-        except StopIteration:
-            pass
-
-        df = DataFrame.from_dict(full_dict, 'index', dtype=str)
-        return df
     
     async def save_amx_df_as_tsv(self, allele_mx_df):
         # print("Allele mx as dataframe:")
