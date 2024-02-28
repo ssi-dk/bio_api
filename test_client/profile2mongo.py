@@ -63,8 +63,10 @@ if __name__ == '__main__':
 
     if args.dmx:
         print("--dmx option set; calculating distance matrix")
-        client_functions.call_dmx_from_mongodb(
+        response = client_functions.call_dmx_from_mongodb(
             collection='samples',
             seqid_field_path='name',
             profile_field_path='profile',
             mongo_ids=inserted_ids)
+        print("Response as JSON:")
+        print(response.json())
