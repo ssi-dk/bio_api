@@ -114,7 +114,7 @@ class DistanceCalculation:
         self.status = 'new'
         self.created_at = datetime.datetime.now(tz=datetime.timezone.utc)
         self.finished_at = None
-        result = self.conn.get_database()['dist_calculations'].insert_one({
+        mongo_save = self.conn.get_database()['dist_calculations'].insert_one({
             'created_at': self.created_at,
             'finished_at': self.finished_at,
             'status': self.status,
@@ -123,8 +123,8 @@ class DistanceCalculation:
             'profile_field_path': self.profile_field_path,
             'seq_mongo_ids': self.seq_mongo_ids
             })
-        assert result.acknowledged == True
-        self.id = str(result.inserted_id)
+        assert mongo_save.acknowledged == True
+        self.id = str(mongo_save.inserted_id)
 
         self.folder = Path(DMX_DIR, self.id)
         self.folder.mkdir()
