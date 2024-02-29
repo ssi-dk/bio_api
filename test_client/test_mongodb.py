@@ -13,10 +13,11 @@ mongo_ids = profile2mongo(db, 'input_data/BN_alleles_export_5.tsv', 'test_sample
 
 def test_dmx_from_mongodb():
     result = client_functions.call_dmx_from_mongodb(
-    collection='samples',
-    seqid_field_path='name',
-    profile_field_path='profile',
-    mongo_ids=mongo_ids)
-    assert result.status_code == 200
+        collection='test_samples',
+        seqid_field_path='name',
+        profile_field_path='profile',
+        mongo_ids=mongo_ids
+    )
+    assert result.status_code == 202
 
-db['test_samples'].drop()
+# db['test_samples'].drop()
