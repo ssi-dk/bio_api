@@ -127,6 +127,7 @@ class DistanceCalculation:
         self.folder.mkdir()
     
     async def query_mongodb_for_allele_profiles(self):
+        "Get a MongoDB cursor that represents the allele profiles for the calculation"
         profile_count, cursor = await mongo_api.get_field_data(
             collection=self.seq_collection,
             field_paths=[self.seqid_field_path, self.profile_field_path],
@@ -139,8 +140,8 @@ class DistanceCalculation:
             )
         return profile_count, cursor
 
-    # Generate an allele matrix with all the allele profiles from the mongo cursor
     async def amx_df_from_mongodb_cursor(self, cursor):
+        "Generate an allele matrix as dataframe containing the allele profiles from the MongoDB cursor"
         full_dict = dict()
 
         try:
@@ -156,14 +157,13 @@ class DistanceCalculation:
         return df
 
     async def save_amx_df_as_tsv(self, allele_mx_df):
-        # print("Allele mx as dataframe:")
-        # print(allele_mx_df)
-        # Save allele matrix to a file that cgmlst-dists can use for input
+        "Save allele matrix dataframe as TSV file"
         with open(self.allele_mx_filepath, 'w') as allele_mx_file_obj:
             allele_mx_file_obj.write("ID")  # Without an initial string in first line cgmlst-dists will fail!
             allele_mx_df.to_csv(allele_mx_file_obj, index = True, header=True, sep ="\t")
 
     async def dmx_df_from_amx_tsv(self):
+        "Generate a distance matrix dataframe from allele matrix TSV file"
         sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {self.allele_mx_filepath}",
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE)
@@ -177,44 +177,30 @@ class DistanceCalculation:
         df = read_table(StringIO(stdout.decode('utf-8')))
         df.rename(columns = {"cgmlst-dists": "ids"}, inplace = True)
         df = df.set_index('ids')
-        # print("df from cgmlst-dists:")
-        # print(df)
         return df
 
     async def save_dmx_as_json(self, dist_mx_dict):
-        print("Saving distance calculation as JSON")
+        "Save distance matrix dataframe as JSON file"
         dist_mx_filepath = Path(self.folder, 'distance_matrix.json')
         with open(dist_mx_filepath, 'w') as dist_mx_file_obj:
             dump(dist_mx_dict, dist_mx_file_obj)
     
     async def update_my_document(self, fields: dict):
+        "Update the MongoDB document that corresponds with the class instance"
         update_result = mongo_api.db['dist_calculations'].update_one(
             {'_id': ObjectId(self.id)}, {'$set': fields}
         )
         assert update_result.acknowledged == True
     
     async def mark_as_finished(self):
+        "Mark calculation as finished in MongoDB document"
         finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
         await self.update_my_document({'finished_at': finished_at, 'status': 'finished'})
         return finished_at
     
-    # TODO Unused - remove?
-    async def get_amx_as_dataframe(self, cursor):
-        full_dict = dict()
-        try:
-            while True:
-                mongo_item = next(cursor)
-                sequence_id = hoist(mongo_item, self.seqid_field_path)
-                allele_profile = hoist(mongo_item, self.profile_field_path)
-                full_dict[sequence_id] = allele_profile
-        except StopIteration:
-            pass
-
-        df = DataFrame.from_dict(full_dict, 'index', dtype=str)
-        return df
-    
     @property
     def allele_mx_filepath(self):
+        "Return the full filepath for the TSV file corresponding with the class instance"
         return str(Path(DMX_DIR, self.id, 'allele_matrix.tsv'))
     
     @classmethod
