@@ -164,3 +164,4 @@ cython_debug/
 tmp/
 data/
 dumps/
+dmx_data/

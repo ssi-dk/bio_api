@@ -5,6 +5,7 @@ from io import StringIO
 from pathlib import Path
 import traceback
 import asyncio
+from datetime import datetime
 
 from pydantic import BaseModel
 from fastapi import FastAPI
@@ -12,45 +13,18 @@ from pandas import DataFrame, read_table
 from pymongo.errors import DocumentTooLarge
 
 import mongo
+
+from pydantic_classes import DMXFromLocalFileRequest, DMXFromMongoDBRequest, DMXFromProfilesRequest, HCTreeCalcRequest
 from tree_maker import make_tree
 # from qstat import consume_qstat
 
 app = FastAPI()
-connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
-print(f"Connection string: {connection_string}")
-mongo_api = mongo.MongoAPI(connection_string)
 
 MANUAL_MX_DIR = getenv('BIO_API_TEST_INPUT_DIR', '/test_input')
-GENERATED_MX_DIR = getenv('BIO_API_DATA_DIR', '/data')
+DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 
-
-class ProcessingRequest(BaseModel):
-    id: Union[None, uuid.UUID]
-    timeout: int = 2
-
-    def __init__(self, **kwargs):
-        super().__init__( **kwargs)
-        self.id = uuid.uuid4()
-
-class DMXFromMongoDBRequest(BaseModel):
-    collection: str
-    seqid_field_path: str
-    profile_field_path: str
-    mongo_ids: list
-
-class DMXFromProfilesRequest(BaseModel):
-    loci: set
-    profiles: dict
-
-class DMXFromLocalFileRequest(BaseModel):
-    file_path: str
-
-class HCTreeCalcRequest(BaseModel):
-    """Represents a REST request for a tree calculation based on hierarchical clustering.
-    """
-    distances: dict
-    method: str
-
+def timed_msg(msg: str):
+    print(datetime.now().isoformat(), msg)
 
 async def allele_mx_from_bifrost_mongo(mongo_cursor):
     # Generate an allele matrix with all the allele profiles from the mongo cursor.
@@ -69,15 +43,7 @@ async def allele_mx_from_bifrost_mongo(mongo_cursor):
         full_dict[mongo.get_sequence_id(mongo_item)] = row
     return DataFrame.from_dict(full_dict, 'index', dtype=str)
 
-def hoist(dict_element, field_path:str):
-    """
-    'Hoists' a deep dictionary element up to the surface :-)
-    """
-    for path_element in field_path.split('.'):
-            dict_element = dict_element[path_element]
-    return dict_element
-
-async def allele_mx_from_mongodb(cursor, seqid_field_path: str, profile_field_path: str):
+async def allele_df_from_mongodb_cursor(cursor, seqid_field_path: str, profile_field_path: str):
     # Generate an allele matrix with all the allele profiles from the mongo cursor.
 
     full_dict = dict()
@@ -85,8 +51,8 @@ async def allele_mx_from_mongodb(cursor, seqid_field_path: str, profile_field_pa
     try:
         while True:
             mongo_item = next(cursor)
-            sequence_id = hoist(mongo_item, seqid_field_path)
-            allele_profile = hoist(mongo_item, profile_field_path)
+            sequence_id = mongo.hoist(mongo_item, seqid_field_path)
+            allele_profile = mongo.hoist(mongo_item, profile_field_path)
             full_dict[sequence_id] = allele_profile
     except StopIteration:
         pass
@@ -95,10 +61,8 @@ async def allele_mx_from_mongodb(cursor, seqid_field_path: str, profile_field_pa
     return df
 
 async def dist_mx_from_allele_df(allele_mx:DataFrame, job_id: str):
-    print("Allele mx:")
-    print(allele_mx)
     # save allele matrix to a file that cgmlst-dists can use for input
-    allele_mx_filepath = Path(GENERATED_MX_DIR, f'allele_matrix_{job_id}.tsv')
+    allele_mx_filepath = Path(DMX_DIR, f'allele_matrix_{job_id}.tsv')
     with open(allele_mx_filepath, 'w') as allele_mx_file_obj:
         allele_mx_file_obj.write("ID")  # Without an initial string in first line cgmlst-dists will fail!
         allele_mx.to_csv(allele_mx_file_obj, index = True, header=True, sep ="\t")
@@ -151,13 +115,13 @@ async def dmx_from_local_file(rq: DMXFromLocalFileRequest):
     """
     Return a distance matrix from allele profiles defined in a local tsv file in the Bio API container
     """
-    job_id, created_at = await mongo_api.create_job()
+    job_id, created_at = await mongo.mongo_api.create_dmx_job()
     dist_mx_df: DataFrame = await calculate_dmx_from_file(rq.file_path)
     dist_mx_dict = dist_mx_df.to_dict(orient='index')
-    finished_at = await mongo_api.mark_job_as_finished(job_id)
+    finished_at = await mongo.mongo_api.mark_job_as_finished(job_id)
     status = "calculation_completed"
     try:
-        await mongo_api.write_result_to_job(job_id, dist_mx_dict)
+        await mongo.mongo_api.write_result_to_job(job_id, dist_mx_dict)
         status = "saved_to_mongodb"
     except DocumentTooLarge:
         status = "document_too_large"
@@ -176,7 +140,7 @@ async def dmx_from_request(rq: DMXFromProfilesRequest):
     """
     Return a distance matrix from allele profiles that are included directly in the request
     """
-    job_id, created_at = await mongo_api.create_job()
+    job_id, created_at = await mongo.mongo_api.create_dmx_job()
 
     print("Requested distance matrix from allele profile")
     print(f"Locus count: {len(rq.loci)}")
@@ -188,7 +152,7 @@ async def dmx_from_request(rq: DMXFromProfilesRequest):
     allele_mx_df = DataFrame.from_dict(rq.profiles, 'index', dtype=str)
     dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
     dist_mx_dict = dist_mx_df.to_dict(orient='index')
-    finished_at = await mongo_api.mark_job_as_finished(job_id)
+    finished_at = await mongo.mongo_api.mark_job_as_finished(job_id)
     return {
         'job_id': job_id,
         'created_at': created_at,
@@ -201,31 +165,45 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     """
     Return a distance matrix from allele profiles defined in MongoDB documents
     """
-    job_id, created_at = await mongo_api.create_job()
-    profile_count, cursor = await mongo_api.get_field_data(
-        collection=rq.collection,
-        field_paths=[rq.seqid_field_path, rq.profile_field_path],
-        mongo_ids=rq.mongo_ids
-        )
     
-    if len(rq.mongo_ids) != profile_count:
+    # Initialize DistanceCalculation object
+    dc = mongo.DistanceCalculation(
+            seq_collection=rq.collection,
+            seqid_field_path=rq.seqid_field_path,
+            profile_field_path=rq.profile_field_path,
+            seq_mongo_ids=rq.mongo_ids
+    )
+    
+    # Query MongoDB for the allele profiles
+    try:
+        profile_count, cursor = await dc.query_mongodb_for_allele_profiles()
+    except mongo.MissingDataException as e:
         return {
-            'status': 'ERROR',
-            'error_msg:': "Could not find the requested number of sequences. " + \
-                f"Requested: {str(len(rq.mongo_ids))}, found: {str(profile_count)}"
+            'status': 'error',
+            'error_msg:': str(e)
         }
 
-    allele_mx_df: DataFrame = await allele_mx_from_mongodb(cursor, rq.seqid_field_path, rq.profile_field_path)
-    dist_mx_df: DataFrame = await dist_mx_from_allele_df(allele_mx_df, job_id)
+    # Compile allele matrix from sequence documents
+    allele_mx_df: DataFrame = await dc.amx_df_from_mongodb_cursor(cursor)
+    
+    # Save allele mx as tsv file in job folder
+    await dc.save_amx_df_as_tsv(allele_mx_df)
+
+    # Calculate distance matrix
+    dist_mx_df: DataFrame = await dc.dmx_df_from_amx_tsv()
+
+    # Save distance matrix as JSON
     dist_mx_dict = dist_mx_df.to_dict(orient='index')
-    finished_at = await mongo_api.mark_job_as_finished(job_id)
+    await dc.save_dmx_as_json(dist_mx_dict)
+
+    # Mark job as finished
+    dc.finished_at = await dc.mark_as_finished()
+
     return {
-        'job_id': job_id,
-        'created_at': created_at,
-        'finished_at': finished_at,
-        'status': 'OK',
+        'dmx_job_id': dc.id,
+        'created_at': dc.created_at,
+        'finished_at': dc.finished_at,
         'profile_count': profile_count,
-        'distance_matrix': dist_mx_dict
         }
 
 @app.post("/v1/tree/hc/")
