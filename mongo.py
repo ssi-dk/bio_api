@@ -126,6 +126,26 @@ class DistanceCalculation:
         self.folder = Path(DMX_DIR, self.id)
         self.folder.mkdir()
     
+    @property
+    def allele_mx_filepath(self):
+        "Return the full filepath for the TSV file corresponding with the class instance"
+        return str(Path(DMX_DIR, self.id, 'allele_matrix.tsv'))
+    
+    @classmethod
+    def find(cls, conn: pymongo.MongoClient, id: str):
+        db = conn.get_database()
+        doc = db['dist_calculations'].find_one({'_id': id})
+        return cls(
+            conn,
+            seq_collection=doc['seq_collection'],
+            seq_field_path=doc['seq_field_path'],
+            profile_field_path=doc['profile_field_path'],
+            seq_mongo_ids=doc['seq_mongo_ids'],
+            status=doc['status'],
+            created_at=doc['created_at'],
+            finished_at=doc['finished_at']
+            )
+
     async def query_mongodb_for_allele_profiles(self):
         "Get a MongoDB cursor that represents the allele profiles for the calculation"
         profile_count, cursor = await mongo_api.get_field_data(
@@ -197,23 +217,3 @@ class DistanceCalculation:
         finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
         await self.update_my_document({'finished_at': finished_at, 'status': 'finished'})
         return finished_at
-    
-    @property
-    def allele_mx_filepath(self):
-        "Return the full filepath for the TSV file corresponding with the class instance"
-        return str(Path(DMX_DIR, self.id, 'allele_matrix.tsv'))
-    
-    @classmethod
-    def find(cls, conn: pymongo.MongoClient, id: str):
-        db = conn.get_database()
-        doc = db['dist_calculations'].find_one({'_id': id})
-        return cls(
-            conn,
-            seq_collection=doc['seq_collection'],
-            seq_field_path=doc['seq_field_path'],
-            profile_field_path=doc['profile_field_path'],
-            seq_mongo_ids=doc['seq_mongo_ids'],
-            status=doc['status'],
-            created_at=doc['created_at'],
-            finished_at=doc['finished_at']
-            )
