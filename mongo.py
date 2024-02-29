@@ -132,11 +132,12 @@ class DistanceCalculation:
         return str(Path(DMX_DIR, self.id, 'allele_matrix.tsv'))
     
     @classmethod
-    def find(cls, conn: pymongo.MongoClient, id: str):
-        db = conn.get_database()
-        doc = db['dist_calculations'].find_one({'_id': id})
+    def find(cls, id: str):
+        "Return a class instance based on a particular MongoDB document"
+        doc = mongo_api.db['dist_calculations'].find_one({'_id': ObjectId(id)})
         return cls(
-            conn,
+            id=str(doc['_id'])
+            folder=doc['folder'] 
             seq_collection=doc['seq_collection'],
             seq_field_path=doc['seq_field_path'],
             profile_field_path=doc['profile_field_path'],
