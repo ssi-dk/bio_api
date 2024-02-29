@@ -87,6 +87,7 @@ print(f"Connection string: {connection_string}")
 mongo_api = MongoAPI(connection_string)
 
 class DistanceCalculation:
+    id: str or None
     created_at: datetime.datetime or None
     finished_at: datetime.datetime or None
     status: str
@@ -94,7 +95,6 @@ class DistanceCalculation:
     seqid_field_path: str
     profile_field_path: str
     seq_mongo_ids: list
-    id: str or None
     folder: Path or None
 
     def __init__(
@@ -137,14 +137,14 @@ class DistanceCalculation:
         doc = mongo_api.db['dist_calculations'].find_one({'_id': ObjectId(id)})
         return cls(
             id=str(doc['_id'])
-            folder=doc['folder'] 
+            created_at=doc['created_at'],
+            finished_at=doc['finished_at']
+            status=doc['status'],
             seq_collection=doc['seq_collection'],
             seq_field_path=doc['seq_field_path'],
             profile_field_path=doc['profile_field_path'],
             seq_mongo_ids=doc['seq_mongo_ids'],
-            status=doc['status'],
-            created_at=doc['created_at'],
-            finished_at=doc['finished_at']
+            folder=doc['folder'] 
             )
 
     async def query_mongodb_for_allele_profiles(self):
