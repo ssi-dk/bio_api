@@ -44,7 +44,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest, background_tasks: Backgrou
         return JSONResponse(
             status_code=422, # Unprocessable Content
             content={
-                'dmx_job_id': dc.id,
+                'job_id': dc.id,
                 'message': str(e)
             }
         )
@@ -55,7 +55,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest, background_tasks: Backgrou
     return JSONResponse(
         status_code=202,  # Accepted
         content={
-            'dmx_job_id': dc.id,
+            'job_id': dc.id,
             'created_at': dc.created_at.isoformat(),
             'status': dc.status,
             'profile_count': profile_count,
