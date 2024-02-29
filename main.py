@@ -53,21 +53,8 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
             'error_msg:': str(e)
         }
 
-    # Compile allele matrix from sequence documents
-    allele_mx_df: DataFrame = await dc.amx_df_from_mongodb_cursor(cursor)
-    
-    # Save allele mx as tsv file in job folder
-    await dc.save_amx_df_as_tsv(allele_mx_df)
-
-    # Calculate distance matrix
-    dist_mx_df: DataFrame = await dc.dmx_df_from_amx_tsv()
-
-    # Save distance matrix as JSON
-    dist_mx_dict = dist_mx_df.to_dict(orient='index')
-    await dc.save_dmx_as_json(dist_mx_dict)
-
-    # Mark job as finished
-    dc.finished_at = await dc.mark_as_finished()
+    # Make the calculation
+    dc = await dc.calculate(cursor)
 
     return {
         'dmx_job_id': dc.id,

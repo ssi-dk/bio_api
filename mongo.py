@@ -221,6 +221,14 @@ class DistanceCalculation:
     
     async def mark_as_finished(self):
         "Mark calculation as finished in MongoDB document"
-        finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
-        await self.update_my_document({'finished_at': finished_at, 'status': 'finished'})
-        return finished_at
+        self.finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
+        await self.update_my_document({'finished_at': self.finished_at, 'status': 'finished'})
+
+    async def calculate(self, cursor):
+        allele_mx_df: DataFrame = await self.amx_df_from_mongodb_cursor(cursor)
+        await self.save_amx_df_as_tsv(allele_mx_df)
+        dist_mx_df: DataFrame = await self.dmx_df_from_amx_tsv()
+        dist_mx_dict = dist_mx_df.to_dict(orient='index')
+        await self.save_dmx_as_json(dist_mx_dict)
+        await self.mark_as_finished()
+        return self
