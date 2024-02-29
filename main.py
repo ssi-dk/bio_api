@@ -2,7 +2,7 @@ from os import getenv
 import traceback
 from datetime import datetime
 
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 from fastapi.responses import JSONResponse
 from pandas import DataFrame
 
@@ -24,7 +24,7 @@ def root():
     return JSONResponse(content={"message": "Hello World"})
 
 @app.post("/v1/distance_matrix/from_mongodb")
-async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
+async def dmx_from_mongodb(rq: DMXFromMongoDBRequest, background_tasks: BackgroundTasks):
     """
     Return a distance matrix from allele profiles defined in MongoDB documents
     """
@@ -49,13 +49,13 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
             }
         )
 
-    # Make the calculation
-    dc = await dc.calculate(cursor)
+    # Initiate the calculation
+    background_tasks.add_task(dc.calculate, cursor)
 
     return JSONResponse(content={
         'dmx_job_id': dc.id,
         'created_at': dc.created_at.isoformat(),
-        'finished_at': dc.finished_at.isoformat(),
+        'status': dc.status,
         'profile_count': profile_count,
     })
 

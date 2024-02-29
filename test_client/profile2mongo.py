@@ -20,7 +20,6 @@ def profile2mongo(db, filename: str, collection: str='samples', max_items:int=No
         existing_document = db[collection].find_one({'name': row['name']})
         if existing_document:
             _id = str(existing_document['_id'])
-            print(f"Document with name = '{row['name']}' already exists and has _id {_id}")
             inserted_ids.append(_id)
             continue
 
