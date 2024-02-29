@@ -44,20 +44,23 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest, background_tasks: Backgrou
         return JSONResponse(
             status_code=422, # Unprocessable Content
             content={
-            'dmx_job_id': dc.id,
-            'message': str(e)
+                'dmx_job_id': dc.id,
+                'message': str(e)
             }
         )
 
     # Initiate the calculation
     background_tasks.add_task(dc.calculate, cursor)
 
-    return JSONResponse(content={
-        'dmx_job_id': dc.id,
-        'created_at': dc.created_at.isoformat(),
-        'status': dc.status,
-        'profile_count': profile_count,
-    })
+    return JSONResponse(
+        status_code=202,  # Accepted
+        content={
+            'dmx_job_id': dc.id,
+            'created_at': dc.created_at.isoformat(),
+            'status': dc.status,
+            'profile_count': profile_count,
+        }
+    )
 
 @app.post("/v1/tree/hc/")
 async def hc_tree(rq: HCTreeCalcRequest):
