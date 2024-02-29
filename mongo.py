@@ -122,29 +122,36 @@ class DistanceCalculation:
             })
         assert mongo_save.acknowledged == True
         self.id = str(mongo_save.inserted_id)
-
-        self.folder = Path(DMX_DIR, self.id)
-        self.folder.mkdir()
+        Path(self.folder).mkdir()
     
     @property
+    def folder(self):
+        "Return the folder corresponding to the class instance"
+        return str(Path(DMX_DIR, self.id))
+
+    @property
     def allele_mx_filepath(self):
-        "Return the full filepath for the TSV file corresponding with the class instance"
-        return str(Path(DMX_DIR, self.id, 'allele_matrix.tsv'))
+        "Return the filepath for the allele matrix file corresponding with the class instance"
+        return str(Path(self.folder, 'allele_matrix.tsv'))
+    
+    @property
+    def dist_mx_filepath(self):
+        "Return the filepath for the distance matrix file corresponding with the class instance"
+        return str(Path(self.folder, 'distance_matrix.json'))
     
     @classmethod
     def find(cls, id: str):
         "Return a class instance based on a particular MongoDB document"
         doc = mongo_api.db['dist_calculations'].find_one({'_id': ObjectId(id)})
         return cls(
-            id=str(doc['_id'])
+            id=str(doc['_id']),
             created_at=doc['created_at'],
-            finished_at=doc['finished_at']
+            finished_at=doc['finished_at'],
             status=doc['status'],
             seq_collection=doc['seq_collection'],
             seq_field_path=doc['seq_field_path'],
             profile_field_path=doc['profile_field_path'],
             seq_mongo_ids=doc['seq_mongo_ids'],
-            folder=doc['folder'] 
             )
 
     async def query_mongodb_for_allele_profiles(self):
@@ -202,8 +209,7 @@ class DistanceCalculation:
 
     async def save_dmx_as_json(self, dist_mx_dict):
         "Save distance matrix dataframe as JSON file"
-        dist_mx_filepath = Path(self.folder, 'distance_matrix.json')
-        with open(dist_mx_filepath, 'w') as dist_mx_file_obj:
+        with open(self.dist_mx_filepath, 'w') as dist_mx_file_obj:
             dump(dist_mx_dict, dist_mx_file_obj)
     
     async def update_my_document(self, fields: dict):
