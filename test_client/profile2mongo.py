@@ -67,5 +67,7 @@ if __name__ == '__main__':
             seqid_field_path='name',
             profile_field_path='profile',
             mongo_ids=inserted_ids)
+        print("Response:")
+        print(response)
         print("Response as JSON:")
         print(response.json())
