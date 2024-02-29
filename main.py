@@ -1,22 +1,15 @@
 from os import getenv
-import uuid
-from typing import Union
-from io import StringIO
-from pathlib import Path
 import traceback
-import asyncio
 from datetime import datetime
 
-from pydantic import BaseModel
 from fastapi import FastAPI
-from pandas import DataFrame, read_table
-from pymongo.errors import DocumentTooLarge
+from fastapi.responses import JSONResponse
+from pandas import DataFrame
 
 import mongo
 
-from pydantic_classes import DMXFromLocalFileRequest, DMXFromMongoDBRequest, DMXFromProfilesRequest, HCTreeCalcRequest
+from pydantic_classes import DMXFromMongoDBRequest, HCTreeCalcRequest
 from tree_maker import make_tree
-# from qstat import consume_qstat
 
 app = FastAPI()
 
@@ -28,7 +21,7 @@ def timed_msg(msg: str):
 
 @app.get("/")
 def root():
-    return {"message": "Hello World"}
+    return JSONResponse(content={"message": "Hello World"})
 
 @app.post("/v1/distance_matrix/from_mongodb")
 async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
@@ -48,29 +41,29 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
     try:
         profile_count, cursor = await dc.query_mongodb_for_allele_profiles()
     except mongo.MissingDataException as e:
-        return {
+        return JSONResponse(content={
             'status': 'error',
             'error_msg:': str(e)
-        }
+        })
 
     # Make the calculation
     dc = await dc.calculate(cursor)
 
-    return {
+    return JSONResponse(content={
         'dmx_job_id': dc.id,
-        'created_at': dc.created_at,
-        'finished_at': dc.finished_at,
+        'created_at': dc.created_at.isoformat(),
+        'finished_at': dc.finished_at.isoformat(),
         'profile_count': profile_count,
-        }
+    })
 
 @app.post("/v1/tree/hc/")
 async def hc_tree(rq: HCTreeCalcRequest):
-    response = {"method": rq.method}
+    content = {"method": rq.method}
     try:
         dist_df: DataFrame = DataFrame.from_dict(rq.distances, orient='index')
         tree = make_tree(dist_df, rq.method)
-        response['tree'] = tree
+        content['tree'] = tree
     except ValueError as e:
-        response['error'] = str(e)
+        content['error'] = str(e)
         print(traceback.format_exc())
-    return response
+    return JSONResponse(content=content)
