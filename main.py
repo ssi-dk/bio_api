@@ -174,7 +174,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
             seq_mongo_ids=rq.mongo_ids
     )
     
-    timed_msg("Query MongoDB for the allele profiles")
+    # Query MongoDB for the allele profiles
     try:
         profile_count, cursor = await dc.query_mongodb_for_allele_profiles()
     except mongo.MissingDataException as e:
@@ -183,16 +183,16 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest):
             'error_msg:': str(e)
         }
 
-    timed_msg("Compile allele matrix from sequence documents")
+    # Compile allele matrix from sequence documents
     allele_mx_df: DataFrame = await dc.amx_df_from_mongodb_cursor(cursor)
     
     # Save allele mx as tsv file in job folder
     await dc.save_amx_df_as_tsv(allele_mx_df)
 
-    timed_msg("Calculate distance matrix")
+    # Calculate distance matrix
     dist_mx_df: DataFrame = await dc.dmx_df_from_amx_tsv()
 
-    timed_msg("Save distance matrix as JSON")
+    # Save distance matrix as JSON
     dist_mx_dict = dist_mx_df.to_dict(orient='index')
     await dc.save_dmx_as_json(dist_mx_dict)
 
