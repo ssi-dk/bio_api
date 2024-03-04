@@ -12,13 +12,6 @@ class DMXFromMongoDBRequest(BaseModel):
     profile_field_path: str
     mongo_ids: list
 
-class DMXFromProfilesRequest(BaseModel):
-    loci: set
-    profiles: dict
-
-class DMXFromLocalFileRequest(BaseModel):
-    file_path: str
-
 class HCTreeCalcRequest(BaseModel):
     """Represents a REST request for a tree calculation based on hierarchical clustering.
     """
