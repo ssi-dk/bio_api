@@ -29,8 +29,8 @@ def call_dmx_status(job_id:str):
     rest_response = requests.get(url, params={'job_id': job_id})
     return rest_response
 
-def call_dmx_status(job_id: str):
-    url = base_url + '/v1/distance_calculation/status/'
+def call_dmx_result(job_id: str):
+    url = base_url + '/v1/distance_calculation/result/'
     rest_response = requests.get(url, params={'job_id': job_id})
     return rest_response
 

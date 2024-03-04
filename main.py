@@ -1,6 +1,8 @@
 from os import getenv
 import traceback
 from datetime import datetime
+from json import load
+from pathlib import Path
 
 from fastapi import FastAPI, BackgroundTasks, Request
 from fastapi.responses import JSONResponse
@@ -81,6 +83,23 @@ async def dist_status(job_id: str):
             'created_at': dc.created_at.isoformat(),
             'finished_at': dc.finished_at.isoformat(),
             'status': dc.status
+        }
+    )
+
+@app.get("/v1/distance_calculation/result/")
+async def dist_status(job_id: str):
+    """
+    Get result of a distance calculation
+    """
+
+    dc = mongo.DistanceCalculation.find(job_id)
+    with open(Path(dc.folder, 'distance_matrix.json')) as f:
+        distances = load(f)
+    
+    return JSONResponse(
+        content={
+            'job_id': dc.id,
+            'distances': distances
         }
     )
 
