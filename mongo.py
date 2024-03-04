@@ -10,7 +10,7 @@ from pydantic import BaseModel
 import pymongo
 from bson.objectid import ObjectId
 from pandas import DataFrame, read_table
-from pydantic_classes import DMXFromLocalFileRequest, DMXFromMongoDBRequest, DMXFromProfilesRequest, HCTreeCalcRequest
+from pydantic_classes import DMXFromMongoDBRequest, HCTreeCalcRequest
 
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 

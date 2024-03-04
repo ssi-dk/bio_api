@@ -2,7 +2,7 @@ from os import getenv
 import traceback
 from datetime import datetime
 
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI, BackgroundTasks, Request
 from fastapi.responses import JSONResponse
 from pandas import DataFrame
 
@@ -59,6 +59,20 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest, background_tasks: Backgrou
             'created_at': dc.created_at.isoformat(),
             'status': dc.status,
             'profile_count': profile_count,
+        }
+    )
+
+@app.get("/v1/distance_calculation/status/{job_id}")
+async def dist_status(job_id: str, request: Request):
+    """
+    Get job status of a distance calculation
+    """
+
+    dc = mongo.DistanceCalculation.find(job_id)
+    
+    return JSONResponse(
+        content={
+            dc.to_dict()
         }
     )
 
