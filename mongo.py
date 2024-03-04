@@ -95,22 +95,28 @@ class DistanceCalculation:
     seqid_field_path: str
     profile_field_path: str
     seq_mongo_ids: list
-    folder: Path or None
 
     def __init__(
             self,
             seq_collection: str,
             seqid_field_path: str,
             profile_field_path: str,
-            seq_mongo_ids: list
+            seq_mongo_ids: list,
+            status: str or None,
+            created_at: datetime.datetime or None,
+            finished_at: datetime.datetime or None,
+            id: str or None
             ):
         self.seq_collection = seq_collection
         self.seqid_field_path = seqid_field_path
         self.profile_field_path = profile_field_path
         self.seq_mongo_ids = seq_mongo_ids
-        self.status = 'new'
-        self.created_at = datetime.datetime.now(tz=datetime.timezone.utc)
-        self.finished_at = None
+        self.status = status
+        self.created_at = created_at
+        self.finished_at = finished_at
+        self.id = id
+    
+    def save(self):
         mongo_save = mongo_api.db['dist_calculations'].insert_one({
             'created_at': self.created_at,
             'finished_at': self.finished_at,
@@ -118,11 +124,15 @@ class DistanceCalculation:
             'seq_collection': self.seq_collection,
             'seqid_field_path': self.seqid_field_path,
             'profile_field_path': self.profile_field_path,
-            'seq_mongo_ids': self.seq_mongo_ids
+            'seq_mongo_ids': self.seq_mongo_ids,
+            'status': self.status,
+            'created_at': self.created_at,
+            'finished_at': self.finished_at,
             })
         assert mongo_save.acknowledged == True
         self.id = str(mongo_save.inserted_id)
         Path(self.folder).mkdir()
+        return self.id
     
     @property
     def folder(self):

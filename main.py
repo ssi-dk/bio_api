@@ -34,8 +34,13 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest, background_tasks: Backgrou
             seq_collection=rq.collection,
             seqid_field_path=rq.seqid_field_path,
             profile_field_path=rq.profile_field_path,
-            seq_mongo_ids=rq.mongo_ids
+            seq_mongo_ids=rq.mongo_ids,
+            status='new',
+            created_at=datetime.now(),
+            finished_at=None,
+            id=None
     )
+    dc.id = dc.save()
     
     # Query MongoDB for the allele profiles
     try:
