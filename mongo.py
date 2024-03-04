@@ -137,7 +137,7 @@ class DistanceCalculation:
     @property
     def folder(self):
         "Return the folder corresponding to the class instance"
-        return str(Path(DMX_DIR, self.id))
+        return Path(DMX_DIR, self.id)
 
     @property
     def allele_mx_filepath(self):
