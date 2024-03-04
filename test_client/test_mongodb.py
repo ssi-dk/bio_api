@@ -1,6 +1,7 @@
 import pytest
 from os import getenv
 import pymongo
+from time import sleep
 
 import client_functions
 from profile2mongo import profile2mongo
@@ -20,5 +21,11 @@ def test_dmx_from_mongodb():
     )
     assert result.status_code == 202
     assert 'job_id' in result.json()
+    job_id = result.json()['job_id']
+    sleep(1)
+    result = client_functions.call_dmx_status(job_id)
+    j = result.json()
+    assert 'status' in j
+    assert j['status'] == 'finished'
 
 # db['test_samples'].drop()
