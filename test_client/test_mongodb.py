@@ -19,5 +19,6 @@ def test_dmx_from_mongodb():
         mongo_ids=mongo_ids
     )
     assert result.status_code == 202
+    assert 'job_id' in result.json()
 
 # db['test_samples'].drop()
