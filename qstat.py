@@ -4,7 +4,7 @@ import datetime
 import pymongo
 from pymongo import InsertOne, DeleteMany, ReplaceOne, UpdateOne
 
-import mongo
+import calculations
 
 from aio_pika import connect_robust
 from aio_pika.patterns import RPC
@@ -16,7 +16,7 @@ __all__ = [
 mongo_connection = getenv('MONGO_CONNECTION')
 
 # TODO: remove?
-mongo_api = mongo.MongoAPI(mongo_connection)
+mongo_api = calculations.MongoAPI(mongo_connection)
 
 class OutputConverter:
     def __init__(self, console_output: str):

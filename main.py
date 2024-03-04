@@ -8,7 +8,7 @@ from fastapi import FastAPI, BackgroundTasks, Request
 from fastapi.responses import JSONResponse
 from pandas import DataFrame
 
-import mongo
+import calculations
 
 from pydantic_classes import DMXFromMongoDBRequest, HCTreeCalcRequest
 from tree_maker import make_tree
@@ -32,7 +32,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest, background_tasks: Backgrou
     """
     
     # Initialize DistanceCalculation object
-    dc = mongo.DistanceCalculation(
+    dc = calculations.DistanceCalculation(
             seq_collection=rq.collection,
             seqid_field_path=rq.seqid_field_path,
             profile_field_path=rq.profile_field_path,
@@ -47,7 +47,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest, background_tasks: Backgrou
     # Query MongoDB for the allele profiles
     try:
         profile_count, cursor = await dc.query_mongodb_for_allele_profiles()
-    except mongo.MissingDataException as e:
+    except calculations.MissingDataException as e:
         return JSONResponse(
             status_code=422, # Unprocessable Content
             content={
@@ -75,7 +75,7 @@ async def dist_status(job_id: str):
     Get job status of a distance calculation
     """
 
-    dc = mongo.DistanceCalculation.find(job_id)
+    dc = calculations.DistanceCalculation.find(job_id)
     
     return JSONResponse(
         content={
@@ -92,7 +92,7 @@ async def dist_status(job_id: str):
     Get result of a distance calculation
     """
 
-    dc = mongo.DistanceCalculation.find(job_id)
+    dc = calculations.DistanceCalculation.find(job_id)
     with open(Path(dc.folder, 'distance_matrix.json')) as f:
         distances = load(f)
     
