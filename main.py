@@ -62,8 +62,8 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest, background_tasks: Backgrou
         }
     )
 
-@app.get("/v1/distance_calculation/status/{job_id}")
-async def dist_status(job_id: str, request: Request):
+@app.get("/v1/distance_calculation/status/")
+async def dist_status(job_id: str):
     """
     Get job status of a distance calculation
     """

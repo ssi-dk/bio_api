@@ -25,7 +25,7 @@ def call_dmx_from_mongodb(
     return rest_response
 
 def call_dmx_status(job_id: str):
-    url = base_url + '/v1/distance_calculation/status'
+    url = base_url + '/v1/distance_calculation/status/'
     rest_response = requests.get(url, params={job_id: job_id})
     return rest_response
 
