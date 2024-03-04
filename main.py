@@ -77,7 +77,10 @@ async def dist_status(job_id: str):
     
     return JSONResponse(
         content={
-            dc.to_dict()
+            'job_id': dc.id,
+            'created_at': dc.created_at.isoformat(),
+            'finished_at': dc.finished_at.isoformat(),
+            'status': dc.status
         }
     )
 

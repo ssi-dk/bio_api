@@ -159,7 +159,7 @@ class DistanceCalculation:
             finished_at=doc['finished_at'],
             status=doc['status'],
             seq_collection=doc['seq_collection'],
-            seq_field_path=doc['seq_field_path'],
+            seqid_field_path=doc['seqid_field_path'],
             profile_field_path=doc['profile_field_path'],
             seq_mongo_ids=doc['seq_mongo_ids'],
             )
