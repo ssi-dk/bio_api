@@ -23,10 +23,10 @@ def timed_msg(msg: str):
 def root():
     return JSONResponse(content={"message": "Hello World"})
 
-@app.post("/v1/distance_matrix/from_mongodb")
+@app.post("/v1/distance_calculation/from_cgmlst")
 async def dmx_from_mongodb(rq: DMXFromMongoDBRequest, background_tasks: BackgroundTasks):
     """
-    Return a distance matrix from allele profiles defined in MongoDB documents
+    Run a distance calculation from selected cgMLST profiles in MongoDB
     """
     
     # Initialize DistanceCalculation object
