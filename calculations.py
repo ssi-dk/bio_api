@@ -5,8 +5,8 @@ from pathlib import Path
 from json import dump
 import asyncio
 from io import StringIO
+import abc
 
-from pydantic import BaseModel
 import pymongo
 from bson.objectid import ObjectId
 from pandas import DataFrame, read_table
@@ -85,6 +85,70 @@ class MongoAPI:
 connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
 print(f"Connection string: {connection_string}")
 mongo_api = MongoAPI(connection_string)
+
+
+class Calculation(metaclass=abc.ABCMeta):
+    # Abstract base class
+    id: str or None
+    created_at: datetime.datetime or None
+    finished_at: datetime.datetime or None
+    status: str
+
+    def __init__(
+            self,
+            status: str or None,
+            created_at: datetime.datetime or None,
+            finished_at: datetime.datetime or None,
+            id: str or None
+            ):
+        self.status = status
+        self.created_at = created_at
+        self.finished_at = finished_at
+        self.id = id
+    
+    @abc.abstractmethod
+    @staticmethod
+    @property
+    def collection(cls):
+        return 'my_collection'
+    
+    def save(self):
+        mongo_save = mongo_api.db[self.collection].insert_one({
+            'created_at': self.created_at,
+            'finished_at': self.finished_at,
+            'status': self.status,
+            })
+        assert mongo_save.acknowledged == True
+        self.id = str(mongo_save.inserted_id)
+        return self.id
+    
+    @classmethod
+    def find(cls, id: str):
+        "Return a class instance based on a particular MongoDB document"
+        doc = mongo_api.db[cls.collection].find_one({'_id': ObjectId(id)})
+        return cls(
+            id=str(doc['_id']),
+            created_at=doc['created_at'],
+            finished_at=doc['finished_at'],
+            status=doc['status'],
+            )
+    
+    async def update_my_document(self, fields: dict):
+        "Update the MongoDB document that corresponds with the class instance"
+        update_result = mongo_api.db[self.collection].update_one(
+            {'_id': ObjectId(self.id)}, {'$set': fields}
+        )
+        assert update_result.acknowledged == True
+    
+    async def mark_as_finished(self):
+        "Mark calculation as finished in MongoDB document"
+        self.finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
+        await self.update_my_document({'finished_at': self.finished_at, 'status': 'finished'})
+
+    @abc.abstractmethod
+    async def calculate(self, cursor):
+        pass
+
 
 class DistanceCalculation:
     id: str or None
