@@ -103,7 +103,7 @@ async def dist_status(job_id: str):
         }
     )
 
-@app.post("/v1/tree/hc/")
+@app.post("/v1/hc_tree/from_request/")
 async def hc_tree(rq: HCTreeCalcRequest):
     content = {"method": rq.method}
     try:
