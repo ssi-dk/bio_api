@@ -178,7 +178,7 @@ class DistanceCalculation:
             raise MissingDataException(message)
         return profile_count, cursor
 
-    async def amx_df_from_mongodb_cursor(self, cursor):
+    async def _amx_df_from_mongodb_cursor(self, cursor):
         "Generate an allele matrix as dataframe containing the allele profiles from the MongoDB cursor"
         full_dict = dict()
 
@@ -194,13 +194,13 @@ class DistanceCalculation:
         df = DataFrame.from_dict(full_dict, 'index', dtype=str)
         return df
 
-    async def save_amx_df_as_tsv(self, allele_mx_df):
+    async def _save_amx_df_as_tsv(self, allele_mx_df):
         "Save allele matrix dataframe as TSV file"
         with open(self.allele_mx_filepath, 'w') as allele_mx_file_obj:
             allele_mx_file_obj.write("ID")  # Without an initial string in first line cgmlst-dists will fail!
             allele_mx_df.to_csv(allele_mx_file_obj, index = True, header=True, sep ="\t")
 
-    async def dmx_df_from_amx_tsv(self):
+    async def _dmx_df_from_amx_tsv(self):
         "Generate a distance matrix dataframe from allele matrix TSV file"
         sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {self.allele_mx_filepath}",
         stdout=asyncio.subprocess.PIPE,
@@ -217,7 +217,7 @@ class DistanceCalculation:
         df = df.set_index('ids')
         return df
 
-    async def save_dmx_as_json(self, dist_mx_dict):
+    async def _save_dmx_as_json(self, dist_mx_dict):
         "Save distance matrix dataframe as JSON file"
         with open(self.dist_mx_filepath, 'w') as dist_mx_file_obj:
             dump(dist_mx_dict, dist_mx_file_obj)
@@ -235,10 +235,10 @@ class DistanceCalculation:
         await self.update_my_document({'finished_at': self.finished_at, 'status': 'finished'})
 
     async def calculate(self, cursor):
-        allele_mx_df: DataFrame = await self.amx_df_from_mongodb_cursor(cursor)
-        await self.save_amx_df_as_tsv(allele_mx_df)
-        dist_mx_df: DataFrame = await self.dmx_df_from_amx_tsv()
+        allele_mx_df: DataFrame = await self._amx_df_from_mongodb_cursor(cursor)
+        await self._save_amx_df_as_tsv(allele_mx_df)
+        dist_mx_df: DataFrame = await self._dmx_df_from_amx_tsv()
         dist_mx_dict = dist_mx_df.to_dict(orient='index')
-        await self.save_dmx_as_json(dist_mx_dict)
+        await self._save_dmx_as_json(dist_mx_dict)
         await self.mark_as_finished()
         return self
