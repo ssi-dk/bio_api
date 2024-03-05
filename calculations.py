@@ -96,13 +96,13 @@ class Calculation(metaclass=abc.ABCMeta):
 
     def __init__(
             self,
-            status: str or None = 'init',
+            status: str = 'init',
             created_at: datetime.datetime or None = None,
             finished_at: datetime.datetime or None = None,
             id: str or None = None
             ):
         self.status = status
-        self.created_at = created_at
+        self.created_at = created_at if created_at else datetime.datetime.now(tz=datetime.timezone.utc)
         self.finished_at = finished_at
         self.id = id
     
