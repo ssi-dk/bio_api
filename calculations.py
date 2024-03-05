@@ -10,7 +10,7 @@ import abc
 import pymongo
 from bson.objectid import ObjectId
 from pandas import DataFrame, read_table
-from pydantic_classes import DMXFromMongoDBRequest, HCTreeCalcRequest
+from pydantic_classes import DMXFromMongoRequest, HCTreeCalcRequest
 
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 
@@ -41,7 +41,7 @@ class MongoAPI:
         self.connection = pymongo.MongoClient(connection_string)
         self.db = self.connection.get_database()
     
-    async def create_dmx_job(self, rq:DMXFromMongoDBRequest):
+    async def create_dmx_job(self, rq:DMXFromMongoRequest):
         created_at = datetime.datetime.now(tz=datetime.timezone.utc)
         result = self.db['dmx_jobs'].insert_one({
             'created_at': created_at,

@@ -10,7 +10,7 @@ from pandas import DataFrame
 
 import calculations
 
-from pydantic_classes import DMXFromMongoDBRequest, HCTreeCalcRequest
+from pydantic_classes import DMXFromMongoRequest, HCTreeCalcRequest
 from tree_maker import make_tree
 
 app = FastAPI()
@@ -26,7 +26,7 @@ def root():
     return JSONResponse(content={"message": "Hello World"})
 
 @app.post("/v1/distance_calculation/from_cgmlst")
-async def dmx_from_mongodb(rq: DMXFromMongoDBRequest, background_tasks: BackgroundTasks):
+async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: BackgroundTasks):
     """
     Run a distance calculation from selected cgMLST profiles in MongoDB
     """

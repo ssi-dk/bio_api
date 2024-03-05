@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-class DMXFromMongoDBRequest(BaseModel):
+class DMXFromMongoRequest(BaseModel):
     """
     collection: collection to find sequences in
     seqid_field_path: field path in dotted notation which contains the 'sequence id' the user wants to see
