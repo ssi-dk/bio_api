@@ -127,6 +127,7 @@ async def hc_tree_from_dmx_job(dmx_job:str, method:str):
     
     # New code
     tc = calculations.TreeCalculation(dmx_job, method)
+    await tc.calculate()
 
     # Old code
     try:

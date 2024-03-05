@@ -106,7 +106,6 @@ class Calculation(metaclass=abc.ABCMeta):
         self.finished_at = finished_at
         self.id = id
     
-    @staticmethod
     @property
     @abc.abstractmethod
     def collection(self):
@@ -135,6 +134,7 @@ class Calculation(metaclass=abc.ABCMeta):
     
     async def update_my_document(self, fields: dict):
         "Update the MongoDB document that corresponds with the class instance"
+        print(f"My collection: {self.collection}")
         update_result = mongo_api.db[self.collection].update_one(
             {'_id': ObjectId(self.id)}, {'$set': fields}
         )
@@ -159,13 +159,13 @@ class TreeCalculation(Calculation):
         self.dmx_job = dmx_job
         self.method = method
     
-    @staticmethod
     @property
     def collection(self):
         return 'tree_calculations'
     
-    def calculate(self):
+    async def calculate(self):
         print("Do some calculation stuff here.")
+        await self.mark_as_finished()
 
 
 class DistanceCalculation:
