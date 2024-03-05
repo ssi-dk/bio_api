@@ -106,9 +106,9 @@ class Calculation(metaclass=abc.ABCMeta):
         self.finished_at = finished_at
         self.id = id
     
-    @abc.abstractmethod
-    @staticmethod
+    @classmethod
     @property
+    @abc.abstractmethod
     def collection(cls):
         return 'my_collection'
     
@@ -148,6 +148,11 @@ class Calculation(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     async def calculate(self, cursor):
         pass
+
+
+class TreeCalculation(Calculation):
+    def __init__(args, **kwargs):
+        super(TreeCalculation.__init__(args, **kwargs))
 
 
 class DistanceCalculation:
