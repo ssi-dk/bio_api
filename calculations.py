@@ -106,6 +106,7 @@ class Calculation(metaclass=abc.ABCMeta):
         self.finished_at = finished_at
         self.id = id
     
+    @classmethod
     @property
     @abc.abstractmethod
     def collection(self):
