@@ -106,10 +106,10 @@ class Calculation(metaclass=abc.ABCMeta):
         self.finished_at = finished_at
         self.id = id
     
-    @classmethod
+    @staticmethod
     @property
     @abc.abstractmethod
-    def collection(cls):
+    def collection(self):
         return 'my_collection'
     
     def save(self):
@@ -158,6 +158,11 @@ class TreeCalculation(Calculation):
         super().__init__(**kwargs)
         self.dmx_job = dmx_job
         self.method = method
+    
+    @staticmethod
+    @property
+    def collection(self):
+        return 'tree_calculations'
     
     def calculate(self):
         print("Do some calculation stuff here.")
