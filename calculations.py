@@ -96,10 +96,10 @@ class Calculation(metaclass=abc.ABCMeta):
 
     def __init__(
             self,
-            status: str or None,
-            created_at: datetime.datetime or None,
-            finished_at: datetime.datetime or None,
-            id: str or None
+            status: str or None = 'init',
+            created_at: datetime.datetime or None = None,
+            finished_at: datetime.datetime or None = None,
+            id: str or None = None
             ):
         self.status = status
         self.created_at = created_at
@@ -151,8 +151,16 @@ class Calculation(metaclass=abc.ABCMeta):
 
 
 class TreeCalculation(Calculation):
-    def __init__(args, **kwargs):
-        super(TreeCalculation.__init__(args, **kwargs))
+    dmx_job: str
+    method: str
+
+    def __init__(self, dmx_job:str, method:str, **kwargs):
+        super().__init__(**kwargs)
+        self.dmx_job = dmx_job
+        self.method = method
+    
+    def calculate(self):
+        print("Do some calculation stuff here.")
 
 
 class DistanceCalculation:
