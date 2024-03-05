@@ -2,6 +2,8 @@ from pydantic import BaseModel
 
 class DMXFromMongoRequest(BaseModel):
     """
+    Parameters for a REST request for a distance calculation.
+
     collection: collection to find sequences in
     seqid_field_path: field path in dotted notation which contains the 'sequence id' the user wants to see
     profile_field_path: field path in dotted notation which contains the cgMLST allele profiles
@@ -13,7 +15,18 @@ class DMXFromMongoRequest(BaseModel):
     mongo_ids: list
 
 class HCTreeCalcRequest(BaseModel):
-    """Represents a REST request for a tree calculation based on hierarchical clustering.
+    """
+    Parameters for a REST request for a tree calculation based on hierarchical clustering.
+    Distances are taken directly from the request.
     """
     distances: dict
+    method: str
+
+
+class HCTreeCalcFromDMXJobRequest(BaseModel):
+    """
+    Parameters for a REST request for a tree calculation based on hierarchical clustering.
+    Distances are taken from a Mongo document (and ultimatley from a file on the file system)
+    """
+    dmx_job: str
     method: str
