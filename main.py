@@ -10,7 +10,7 @@ from pandas import DataFrame
 
 import calculations
 
-from pydantic_classes import DMXFromMongoRequest, HCTreeCalcRequest
+from pydantic_classes import DMXFromMongoRequest, HCTreeCalcRequest, HCTreeCalcFromDMXJobRequest
 from tree_maker import make_tree
 
 app = FastAPI()
@@ -104,11 +104,29 @@ async def dist_status(job_id: str):
     )
 
 @app.post("/v1/hc_tree/from_request/")
-async def hc_tree(rq: HCTreeCalcRequest):
+async def hc_tree_from_rq(rq: HCTreeCalcRequest):
     content = {"method": rq.method}
     try:
         dist_df: DataFrame = DataFrame.from_dict(rq.distances, orient='index')
         tree = make_tree(dist_df, rq.method)
+        content['tree'] = tree
+    except ValueError as e:
+        content['error'] = str(e)
+        print(traceback.format_exc())
+    return JSONResponse(content=content)
+
+@app.get("/v1/hc_tree/from_dmx_job/")
+async def hc_tree_from_dmx_job(dmx_job:str, method:str):
+    content = {
+        "dmx_job": dmx_job,
+        "method": method
+        }
+    dc = calculations.DistanceCalculation.find(dmx_job)
+    with open(Path(dc.folder, 'distance_matrix.json')) as f:
+        distances = load(f)
+    try:
+        dist_df: DataFrame = DataFrame.from_dict(distances, orient='index')
+        tree = make_tree(dist_df, method)
         content['tree'] = tree
     except ValueError as e:
         content['error'] = str(e)
