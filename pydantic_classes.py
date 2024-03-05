@@ -21,12 +21,3 @@ class HCTreeCalcRequest(BaseModel):
     """
     distances: dict
     method: str
-
-
-class HCTreeCalcFromDMXJobRequest(BaseModel):
-    """
-    Parameters for a REST request for a tree calculation based on hierarchical clustering.
-    Distances are taken from a Mongo document (and ultimatley from a file on the file system)
-    """
-    dmx_job: str
-    method: str

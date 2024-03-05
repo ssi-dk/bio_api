@@ -10,7 +10,7 @@ from pandas import DataFrame
 
 import calculations
 
-from pydantic_classes import DMXFromMongoRequest, HCTreeCalcRequest, HCTreeCalcFromDMXJobRequest
+from pydantic_classes import DMXFromMongoRequest, HCTreeCalcRequest
 from tree_maker import make_tree
 
 app = FastAPI()
