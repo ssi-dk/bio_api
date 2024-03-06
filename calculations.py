@@ -167,8 +167,8 @@ class TreeCalculation(Calculation):
         try:
             dist_df: DataFrame = DataFrame.from_dict(distances, orient='index')
             tree = make_tree(dist_df, self.method)
+            await self.update_my_document({'tree': tree})
             await self.mark_as_finished()
-            return tree
         except ValueError:
             raise
 
