@@ -112,15 +112,18 @@ async def hc_tree_from_rq(rq: HCTreeCalcRequest):
     return JSONResponse(content=content)
 
 @app.get("/v1/hc_tree/from_dmx_job/")
-async def hc_tree_from_dmx_job(dmx_job:str, method:str):
-    content = {
-        "dmx_job": dmx_job,
-        "method": method
-        }
+async def hc_tree_from_dmx_job(dmx_job:str, method:str, background_tasks: BackgroundTasks):
     tc = calculations.TreeCalculation(dmx_job, method)
-    tree = await tc.calculate()
-    content['tree'] = tree
-    return JSONResponse(content=content)
+    tc.id = tc.save()
+    background_tasks.add_task(tc.calculate)
+    return JSONResponse(
+    status_code=202,  # Accepted
+    content={
+        'job_id': tc.id,
+        'created_at': tc.created_at.isoformat(),
+        'status': tc.status,
+    }
+)
 
 @app.get("/v1/hc_tree/status/")
 async def hc_tree_status(job_id:str):

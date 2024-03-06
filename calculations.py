@@ -107,9 +107,7 @@ class Calculation(metaclass=abc.ABCMeta):
         self.finished_at = finished_at
         self.id = id
     
-    @classmethod
-    @property
-    @abc.abstractmethod
+    @abc.abstractproperty
     def collection(self):
         return 'my_collection'
     
@@ -155,15 +153,12 @@ class Calculation(metaclass=abc.ABCMeta):
 class TreeCalculation(Calculation):
     dmx_job: str
     method: str
+    collection = 'tree_calculations'
 
-    def __init__(self, dmx_job:str, method:str, **kwargs):
+    def __init__(self, dmx_job:str or None = None, method:str or None = None, **kwargs):
         super().__init__(**kwargs)
         self.dmx_job = dmx_job
         self.method = method
-    
-    @property
-    def collection(self):
-        return 'tree_calculations'
     
     async def calculate(self):
         dc = DistanceCalculation.find(self.dmx_job)
