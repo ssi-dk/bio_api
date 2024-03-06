@@ -121,21 +121,7 @@ async def hc_tree_from_dmx_job(dmx_job:str, method:str):
         "dmx_job": dmx_job,
         "method": method
         }
-    dc = calculations.DistanceCalculation.find(dmx_job)
-    with open(Path(dc.folder, 'distance_matrix.json')) as f:
-        distances = load(f)
-    
-    # New code
     tc = calculations.TreeCalculation(dmx_job, method)
-    await tc.calculate()
-
-    # Old code
-    try:
-        dist_df: DataFrame = DataFrame.from_dict(distances, orient='index')
-        tree = make_tree(dist_df, method)
-        content['tree'] = tree
-    except ValueError as e:
-        content['error'] = str(e)
-        print(traceback.format_exc())
-
+    tree = await tc.calculate()
+    content['tree'] = tree
     return JSONResponse(content=content)

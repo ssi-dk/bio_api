@@ -2,7 +2,7 @@ from bson.objectid import ObjectId
 import datetime
 from os import getenv
 from pathlib import Path
-from json import dump
+from json import dump, load
 import asyncio
 from io import StringIO
 import abc
@@ -11,6 +11,7 @@ import pymongo
 from bson.objectid import ObjectId
 from pandas import DataFrame, read_table
 from pydantic_classes import DMXFromMongoRequest, HCTreeCalcRequest
+from tree_maker import make_tree
 
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 
@@ -165,8 +166,16 @@ class TreeCalculation(Calculation):
         return 'tree_calculations'
     
     async def calculate(self):
-        print("Do some calculation stuff here.")
-        await self.mark_as_finished()
+        dc = DistanceCalculation.find(self.dmx_job)
+        with open(Path(dc.folder, 'distance_matrix.json')) as f:
+            distances = load(f)
+        try:
+            dist_df: DataFrame = DataFrame.from_dict(distances, orient='index')
+            tree = make_tree(dist_df, self.method)
+            await self.mark_as_finished()
+            return tree
+        except ValueError:
+            raise
 
 
 class DistanceCalculation:
