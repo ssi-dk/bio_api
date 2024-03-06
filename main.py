@@ -74,9 +74,7 @@ async def dist_status(job_id: str):
     """
     Get job status of a distance calculation
     """
-
     dc = calculations.DistanceCalculation.find(job_id)
-    
     return JSONResponse(
         content={
             'job_id': dc.id,
@@ -91,11 +89,9 @@ async def dist_status(job_id: str):
     """
     Get result of a distance calculation
     """
-
     dc = calculations.DistanceCalculation.find(job_id)
     with open(Path(dc.folder, 'distance_matrix.json')) as f:
         distances = load(f)
-    
     return JSONResponse(
         content={
             'job_id': dc.id,
@@ -125,3 +121,15 @@ async def hc_tree_from_dmx_job(dmx_job:str, method:str):
     tree = await tc.calculate()
     content['tree'] = tree
     return JSONResponse(content=content)
+
+@app.get("/v1/hc_tree/status/")
+async def hc_tree_status(job_id:str):
+    tc = calculations.TreeCalculation.find(job_id)
+    return JSONResponse(
+        content={
+            'job_id': tc.id,
+            'created_at': tc.created_at.isoformat(),
+            'finished_at': tc.finished_at.isoformat(),
+            'status': tc.status
+        }
+    )
