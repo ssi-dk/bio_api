@@ -171,7 +171,12 @@ class DistanceCalculation(Calculation):
     seq_mongo_ids: list
 
     def __init__(
-        self, seq_collection: str, seqid_field_path: str, profile_field_path: str, seq_mongo_ids: list, **kwargs):
+            self,
+            seq_collection: str or None=None,
+            seqid_field_path: str or None = None,
+            profile_field_path: str or None = None,
+            seq_mongo_ids: list or None = None,
+            **kwargs):
         super().__init__(**kwargs)
         self.seq_collection = seq_collection
         self.seqid_field_path = seqid_field_path
