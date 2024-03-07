@@ -54,3 +54,8 @@ def call_hc_tree_status(job_id):
     url = base_url + '/v1/hc_tree/status/'
     rest_response = requests.get(url, params={'job_id': job_id})
     return rest_response
+
+def call_hc_tree_result(job_id):
+    url = base_url + '/v1/hc_tree/result/'
+    rest_response = requests.get(url, params={'job_id': job_id})
+    return rest_response

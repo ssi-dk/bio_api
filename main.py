@@ -136,3 +136,17 @@ async def hc_tree_status(job_id:str):
             'status': tc.status
         }
     )
+
+@app.get("/v1/hc_tree/result/")
+async def hc_tree_result(job_id:str):
+    tc = calculations.TreeCalculation.find(job_id)
+    tree = await tc.get_tree()
+    return JSONResponse(
+        content={
+            'job_id': tc.id,
+            'created_at': tc.created_at.isoformat(),
+            'finished_at': tc.finished_at.isoformat(),
+            'status': tc.status,
+            'tree': tree
+        }
+    )

@@ -132,6 +132,10 @@ class Calculation(metaclass=abc.ABCMeta):
             status=doc['status'],
             )
     
+    async def get_field(self, field):
+         doc = mongo_api.db[self.collection].find_one({'_id': ObjectId(self.id)}, {field: True})
+         return doc[field]
+    
     async def update(self, fields: dict):
         "Update the MongoDB document that corresponds with the class instance"
         print(f"My collection: {self.collection}")
@@ -172,6 +176,8 @@ class TreeCalculation(Calculation):
         except ValueError:
             raise
 
+    async def get_tree(self):
+        return await self.get_field('tree')
 
 class DistanceCalculation:
     id: str or None
