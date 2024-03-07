@@ -207,22 +207,6 @@ class DistanceCalculation(Calculation):
     def dist_mx_filepath(self):
         "Return the filepath for the distance matrix file corresponding with the class instance"
         return str(Path(self.folder, 'distance_matrix.json'))
-    
-    #TODO: Do we need the specific fields (the 4 last ones), or will the super method do?
-    # @classmethod
-    # def find(cls, id: str):
-    #     "Return a class instance based on a particular MongoDB document"
-    #     doc = mongo_api.db['dist_calculations'].find_one({'_id': ObjectId(id)})
-    #     return cls(
-    #         id=str(doc['_id']),
-    #         created_at=doc['created_at'],
-    #         finished_at=doc['finished_at'],
-    #         status=doc['status'],
-    #         seq_collection=doc['seq_collection'],
-    #         seqid_field_path=doc['seqid_field_path'],
-    #         profile_field_path=doc['profile_field_path'],
-    #         seq_mongo_ids=doc['seq_mongo_ids'],
-    #         )
 
     async def query_mongodb_for_allele_profiles(self):
         "Get a MongoDB cursor that represents the allele profiles for the calculation"
