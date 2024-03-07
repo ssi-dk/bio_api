@@ -2,15 +2,16 @@ from bson.objectid import ObjectId
 import datetime
 from os import getenv
 from pathlib import Path
-from json import dump
+from json import dump, load
 import asyncio
 from io import StringIO
+import abc
 
-from pydantic import BaseModel
 import pymongo
 from bson.objectid import ObjectId
 from pandas import DataFrame, read_table
-from pydantic_classes import DMXFromMongoDBRequest, HCTreeCalcRequest
+from pydantic_classes import DMXFromMongoRequest, HCTreeCalcRequest
+from tree_maker import make_tree
 
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 
@@ -41,7 +42,7 @@ class MongoAPI:
         self.connection = pymongo.MongoClient(connection_string)
         self.db = self.connection.get_database()
     
-    async def create_dmx_job(self, rq:DMXFromMongoDBRequest):
+    async def create_dmx_job(self, rq:DMXFromMongoRequest):
         created_at = datetime.datetime.now(tz=datetime.timezone.utc)
         result = self.db['dmx_jobs'].insert_one({
             'created_at': created_at,
@@ -86,11 +87,84 @@ connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/
 print(f"Connection string: {connection_string}")
 mongo_api = MongoAPI(connection_string)
 
-class DistanceCalculation:
+
+class Calculation(metaclass=abc.ABCMeta):
+    # Abstract base class
     id: str or None
     created_at: datetime.datetime or None
     finished_at: datetime.datetime or None
     status: str
+
+    def __init__(
+            self,
+            status: str = 'init',
+            created_at: datetime.datetime or None = None,
+            finished_at: datetime.datetime or None = None,
+            id: str or None = None
+            ):
+        self.status = status
+        self.created_at = created_at if created_at else datetime.datetime.now(tz=datetime.timezone.utc)
+        self.finished_at = finished_at
+        self.id = id
+    
+    @abc.abstractproperty
+    def collection(self):
+        return 'my_collection'
+    
+    async def save(self, **attrs):
+        global_attrs = {
+            'created_at': self.created_at,
+            'finished_at': self.finished_at,
+            'status': self.status,
+            }
+        doc_to_save = dict(global_attrs, **attrs)
+        print()
+        print("Doc to save:")
+        print(doc_to_save)
+        print()
+        mongo_save = mongo_api.db[self.collection].insert_one(doc_to_save)
+        assert mongo_save.acknowledged == True
+        self.id = str(mongo_save.inserted_id)
+        return self.id
+    
+    @classmethod
+    def find(cls, id: str):
+        "Return a class instance based on a particular MongoDB document"
+        doc = mongo_api.db[cls.collection].find_one({'_id': ObjectId(id)})
+        print()
+        print(doc)
+        print()
+        return cls(
+            id=str(doc['_id']),
+            created_at=doc['created_at'],
+            finished_at=doc['finished_at'],
+            status=doc['status'],
+            )
+    
+    async def get_field(self, field):
+         doc = mongo_api.db[self.collection].find_one({'_id': ObjectId(self.id)}, {field: True})
+         return doc[field]
+    
+    async def update(self, fields: dict):
+        "Update the MongoDB document that corresponds with the class instance"
+        print(f"My collection: {self.collection}")
+        update_result = mongo_api.db[self.collection].update_one(
+            {'_id': ObjectId(self.id)}, {'$set': fields}
+        )
+        assert update_result.acknowledged == True
+    
+    async def mark_as_finished(self):
+        "Mark calculation as finished in MongoDB document"
+        self.finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
+        await self.update({'finished_at': self.finished_at, 'status': 'finished'})
+
+    @abc.abstractmethod
+    async def calculate(self, cursor):
+        pass
+
+class DistanceCalculation(Calculation):
+    collection = 'dist_calculations'
+
     seq_collection: str
     seqid_field_path: str
     profile_field_path: str
@@ -98,39 +172,24 @@ class DistanceCalculation:
 
     def __init__(
             self,
-            seq_collection: str,
-            seqid_field_path: str,
-            profile_field_path: str,
-            seq_mongo_ids: list,
-            status: str or None,
-            created_at: datetime.datetime or None,
-            finished_at: datetime.datetime or None,
-            id: str or None
-            ):
+            seq_collection: str or None=None,
+            seqid_field_path: str or None = None,
+            profile_field_path: str or None = None,
+            seq_mongo_ids: list or None = None,
+            **kwargs):
+        super().__init__(**kwargs)
         self.seq_collection = seq_collection
         self.seqid_field_path = seqid_field_path
         self.profile_field_path = profile_field_path
         self.seq_mongo_ids = seq_mongo_ids
-        self.status = status
-        self.created_at = created_at
-        self.finished_at = finished_at
-        self.id = id
     
-    def save(self):
-        mongo_save = mongo_api.db['dist_calculations'].insert_one({
-            'created_at': self.created_at,
-            'finished_at': self.finished_at,
-            'status': self.status,
-            'seq_collection': self.seq_collection,
-            'seqid_field_path': self.seqid_field_path,
-            'profile_field_path': self.profile_field_path,
-            'seq_mongo_ids': self.seq_mongo_ids,
-            'status': self.status,
-            'created_at': self.created_at,
-            'finished_at': self.finished_at,
-            })
-        assert mongo_save.acknowledged == True
-        self.id = str(mongo_save.inserted_id)
+    async def save(self):
+        await super().save(
+            seq_collection=self.seq_collection,
+            seqid_field_path=self.seqid_field_path,
+            profile_field_path=self.profile_field_path,
+            seq_mongo_ids=self.seq_mongo_ids,
+        )
         Path(self.folder).mkdir()
         return self.id
     
@@ -149,20 +208,21 @@ class DistanceCalculation:
         "Return the filepath for the distance matrix file corresponding with the class instance"
         return str(Path(self.folder, 'distance_matrix.json'))
     
-    @classmethod
-    def find(cls, id: str):
-        "Return a class instance based on a particular MongoDB document"
-        doc = mongo_api.db['dist_calculations'].find_one({'_id': ObjectId(id)})
-        return cls(
-            id=str(doc['_id']),
-            created_at=doc['created_at'],
-            finished_at=doc['finished_at'],
-            status=doc['status'],
-            seq_collection=doc['seq_collection'],
-            seqid_field_path=doc['seqid_field_path'],
-            profile_field_path=doc['profile_field_path'],
-            seq_mongo_ids=doc['seq_mongo_ids'],
-            )
+    #TODO: Do we need the specific fields (the 4 last ones), or will the super method do?
+    # @classmethod
+    # def find(cls, id: str):
+    #     "Return a class instance based on a particular MongoDB document"
+    #     doc = mongo_api.db['dist_calculations'].find_one({'_id': ObjectId(id)})
+    #     return cls(
+    #         id=str(doc['_id']),
+    #         created_at=doc['created_at'],
+    #         finished_at=doc['finished_at'],
+    #         status=doc['status'],
+    #         seq_collection=doc['seq_collection'],
+    #         seqid_field_path=doc['seqid_field_path'],
+    #         profile_field_path=doc['profile_field_path'],
+    #         seq_mongo_ids=doc['seq_mongo_ids'],
+    #         )
 
     async def query_mongodb_for_allele_profiles(self):
         "Get a MongoDB cursor that represents the allele profiles for the calculation"
@@ -178,7 +238,7 @@ class DistanceCalculation:
             raise MissingDataException(message)
         return profile_count, cursor
 
-    async def amx_df_from_mongodb_cursor(self, cursor):
+    async def _amx_df_from_mongodb_cursor(self, cursor):
         "Generate an allele matrix as dataframe containing the allele profiles from the MongoDB cursor"
         full_dict = dict()
 
@@ -194,13 +254,13 @@ class DistanceCalculation:
         df = DataFrame.from_dict(full_dict, 'index', dtype=str)
         return df
 
-    async def save_amx_df_as_tsv(self, allele_mx_df):
+    async def _save_amx_df_as_tsv(self, allele_mx_df):
         "Save allele matrix dataframe as TSV file"
         with open(self.allele_mx_filepath, 'w') as allele_mx_file_obj:
             allele_mx_file_obj.write("ID")  # Without an initial string in first line cgmlst-dists will fail!
             allele_mx_df.to_csv(allele_mx_file_obj, index = True, header=True, sep ="\t")
 
-    async def dmx_df_from_amx_tsv(self):
+    async def _dmx_df_from_amx_tsv(self):
         "Generate a distance matrix dataframe from allele matrix TSV file"
         sp = await asyncio.create_subprocess_shell(f"cgmlst-dists {self.allele_mx_filepath}",
         stdout=asyncio.subprocess.PIPE,
@@ -217,28 +277,43 @@ class DistanceCalculation:
         df = df.set_index('ids')
         return df
 
-    async def save_dmx_as_json(self, dist_mx_dict):
+    async def _save_dmx_as_json(self, dist_mx_dict):
         "Save distance matrix dataframe as JSON file"
         with open(self.dist_mx_filepath, 'w') as dist_mx_file_obj:
             dump(dist_mx_dict, dist_mx_file_obj)
-    
-    async def update_my_document(self, fields: dict):
-        "Update the MongoDB document that corresponds with the class instance"
-        update_result = mongo_api.db['dist_calculations'].update_one(
-            {'_id': ObjectId(self.id)}, {'$set': fields}
-        )
-        assert update_result.acknowledged == True
-    
-    async def mark_as_finished(self):
-        "Mark calculation as finished in MongoDB document"
-        self.finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
-        await self.update_my_document({'finished_at': self.finished_at, 'status': 'finished'})
 
     async def calculate(self, cursor):
-        allele_mx_df: DataFrame = await self.amx_df_from_mongodb_cursor(cursor)
-        await self.save_amx_df_as_tsv(allele_mx_df)
-        dist_mx_df: DataFrame = await self.dmx_df_from_amx_tsv()
+        allele_mx_df: DataFrame = await self._amx_df_from_mongodb_cursor(cursor)
+        await self._save_amx_df_as_tsv(allele_mx_df)
+        dist_mx_df: DataFrame = await self._dmx_df_from_amx_tsv()
         dist_mx_dict = dist_mx_df.to_dict(orient='index')
-        await self.save_dmx_as_json(dist_mx_dict)
+        await self._save_dmx_as_json(dist_mx_dict)
         await self.mark_as_finished()
         return self
+
+
+class TreeCalculation(Calculation):
+    dmx_job: str
+    method: str
+    collection = 'tree_calculations'
+
+    def __init__(self, dmx_job:str or None = None, method:str or None = None, **kwargs):
+        super().__init__(**kwargs)
+        self.dmx_job = dmx_job
+        self.method = method
+    
+    async def calculate(self):
+        dc = DistanceCalculation.find(self.dmx_job)
+        with open(Path(dc.folder, 'distance_matrix.json')) as f:
+            distances = load(f)
+        try:
+            dist_df: DataFrame = DataFrame.from_dict(distances, orient='index')
+            tree = make_tree(dist_df, self.method)
+            await self.update({'tree': tree})
+            await self.mark_as_finished()
+        except ValueError:
+            raise
+
+    async def get_tree(self):
+        return await self.get_field('tree')
+

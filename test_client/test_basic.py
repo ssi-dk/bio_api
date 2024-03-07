@@ -26,7 +26,7 @@ def test_hello_world():
 #     assert result.status_code == 200
 
 def test_hc_tree():
-    result = client_functions.call_hc_tree(
+    result = client_functions.call_hc_tree_from_rq(
         method='single',
         distances={
             "Cj_0002_beone": {

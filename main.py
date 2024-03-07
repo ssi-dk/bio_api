@@ -10,7 +10,7 @@ from pandas import DataFrame
 
 import calculations
 
-from pydantic_classes import DMXFromMongoDBRequest, HCTreeCalcRequest
+from pydantic_classes import DMXFromMongoRequest, HCTreeCalcRequest
 from tree_maker import make_tree
 
 app = FastAPI()
@@ -26,7 +26,7 @@ def root():
     return JSONResponse(content={"message": "Hello World"})
 
 @app.post("/v1/distance_calculation/from_cgmlst")
-async def dmx_from_mongodb(rq: DMXFromMongoDBRequest, background_tasks: BackgroundTasks):
+async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: BackgroundTasks):
     """
     Run a distance calculation from selected cgMLST profiles in MongoDB
     """
@@ -42,7 +42,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoDBRequest, background_tasks: Backgrou
             finished_at=None,
             id=None
     )
-    dc.id = dc.save()
+    dc.id = await dc.save()
     
     # Query MongoDB for the allele profiles
     try:
@@ -74,9 +74,7 @@ async def dist_status(job_id: str):
     """
     Get job status of a distance calculation
     """
-
     dc = calculations.DistanceCalculation.find(job_id)
-    
     return JSONResponse(
         content={
             'job_id': dc.id,
@@ -91,11 +89,9 @@ async def dist_status(job_id: str):
     """
     Get result of a distance calculation
     """
-
     dc = calculations.DistanceCalculation.find(job_id)
     with open(Path(dc.folder, 'distance_matrix.json')) as f:
         distances = load(f)
-    
     return JSONResponse(
         content={
             'job_id': dc.id,
@@ -103,8 +99,8 @@ async def dist_status(job_id: str):
         }
     )
 
-@app.post("/v1/tree/hc/")
-async def hc_tree(rq: HCTreeCalcRequest):
+@app.post("/v1/hc_tree/from_request/")
+async def hc_tree_from_rq(rq: HCTreeCalcRequest):
     content = {"method": rq.method}
     try:
         dist_df: DataFrame = DataFrame.from_dict(rq.distances, orient='index')
@@ -114,3 +110,43 @@ async def hc_tree(rq: HCTreeCalcRequest):
         content['error'] = str(e)
         print(traceback.format_exc())
     return JSONResponse(content=content)
+
+@app.get("/v1/hc_tree/from_dmx_job/")
+async def hc_tree_from_dmx_job(dmx_job:str, method:str, background_tasks: BackgroundTasks):
+    tc = calculations.TreeCalculation(dmx_job, method)
+    tc.id = await tc.save()
+    background_tasks.add_task(tc.calculate)
+    return JSONResponse(
+    status_code=202,  # Accepted
+    content={
+        'job_id': tc.id,
+        'created_at': tc.created_at.isoformat(),
+        'status': tc.status,
+    }
+)
+
+@app.get("/v1/hc_tree/status/")
+async def hc_tree_status(job_id:str):
+    tc = calculations.TreeCalculation.find(job_id)
+    return JSONResponse(
+        content={
+            'job_id': tc.id,
+            'created_at': tc.created_at.isoformat(),
+            'finished_at': tc.finished_at.isoformat(),
+            'status': tc.status
+        }
+    )
+
+@app.get("/v1/hc_tree/result/")
+async def hc_tree_result(job_id:str):
+    tc = calculations.TreeCalculation.find(job_id)
+    tree = await tc.get_tree()
+    return JSONResponse(
+        content={
+            'job_id': tc.id,
+            'created_at': tc.created_at.isoformat(),
+            'finished_at': tc.finished_at.isoformat(),
+            'status': tc.status,
+            'tree': tree
+        }
+    )
