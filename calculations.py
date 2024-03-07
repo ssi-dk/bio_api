@@ -111,7 +111,7 @@ class Calculation(metaclass=abc.ABCMeta):
     def collection(self):
         return 'my_collection'
     
-    def save(self, **attrs):
+    async def save(self, **attrs):
         global_attrs = {
             'created_at': self.created_at,
             'finished_at': self.finished_at,
@@ -183,8 +183,8 @@ class DistanceCalculation(Calculation):
         self.profile_field_path = profile_field_path
         self.seq_mongo_ids = seq_mongo_ids
     
-    def save(self):
-        super().save(
+    async def save(self):
+        await super().save(
             seq_collection=self.seq_collection,
             seqid_field_path=self.seqid_field_path,
             profile_field_path=self.profile_field_path,

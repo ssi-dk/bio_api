@@ -42,7 +42,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
             finished_at=None,
             id=None
     )
-    dc.id = dc.save()
+    dc.id = await dc.save()
     
     # Query MongoDB for the allele profiles
     try:
@@ -114,7 +114,7 @@ async def hc_tree_from_rq(rq: HCTreeCalcRequest):
 @app.get("/v1/hc_tree/from_dmx_job/")
 async def hc_tree_from_dmx_job(dmx_job:str, method:str, background_tasks: BackgroundTasks):
     tc = calculations.TreeCalculation(dmx_job, method)
-    tc.id = tc.save()
+    tc.id = await tc.save()
     background_tasks.add_task(tc.calculate)
     return JSONResponse(
     status_code=202,  # Accepted
