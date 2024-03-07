@@ -125,6 +125,9 @@ class Calculation(metaclass=abc.ABCMeta):
     def find(cls, id: str):
         "Return a class instance based on a particular MongoDB document"
         doc = mongo_api.db[cls.collection].find_one({'_id': ObjectId(id)})
+        print()
+        print(doc)
+        print()
         return cls(
             id=str(doc['_id']),
             created_at=doc['created_at'],
@@ -153,48 +156,29 @@ class Calculation(metaclass=abc.ABCMeta):
     async def calculate(self, cursor):
         pass
 
-class DistanceCalculation:
-    id: str or None
-    created_at: datetime.datetime or None
-    finished_at: datetime.datetime or None
-    status: str
+class DistanceCalculation(Calculation):
+    collection = 'dist_calculations'
+
     seq_collection: str
     seqid_field_path: str
     profile_field_path: str
     seq_mongo_ids: list
 
     def __init__(
-            self,
-            seq_collection: str,
-            seqid_field_path: str,
-            profile_field_path: str,
-            seq_mongo_ids: list,
-            status: str or None,
-            created_at: datetime.datetime or None,
-            finished_at: datetime.datetime or None,
-            id: str or None
-            ):
+        self, seq_collection: str, seqid_field_path: str, profile_field_path: str, seq_mongo_ids: list, **kwargs):
+        super().__init__(**kwargs)
         self.seq_collection = seq_collection
         self.seqid_field_path = seqid_field_path
         self.profile_field_path = profile_field_path
         self.seq_mongo_ids = seq_mongo_ids
-        self.status = status
-        self.created_at = created_at
-        self.finished_at = finished_at
-        self.id = id
     
     def save(self):
-        mongo_save = mongo_api.db['dist_calculations'].insert_one({
-            'created_at': self.created_at,
-            'finished_at': self.finished_at,
-            'status': self.status,
+        super().save()
+        mongo_save = mongo_api.db[self.collection].insert_one({
             'seq_collection': self.seq_collection,
             'seqid_field_path': self.seqid_field_path,
             'profile_field_path': self.profile_field_path,
             'seq_mongo_ids': self.seq_mongo_ids,
-            'status': self.status,
-            'created_at': self.created_at,
-            'finished_at': self.finished_at,
             })
         assert mongo_save.acknowledged == True
         self.id = str(mongo_save.inserted_id)
@@ -216,20 +200,21 @@ class DistanceCalculation:
         "Return the filepath for the distance matrix file corresponding with the class instance"
         return str(Path(self.folder, 'distance_matrix.json'))
     
-    @classmethod
-    def find(cls, id: str):
-        "Return a class instance based on a particular MongoDB document"
-        doc = mongo_api.db['dist_calculations'].find_one({'_id': ObjectId(id)})
-        return cls(
-            id=str(doc['_id']),
-            created_at=doc['created_at'],
-            finished_at=doc['finished_at'],
-            status=doc['status'],
-            seq_collection=doc['seq_collection'],
-            seqid_field_path=doc['seqid_field_path'],
-            profile_field_path=doc['profile_field_path'],
-            seq_mongo_ids=doc['seq_mongo_ids'],
-            )
+    #TODO: Do we need the specific fields (the 4 last ones), or will the super method do?
+    # @classmethod
+    # def find(cls, id: str):
+    #     "Return a class instance based on a particular MongoDB document"
+    #     doc = mongo_api.db['dist_calculations'].find_one({'_id': ObjectId(id)})
+    #     return cls(
+    #         id=str(doc['_id']),
+    #         created_at=doc['created_at'],
+    #         finished_at=doc['finished_at'],
+    #         status=doc['status'],
+    #         seq_collection=doc['seq_collection'],
+    #         seqid_field_path=doc['seqid_field_path'],
+    #         profile_field_path=doc['profile_field_path'],
+    #         seq_mongo_ids=doc['seq_mongo_ids'],
+    #         )
 
     async def query_mongodb_for_allele_profiles(self):
         "Get a MongoDB cursor that represents the allele profiles for the calculation"
@@ -288,18 +273,6 @@ class DistanceCalculation:
         "Save distance matrix dataframe as JSON file"
         with open(self.dist_mx_filepath, 'w') as dist_mx_file_obj:
             dump(dist_mx_dict, dist_mx_file_obj)
-    
-    async def update_my_document(self, fields: dict):
-        "Update the MongoDB document that corresponds with the class instance"
-        update_result = mongo_api.db['dist_calculations'].update_one(
-            {'_id': ObjectId(self.id)}, {'$set': fields}
-        )
-        assert update_result.acknowledged == True
-    
-    async def mark_as_finished(self):
-        "Mark calculation as finished in MongoDB document"
-        self.finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
-        await self.update_my_document({'finished_at': self.finished_at, 'status': 'finished'})
 
     async def calculate(self, cursor):
         allele_mx_df: DataFrame = await self._amx_df_from_mongodb_cursor(cursor)
