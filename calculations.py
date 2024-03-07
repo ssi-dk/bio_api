@@ -153,32 +153,6 @@ class Calculation(metaclass=abc.ABCMeta):
     async def calculate(self, cursor):
         pass
 
-
-class TreeCalculation(Calculation):
-    dmx_job: str
-    method: str
-    collection = 'tree_calculations'
-
-    def __init__(self, dmx_job:str or None = None, method:str or None = None, **kwargs):
-        super().__init__(**kwargs)
-        self.dmx_job = dmx_job
-        self.method = method
-    
-    async def calculate(self):
-        dc = DistanceCalculation.find(self.dmx_job)
-        with open(Path(dc.folder, 'distance_matrix.json')) as f:
-            distances = load(f)
-        try:
-            dist_df: DataFrame = DataFrame.from_dict(distances, orient='index')
-            tree = make_tree(dist_df, self.method)
-            await self.update({'tree': tree})
-            await self.mark_as_finished()
-        except ValueError:
-            raise
-
-    async def get_tree(self):
-        return await self.get_field('tree')
-
 class DistanceCalculation:
     id: str or None
     created_at: datetime.datetime or None
@@ -335,3 +309,30 @@ class DistanceCalculation:
         await self._save_dmx_as_json(dist_mx_dict)
         await self.mark_as_finished()
         return self
+
+
+class TreeCalculation(Calculation):
+    dmx_job: str
+    method: str
+    collection = 'tree_calculations'
+
+    def __init__(self, dmx_job:str or None = None, method:str or None = None, **kwargs):
+        super().__init__(**kwargs)
+        self.dmx_job = dmx_job
+        self.method = method
+    
+    async def calculate(self):
+        dc = DistanceCalculation.find(self.dmx_job)
+        with open(Path(dc.folder, 'distance_matrix.json')) as f:
+            distances = load(f)
+        try:
+            dist_df: DataFrame = DataFrame.from_dict(distances, orient='index')
+            tree = make_tree(dist_df, self.method)
+            await self.update({'tree': tree})
+            await self.mark_as_finished()
+        except ValueError:
+            raise
+
+    async def get_tree(self):
+        return await self.get_field('tree')
+
