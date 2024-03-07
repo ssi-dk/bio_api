@@ -112,11 +112,12 @@ class Calculation(metaclass=abc.ABCMeta):
         return 'my_collection'
     
     def save(self):
-        mongo_save = mongo_api.db[self.collection].insert_one({
+        doc_to_save = {
             'created_at': self.created_at,
             'finished_at': self.finished_at,
             'status': self.status,
-            })
+            }
+        mongo_save = mongo_api.db[self.collection].insert_one(doc_to_save)
         assert mongo_save.acknowledged == True
         self.id = str(mongo_save.inserted_id)
         return self.id
