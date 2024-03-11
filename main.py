@@ -22,7 +22,7 @@ DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 def timed_msg(msg: str):
     print(datetime.now().isoformat(), msg)
 
-@app.get("/", tags=["Test"])
+@app.get("/", tags=["test"])
 def root():
     return JSONResponse(content={"message": "Hello World"})
 
