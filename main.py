@@ -75,6 +75,9 @@ async def dist_status(job_id: str):
     Get job status of a distance calculation
     """
     dc = calculations.DistanceCalculation.find(job_id)
+    if dc is None:
+        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
+        return JSONResponse(status_code=404, content={'error': err_msg})
     return JSONResponse(
         content={
             'job_id': dc.id,
@@ -90,6 +93,9 @@ async def dist_status(job_id: str):
     Get result of a distance calculation
     """
     dc = calculations.DistanceCalculation.find(job_id)
+    if dc is None:
+        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
+        return JSONResponse(status_code=404, content={'error': err_msg})
     with open(Path(dc.folder, 'distance_matrix.json')) as f:
         distances = load(f)
     return JSONResponse(
@@ -128,6 +134,9 @@ async def hc_tree_from_dmx_job(dmx_job:str, method:str, background_tasks: Backgr
 @app.get("/v1/hc_tree/status/", tags=["cgMLST"])
 async def hc_tree_status(job_id:str):
     tc = calculations.TreeCalculation.find(job_id)
+    if tc is None:
+        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
+        return JSONResponse(status_code=404, content={'error': err_msg})
     return JSONResponse(
         content={
             'job_id': tc.id,
@@ -140,6 +149,9 @@ async def hc_tree_status(job_id:str):
 @app.get("/v1/hc_tree/result/", tags=["cgMLST"])
 async def hc_tree_result(job_id:str):
     tc = calculations.TreeCalculation.find(job_id)
+    if tc is None:
+        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
+        return JSONResponse(status_code=404, content={'error': err_msg})
     tree = await tc.get_tree()
     return JSONResponse(
         content={

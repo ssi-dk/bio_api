@@ -129,11 +129,14 @@ class Calculation(metaclass=abc.ABCMeta):
     
     @classmethod
     def find(cls, id: str):
-        "Return a class instance based on a particular MongoDB document"
+        """Return a class instance based on a particular MongoDB document.
+
+        If id cannot be converted to an ObjectId, a bson.errors.InvalidId exception will be returned.
+        If id can be converted but a document does not exist in this collection, None will be returned.
+        """
         doc = mongo_api.db[cls.collection].find_one({'_id': ObjectId(id)})
-        print()
-        print(doc)
-        print()
+        if doc is None:
+            return None
         return cls(
             id=str(doc['_id']),
             created_at=doc['created_at'],
