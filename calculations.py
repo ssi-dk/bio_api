@@ -165,6 +165,11 @@ class Calculation(metaclass=abc.ABCMeta):
     async def calculate(self, cursor):
         pass
 
+
+class NearestNeighbors(Calculation):
+    pass
+
+
 class DistanceCalculation(Calculation):
     collection = 'dist_calculations'
 
