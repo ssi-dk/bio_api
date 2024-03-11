@@ -7,6 +7,7 @@ from pathlib import Path
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.responses import JSONResponse
 from pandas import DataFrame
+from bson.errors import InvalidId
 
 import calculations
 
@@ -74,7 +75,10 @@ async def dist_status(job_id: str):
     """
     Get job status of a distance calculation
     """
-    dc = calculations.DistanceCalculation.find(job_id)
+    try:
+        dc = calculations.DistanceCalculation.find(job_id)
+    except InvalidId as e:
+        return JSONResponse(status_code=422, content={'error': str(e)})
     if dc is None:
         err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
@@ -92,7 +96,10 @@ async def dist_status(job_id: str):
     """
     Get result of a distance calculation
     """
-    dc = calculations.DistanceCalculation.find(job_id)
+    try:
+        dc = calculations.DistanceCalculation.find(job_id)
+    except InvalidId as e:
+        return JSONResponse(status_code=422, content={'error': str(e)})
     if dc is None:
         err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
@@ -133,7 +140,10 @@ async def hc_tree_from_dmx_job(dmx_job:str, method:str, background_tasks: Backgr
 
 @app.get("/v1/hc_tree/status/", tags=["cgMLST"])
 async def hc_tree_status(job_id:str):
-    tc = calculations.TreeCalculation.find(job_id)
+    try:
+        tc = calculations.TreeCalculation.find(job_id)
+    except InvalidId as e:
+        return JSONResponse(status_code=422, content={'error': str(e)})
     if tc is None:
         err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
@@ -148,7 +158,10 @@ async def hc_tree_status(job_id:str):
 
 @app.get("/v1/hc_tree/result/", tags=["cgMLST"])
 async def hc_tree_result(job_id:str):
-    tc = calculations.TreeCalculation.find(job_id)
+    try:
+        tc = calculations.TreeCalculation.find(job_id)
+    except InvalidId as e:
+        return JSONResponse(status_code=422, content={'error': str(e)})
     if tc is None:
         err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
