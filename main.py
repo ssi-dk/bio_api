@@ -4,7 +4,7 @@ from datetime import datetime
 from json import load
 from pathlib import Path
 
-from fastapi import FastAPI, BackgroundTasks, Request
+from fastapi import FastAPI, BackgroundTasks
 from fastapi.responses import JSONResponse
 from pandas import DataFrame
 
@@ -13,7 +13,7 @@ import calculations
 from pydantic_classes import DMXFromMongoRequest, HCTreeCalcRequest
 from tree_maker import make_tree
 
-app = FastAPI()
+app = FastAPI(title="Bio API", description="REST API for controlling bioinformatic calculations", version="0.1.0")
 
 MANUAL_MX_DIR = getenv('BIO_API_TEST_INPUT_DIR', '/test_input')
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
@@ -21,11 +21,11 @@ DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 def timed_msg(msg: str):
     print(datetime.now().isoformat(), msg)
 
-@app.get("/")
+@app.get("/", tags=["Test"])
 def root():
     return JSONResponse(content={"message": "Hello World"})
 
-@app.post("/v1/distance_calculation/from_cgmlst")
+@app.post("/v1/distance_calculation/from_cgmlst", tags=["cgMLST"])
 async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: BackgroundTasks):
     """
     Run a distance calculation from selected cgMLST profiles in MongoDB
@@ -69,7 +69,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
         }
     )
 
-@app.get("/v1/distance_calculation/status/")
+@app.get("/v1/distance_calculation/status/", tags=["cgMLST"])
 async def dist_status(job_id: str):
     """
     Get job status of a distance calculation
@@ -84,7 +84,7 @@ async def dist_status(job_id: str):
         }
     )
 
-@app.get("/v1/distance_calculation/result/")
+@app.get("/v1/distance_calculation/result/", tags=["cgMLST"])
 async def dist_status(job_id: str):
     """
     Get result of a distance calculation
@@ -99,7 +99,7 @@ async def dist_status(job_id: str):
         }
     )
 
-@app.post("/v1/hc_tree/from_request/")
+@app.post("/v1/hc_tree/from_request/", tags=["cgMLST"])
 async def hc_tree_from_rq(rq: HCTreeCalcRequest):
     content = {"method": rq.method}
     try:
@@ -111,7 +111,7 @@ async def hc_tree_from_rq(rq: HCTreeCalcRequest):
         print(traceback.format_exc())
     return JSONResponse(content=content)
 
-@app.get("/v1/hc_tree/from_dmx_job/")
+@app.get("/v1/hc_tree/from_dmx_job/", tags=["cgMLST"])
 async def hc_tree_from_dmx_job(dmx_job:str, method:str, background_tasks: BackgroundTasks):
     tc = calculations.TreeCalculation(dmx_job, method)
     tc.id = await tc.save()
@@ -125,7 +125,7 @@ async def hc_tree_from_dmx_job(dmx_job:str, method:str, background_tasks: Backgr
     }
 )
 
-@app.get("/v1/hc_tree/status/")
+@app.get("/v1/hc_tree/status/", tags=["cgMLST"])
 async def hc_tree_status(job_id:str):
     tc = calculations.TreeCalculation.find(job_id)
     return JSONResponse(
@@ -137,7 +137,7 @@ async def hc_tree_status(job_id:str):
         }
     )
 
-@app.get("/v1/hc_tree/result/")
+@app.get("/v1/hc_tree/result/", tags=["cgMLST"])
 async def hc_tree_result(job_id:str):
     tc = calculations.TreeCalculation.find(job_id)
     tree = await tc.get_tree()
