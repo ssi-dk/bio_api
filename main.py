@@ -22,7 +22,7 @@ DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 def timed_msg(msg: str):
     print(datetime.now().isoformat(), msg)
 
-@app.get("/", tags=["test"])
+@app.get("/", tags=["Test"])
 def root():
     return JSONResponse(content={"message": "Hello World"})
 
@@ -176,7 +176,7 @@ async def hc_tree_result(job_id:str):
         }
     )
 
-@app.post("/v1/nearest_neighbors/", tags=["nearest_neigbors"])
+@app.post("/v1/nearest_neighbors/", tags=["Nearest Neighbors"])
 async def nearest_neighbors(rq: NearestNeighborsRequest):
     content = {'input_mongo_id': rq.input_mongo_id, 'cutoff': rq.cutoff}
     return JSONResponse(status_code=202, content=content)
