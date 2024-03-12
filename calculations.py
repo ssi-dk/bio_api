@@ -55,11 +55,11 @@ class MongoAPI:
         assert result.acknowledged == True
         return (str(result.inserted_id), created_at)
 
-    async def mark_job_as_finished(self, job_id):
+    async def mark_job_as_completed(self, job_id):
         finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
         result = self.db['bio_api_jobs'].update_one(
             {'_id': ObjectId(job_id)},
-            {'$set': {'status': 'finished', 'finished_at': finished_at}}
+            {'$set': {'status': 'completed', 'finished_at': finished_at}}
         )
         assert result.acknowledged == True
         return finished_at
@@ -156,10 +156,10 @@ class Calculation(metaclass=abc.ABCMeta):
         )
         assert update_result.acknowledged == True
     
-    async def mark_as_finished(self):
-        "Mark calculation as finished in MongoDB document"
+    async def mark_as_completed(self):
+        "Mark calculation as completed in MongoDB document"
         self.finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
-        await self.update({'finished_at': self.finished_at, 'status': 'finished'})
+        await self.update({'finished_at': self.finished_at, 'status': 'completed'})
 
     @abc.abstractmethod
     async def calculate(self, cursor):
@@ -280,7 +280,7 @@ class DistanceCalculation(Calculation):
         dist_mx_df: DataFrame = await self._dmx_df_from_amx_tsv()
         dist_mx_dict = dist_mx_df.to_dict(orient='index')
         await self._save_dmx_as_json(dist_mx_dict)
-        await self.mark_as_finished()
+        await self.mark_as_completed()
         return self
 
 
@@ -302,7 +302,7 @@ class TreeCalculation(Calculation):
             dist_df: DataFrame = DataFrame.from_dict(distances, orient='index')
             tree = make_tree(dist_df, self.method)
             await self.update({'tree': tree})
-            await self.mark_as_finished()
+            await self.mark_as_completed()
         except ValueError:
             raise
 

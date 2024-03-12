@@ -28,7 +28,7 @@ def test_dmx_and_tree_from_mongodb():
     assert result.status_code == 200
     j = result.json()
     assert 'status' in j
-    assert j['status'] == 'finished'
+    assert j['status'] == 'completed'
     assert 'job_id' in j
     dmx_job = j['job_id']
 
@@ -43,7 +43,7 @@ def test_dmx_and_tree_from_mongodb():
     assert result.status_code == 200
     j = result.json()
     assert 'status' in j
-    assert j['status'] == 'finished'
+    assert j['status'] == 'completed'
 
     result = client_functions.call_hc_tree_result(tree_job)
     assert result.status_code == 200
