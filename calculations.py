@@ -169,6 +169,21 @@ class NearestNeighbors(Calculation):
         )
         return self.id
 
+    async def query_mongodb_for_input_profile(self):
+        pass
+        # "Get a the allele profile for the input sequence from MongoDB"
+        # profile_count, cursor = await mongo_api.get_field_data(
+        #     collection=self.seq_collection,
+        #     field_paths=[self.profile_field_path],
+        #     mongo_ids=[self.input_mongo_id]
+        #     )
+        # if len(profile_count == 0):
+        #     self.update_my_document({'status': 'error', 'profile_count': profile_count})
+        #     message = "Could not find the requested number of sequences. " + \
+        #         f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(profile_count)}"
+        #     raise MissingDataException(message)
+        # return profile_count, cursor
+
 class DistanceCalculation(Calculation):
     collection = 'dist_calculations'
 

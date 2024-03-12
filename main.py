@@ -35,6 +35,10 @@ async def nearest_neighbors(rq: NearestNeighborsRequest):
         cutoff=rq.cutoff
     )
     nn.id = await nn.save()
+
+    # Get input profile or fail if sequence not found
+    input_sequence = await nn.query_mongodb_for_input_profile()
+
     content = {'input_mongo_id': rq.input_mongo_id, 'cutoff': rq.cutoff}
     return JSONResponse(status_code=202, content=content)
 
