@@ -143,6 +143,7 @@ class NearestNeighbors(Calculation):
     profile_field_path: str
     input_mongo_id: str
     cutoff: int
+    input_sequence: dict or None
 
     async def calculate(self, cursor):
         print("Do nn calc here")
