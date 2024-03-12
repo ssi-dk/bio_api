@@ -14,7 +14,7 @@ mongo_ids = profile2mongo(db, 'input_data/BN_alleles_export_5.tsv', 'test_sample
 
 def test_dmx_and_tree_from_mongodb():
     result = client_functions.call_dmx_from_mongodb(
-        collection='test_samples',
+        seq_collection='test_samples',
         seqid_field_path='name',
         profile_field_path='profile',
         mongo_ids=mongo_ids
@@ -52,7 +52,7 @@ def test_dmx_and_tree_from_mongodb():
 
 def test_nearest_neighbors():
     result = client_functions.call_nearest_neighbors(
-        collection='test_samples',
+        seq_collection='test_samples',
         input_mongo_id=mongo_ids[0],
         profile_field_path='profile',
         cutoff = 5

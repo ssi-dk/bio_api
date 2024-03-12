@@ -62,7 +62,7 @@ if __name__ == '__main__':
     if args.dmx:
         print("--dmx option set; calculating distance matrix")
         response = client_functions.call_dmx_from_mongodb(
-            collection='samples',
+            seq_collection='samples',
             seqid_field_path='name',
             profile_field_path='profile',
             mongo_ids=inserted_ids)

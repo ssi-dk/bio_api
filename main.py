@@ -34,7 +34,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
     
     # Initialize DistanceCalculation object
     dc = calculations.DistanceCalculation(
-            seq_collection=rq.collection,
+            seq_collection=rq.seq_collection,
             seqid_field_path=rq.seqid_field_path,
             profile_field_path=rq.profile_field_path,
             seq_mongo_ids=rq.mongo_ids,

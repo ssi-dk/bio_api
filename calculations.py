@@ -137,7 +137,12 @@ class Calculation(metaclass=abc.ABCMeta):
 
 
 class NearestNeighbors(Calculation):
-    pass
+    collection = 'nearest_neighbors'
+
+    seq_collection: str
+    profile_field_path: str
+    input_mongo_id: str
+    cutoff: int
 
 
 class DistanceCalculation(Calculation):
