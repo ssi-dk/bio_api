@@ -145,9 +145,6 @@ class NearestNeighbors(Calculation):
     cutoff: int
     input_sequence: dict or None
 
-    async def calculate(self, cursor):
-        print("Do nn calc here")
-
     def __init__(
             self,
             seq_collection: str or None=None,
@@ -181,6 +178,10 @@ class NearestNeighbors(Calculation):
             message = f"Could not find the requested input sequence with mongo id {self.input_mongo_id}."
             raise MissingDataException(message)
         return next(cursor)
+    
+    async def calculate(self, cursor):
+        print("Do nn calc here")
+
 
 class DistanceCalculation(Calculation):
     collection = 'dist_calculations'
