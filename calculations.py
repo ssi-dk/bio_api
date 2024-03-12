@@ -159,6 +159,15 @@ class NearestNeighbors(Calculation):
         self.profile_field_path = profile_field_path
         self.input_mongo_id = input_mongo_id,
         self.cutoff = cutoff
+    
+    async def save(self):
+        await super().save(
+            seq_collection=self.seq_collection,
+            profile_field_path=self.profile_field_path,
+            input_mongo_id=self.input_mongo_id,
+            cutoff=self.cutoff
+        )
+        return self.id
 
 class DistanceCalculation(Calculation):
     collection = 'dist_calculations'
