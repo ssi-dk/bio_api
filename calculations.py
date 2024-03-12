@@ -195,14 +195,14 @@ class NearestNeighbors(Calculation):
                 }
             }
         )
-        # pipeline.append(
-        #     {'$project':
-        #         {
-        #             # '_id': '_id', Probaly get this automatically
-        #             'allele_profile': self.profile_field_path,  # Will not work with nested fields
-        #         }
-        #     }
-        # )
+        pipeline.append(
+            {'$project':
+                {
+                    # '_id': '_id', Probaly get this automatically
+                    self.profile_field_path: 1,  # TODO un-nest dotted fields
+                }
+            }
+        )
         sequences_to_compare_with = mongo_api.db[self.seq_collection].aggregate(pipeline)
         print("This is an example of the sequences that will be used for comparison:")
         print(next(sequences_to_compare_with))
