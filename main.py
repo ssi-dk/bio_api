@@ -11,7 +11,7 @@ from bson.errors import InvalidId
 
 import calculations
 
-from pydantic_classes import DMXFromMongoRequest, HCTreeCalcRequest
+from pydantic_classes import DMXFromMongoRequest, HCTreeCalcRequest, NearestNeighborsRequest
 from tree_maker import make_tree
 
 app = FastAPI(title="Bio API", description="REST API for controlling bioinformatic calculations", version="0.1.0")
@@ -175,3 +175,8 @@ async def hc_tree_result(job_id:str):
             'tree': tree
         }
     )
+
+@app.post("/v1/nearest_neighbors/", tags=["nearest_neigbors"])
+async def nearest_neighbors(rq: NearestNeighborsRequest):
+    content = {'input_mongo_id': rq.input_mongo_id, 'cutoff': rq.cutoff}
+    return JSONResponse(status_code=202, content=content)

@@ -59,3 +59,21 @@ def call_hc_tree_result(job_id):
     url = base_url + '/v1/hc_tree/result/'
     rest_response = requests.get(url, params={'job_id': job_id})
     return rest_response
+
+def call_nearest_neighbors(
+        collection: str,
+        input_mongo_id: str,
+        profile_field_path: str,
+        cutoff: int
+    ):
+    url = base_url + '/v1/nearest_neighbors/'
+    rest_response = requests.post(
+        url,
+        json={
+            'collection': collection,
+            'input_mongo_id':  input_mongo_id,
+            'profile_field_path': profile_field_path,
+            'cutoff': cutoff
+            }
+    )
+    return rest_response

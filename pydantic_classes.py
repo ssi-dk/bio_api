@@ -21,3 +21,13 @@ class HCTreeCalcRequest(BaseModel):
     """
     distances: dict
     method: str
+
+
+class NearestNeighborsRequest(BaseModel):
+    """
+    Parameters for a REST request for a nearest neighbors calculation.
+    """
+    collection: str
+    input_mongo_id: str
+    profile_field_path: str
+    cutoff: int

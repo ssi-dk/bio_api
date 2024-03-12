@@ -50,4 +50,15 @@ def test_dmx_and_tree_from_mongodb():
     j = result.json()
     assert 'tree' in j
 
+def test_nearest_neighbors():
+    result = client_functions.call_nearest_neighbors(
+        collection='test_samples',
+        input_mongo_id=mongo_ids[0],
+        profile_field_path='profile',
+        cutoff = 5
+    )
+    assert result.status_code == 202
+    # assert 'job_id' in result.json()
+    # job_id = result.json()['job_id']
+
 # db['test_samples'].drop()
