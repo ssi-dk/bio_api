@@ -41,36 +41,6 @@ class MongoAPI:
     ):
         self.connection = pymongo.MongoClient(connection_string)
         self.db = self.connection.get_database()
-    
-    async def create_dmx_job(self, rq:DMXFromMongoRequest):
-        created_at = datetime.datetime.now(tz=datetime.timezone.utc)
-        result = self.db['dmx_jobs'].insert_one({
-            'created_at': created_at,
-            'status': 'new',
-            'collection': rq.collection,
-            'seqid_field_path': rq.seqid_field_path,
-            'profile_field_path': rq.profile_field_path,
-            'mongo_ids': rq.mongo_ids
-            })
-        assert result.acknowledged == True
-        return (str(result.inserted_id), created_at)
-
-    async def mark_job_as_completed(self, job_id):
-        finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
-        result = self.db['bio_api_jobs'].update_one(
-            {'_id': ObjectId(job_id)},
-            {'$set': {'status': 'completed', 'finished_at': finished_at}}
-        )
-        assert result.acknowledged == True
-        return finished_at
-
-    # Might throw pymongo.errors.DocumentTooLarge
-    async def write_result_to_job(self, job_id, result):
-        result = self.db['bio_api_jobs'].update_one(
-            {'_id': ObjectId(job_id)},
-            {'$set': {'result': result}}
-        )
-        assert result.acknowledged == True
 
     async def get_field_data(
             self,
