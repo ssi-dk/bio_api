@@ -26,6 +26,18 @@ def timed_msg(msg: str):
 def root():
     return JSONResponse(content={"message": "Hello World"})
 
+@app.post("/v1/nearest_neighbors/", tags=["Nearest Neighbors"])
+async def nearest_neighbors(rq: NearestNeighborsRequest):
+    nn = calculations.NearestNeighbors(
+        seq_collection=rq.seq_collection,
+        profile_field_path=rq.profile_field_path,
+        input_mongo_id=rq.input_mongo_id,
+        cutoff=rq.cutoff
+    )
+    nn.id = await nn.save()
+    content = {'input_mongo_id': rq.input_mongo_id, 'cutoff': rq.cutoff}
+    return JSONResponse(status_code=202, content=content)
+
 @app.post("/v1/distance_calculation/from_cgmlst", tags=["cgMLST"])
 async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: BackgroundTasks):
     """
@@ -175,8 +187,3 @@ async def hc_tree_result(job_id:str):
             'tree': tree
         }
     )
-
-@app.post("/v1/nearest_neighbors/", tags=["Nearest Neighbors"])
-async def nearest_neighbors(rq: NearestNeighborsRequest):
-    content = {'input_mongo_id': rq.input_mongo_id, 'cutoff': rq.cutoff}
-    return JSONResponse(status_code=202, content=content)

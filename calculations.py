@@ -144,6 +144,21 @@ class NearestNeighbors(Calculation):
     input_mongo_id: str
     cutoff: int
 
+    async def calculate(self, cursor):
+        print("Do nn calc here")
+
+    def __init__(
+            self,
+            seq_collection: str or None=None,
+            profile_field_path: str or None = None,
+            input_mongo_id: str or None = None,
+            cutoff: int or None=None,
+            **kwargs):
+        super().__init__(**kwargs)
+        self.seq_collection = seq_collection,
+        self.profile_field_path = profile_field_path
+        self.input_mongo_id = input_mongo_id,
+        self.cutoff = cutoff
 
 class DistanceCalculation(Calculation):
     collection = 'dist_calculations'
