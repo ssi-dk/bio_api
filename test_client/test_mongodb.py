@@ -10,7 +10,7 @@ connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/
 connection = pymongo.MongoClient(connection_string)
 db = connection.get_database()
 print(f"Connection string: {connection_string}")
-mongo_ids = profile2mongo(db, 'input_data/BN_alleles_export_5.tsv', 'test_samples')
+mongo_ids = profile2mongo(db, 'input_data/BN_alleles_export_50.tsv', 'test_samples')
 
 def test_dmx_and_tree_from_mongodb():
     result = client_functions.call_dmx_from_mongodb(
