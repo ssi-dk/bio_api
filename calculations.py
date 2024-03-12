@@ -177,10 +177,44 @@ class NearestNeighbors(Calculation):
         if profile_count == 0:
             message = f"Could not find the requested input sequence with mongo id {self.input_mongo_id}."
             raise MissingDataException(message)
-        return next(cursor)
+        reference_profile = next(cursor)
+        # TODO assert that reference sequence has the requested profile field
+        return reference_profile
     
-    async def calculate(self, cursor):
-        print("Do nn calc here")
+    async def calculate(self):
+        print(f"Sequence collection: {self.seq_collection}")
+        print(f"Profile field path: {self.profile_field_path}")
+        comparable_sequences_count = mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})
+        print(f"Comparable sequences found: {str(comparable_sequences_count)}")
+        
+        # pipeline = list()
+        # pipeline.append(
+        #     {'$match':
+        #         {
+        #             self.sequence_field_mapping['species']: species,
+        #             self.sequence_field_mapping['allele_profile']: {'$exists': True},
+        #             self.sequence_field_mapping['sequence_id']: {'$exists': True}
+        #         }
+        #     }
+        # )
+        # pipeline.append(
+        #     {'$project':
+        #         {
+        #             'sequence_id': f"${self.sequence_field_mapping['sequence_id']}",
+        #             'allele_profile': f"${self.sequence_field_mapping['allele_profile']}",
+        #         }
+        #     }
+        # )
+        # sequences_to_compare_with = self.db.samples.aggregate(pipeline)
+        # nearest_neighbors = list()
+        # for other_sequence in sequences_to_compare_with:
+        #     if other_sequence['sequence_id'] == reference_sequence['sequence_id']:
+        #         print("Ignoring reference sequence.")
+        #     else:
+        #         diff_count = profile_diffs(other_sequence['allele_profile']['alleles'], reference_sequence['allele_profile']['alleles'], unknowns_are_diffs)
+        #         if diff_count <= cutoff:
+        #             nearest_neighbors.append({'sequence_id': other_sequence['sequence_id'], 'diff_count': diff_count})
+        # return sorted(nearest_neighbors, key=lambda x : x['diff_count'])
 
 
 class DistanceCalculation(Calculation):
