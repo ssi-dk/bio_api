@@ -155,9 +155,9 @@ class NearestNeighbors(Calculation):
             cutoff: int or None=None,
             **kwargs):
         super().__init__(**kwargs)
-        self.seq_collection = seq_collection,
+        self.seq_collection = seq_collection
         self.profile_field_path = profile_field_path
-        self.input_mongo_id = input_mongo_id,
+        self.input_mongo_id = input_mongo_id
         self.cutoff = cutoff
     
     async def save(self):
@@ -170,19 +170,16 @@ class NearestNeighbors(Calculation):
         return self.id
 
     async def query_mongodb_for_input_profile(self):
-        pass
-        # "Get a the allele profile for the input sequence from MongoDB"
-        # profile_count, cursor = await mongo_api.get_field_data(
-        #     collection=self.seq_collection,
-        #     field_paths=[self.profile_field_path],
-        #     mongo_ids=[self.input_mongo_id]
-        #     )
-        # if len(profile_count == 0):
-        #     self.update_my_document({'status': 'error', 'profile_count': profile_count})
-        #     message = "Could not find the requested number of sequences. " + \
-        #         f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(profile_count)}"
-        #     raise MissingDataException(message)
-        # return profile_count, cursor
+        "Get a the allele profile for the input sequence from MongoDB"
+        profile_count, cursor = await mongo_api.get_field_data(
+            collection=self.seq_collection,
+            field_paths=[self.profile_field_path],
+            mongo_ids=[self.input_mongo_id]
+            )
+        if profile_count == 0:
+            message = f"Could not find the requested input sequence with mongo id {self.input_mongo_id}."
+            raise MissingDataException(message)
+        return next(cursor)
 
 class DistanceCalculation(Calculation):
     collection = 'dist_calculations'
