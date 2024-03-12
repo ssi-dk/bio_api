@@ -238,7 +238,6 @@ class DistanceCalculation(Calculation):
             mongo_ids=self.seq_mongo_ids
             )
         if len(self.seq_mongo_ids) != profile_count:
-            self.update_my_document({'status': 'error', 'profile_count': profile_count})
             message = "Could not find the requested number of sequences. " + \
                 f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(profile_count)}"
             raise MissingDataException(message)
