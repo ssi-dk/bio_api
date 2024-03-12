@@ -187,25 +187,25 @@ class NearestNeighbors(Calculation):
         comparable_sequences_count = mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})
         print(f"Comparable sequences found: {str(comparable_sequences_count)}")
         
-        # pipeline = list()
-        # pipeline.append(
-        #     {'$match':
-        #         {
-        #             self.sequence_field_mapping['species']: species,
-        #             self.sequence_field_mapping['allele_profile']: {'$exists': True},
-        #             self.sequence_field_mapping['sequence_id']: {'$exists': True}
-        #         }
-        #     }
-        # )
+        pipeline = list()
+        pipeline.append(
+            {'$match':
+                {
+                    self.profile_field_path: {'$exists': True},
+                }
+            }
+        )
         # pipeline.append(
         #     {'$project':
         #         {
-        #             'sequence_id': f"${self.sequence_field_mapping['sequence_id']}",
-        #             'allele_profile': f"${self.sequence_field_mapping['allele_profile']}",
+        #             # '_id': '_id', Probaly get this automatically
+        #             'allele_profile': self.profile_field_path,  # Will not work with nested fields
         #         }
         #     }
         # )
-        # sequences_to_compare_with = self.db.samples.aggregate(pipeline)
+        sequences_to_compare_with = mongo_api.db[self.seq_collection].aggregate(pipeline)
+        print("This is an example of the sequences that will be used for comparison:")
+        print(next(sequences_to_compare_with))
         # nearest_neighbors = list()
         # for other_sequence in sequences_to_compare_with:
         #     if other_sequence['sequence_id'] == reference_sequence['sequence_id']:
