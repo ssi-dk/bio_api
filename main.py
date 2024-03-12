@@ -27,7 +27,7 @@ def root():
     return JSONResponse(content={"message": "Hello World"})
 
 @app.post("/v1/nearest_neighbors/", tags=["Nearest Neighbors"])
-async def nearest_neighbors(rq: NearestNeighborsRequest):
+async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: BackgroundTasks):
     nn = calculations.NearestNeighbors(
         seq_collection=rq.seq_collection,
         profile_field_path=rq.profile_field_path,
@@ -48,8 +48,17 @@ async def nearest_neighbors(rq: NearestNeighborsRequest):
             }
         )       
 
-    content = {'input_mongo_id': rq.input_mongo_id, 'cutoff': rq.cutoff}
-    return JSONResponse(status_code=202, content=content)
+    # Initiate the calculation
+    background_tasks.add_task(nn.calculate)
+
+    return JSONResponse(
+        status_code=202,
+        content={
+            'job_id': nn.id,
+            'created_at': nn.created_at.isoformat(),
+            'status': nn.status
+        }
+    )
 
 @app.post("/v1/distance_calculation/from_cgmlst", tags=["cgMLST"])
 async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: BackgroundTasks):
