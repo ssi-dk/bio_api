@@ -152,7 +152,6 @@ class NearestNeighbors(Calculation):
     cutoff: int
     input_sequence: dict or None
     unknowns_are_diffs: bool = True
-    nearest_neighbors: dict or None = None
 
     def __init__(
             self,
@@ -176,7 +175,6 @@ class NearestNeighbors(Calculation):
             input_mongo_id=self.input_mongo_id,
             cutoff=self.cutoff,
             unknowns_are_diffs = self.unknowns_are_diffs,
-            nearest_neighbors = self.nearest_neighbors
         )
         return self.id
 
@@ -251,8 +249,8 @@ class NearestNeighbors(Calculation):
                 if diff_count <= self.cutoff:
                     print("This is a neighbor")
                     nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
-        self.nearest_neighbors = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
-        await self.store_result(self.nearest_neighbors)
+        self.result = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
+        await self.store_result(self.result)
         return self  # TODO remove
 
 
