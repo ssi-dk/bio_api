@@ -210,11 +210,10 @@ class NearestNeighbors(Calculation):
             }
         )
         sequences_to_compare_with = mongo_api.db[self.seq_collection].aggregate(pipeline)
-        print("This is an example of the sequences that will be used for comparison:")
-        print(next(sequences_to_compare_with))
+
         # nearest_neighbors = list()
         # for other_sequence in sequences_to_compare_with:
-        #     if other_sequence['sequence_id'] == reference_sequence['sequence_id']:
+        #     if other_sequence['_id'] == reference_sequence['sequence_id']:
         #         print("Ignoring reference sequence.")
         #     else:
         #         diff_count = profile_diffs(other_sequence['allele_profile']['alleles'], reference_sequence['allele_profile']['alleles'], unknowns_are_diffs)
