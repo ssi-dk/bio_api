@@ -148,6 +148,7 @@ class NearestNeighbors(Calculation):
     cutoff: int
     input_sequence: dict or None
     unknowns_are_diffs: bool = True
+    nearest_neighbors: dict or None = None
 
     def __init__(
             self,
@@ -169,7 +170,9 @@ class NearestNeighbors(Calculation):
             seq_collection=self.seq_collection,
             profile_field_path=self.profile_field_path,
             input_mongo_id=self.input_mongo_id,
-            cutoff=self.cutoff
+            cutoff=self.cutoff,
+            unknowns_are_diffs = self.unknowns_are_diffs,
+            nearest_neighbors = self.nearest_neighbors
         )
         return self.id
 
@@ -242,7 +245,12 @@ class NearestNeighbors(Calculation):
                 diff_count = self.profile_diffs(other_sequence[self.profile_field_path])
                 if diff_count <= self.cutoff:
                     nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
-        return sorted(nearest_neighbors, key=lambda x : x['diff_count'])
+        self.nearest_neighbors = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
+        print(f"Saving _id {self.id}")
+        new_id = await self.save()
+        print(f"Now id is {new_id}")
+        await self.mark_as_completed()
+        return self
 
 
 class DistanceCalculation(Calculation):
