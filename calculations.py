@@ -248,9 +248,6 @@ class NearestNeighbors(Calculation):
                     print("This is a neighbor")
                     nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
         self.nearest_neighbors = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
-        print(f"Saving _id {self.id}")
-        new_id = await self.insert_document()
-        print(f"Now id is {new_id}")
         await self.mark_as_completed()
         return self
 
