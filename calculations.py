@@ -121,18 +121,19 @@ class Calculation(metaclass=abc.ABCMeta):
          doc = mongo_api.db[self.collection].find_one({'_id': ObjectId(self.id)}, {field: True})
          return doc[field]
     
-    async def store_result(self, fields: dict):
-        "Update the MongoDB document that corresponds with the class instance"
+    async def store_result(self, result):
+        """Update the MongoDB document that corresponds with the class instance with a result.
+        Also insert a timestamp for when the calculation was completed and mark the calculation as completed.
+        """
         print(f"My collection: {self.collection}")
         update_result = mongo_api.db[self.collection].update_one(
-            {'_id': ObjectId(self.id)}, {'$set': fields}
+            {'_id': ObjectId(self.id)}, {'$set': {
+                'result': result,
+                'finished_at': datetime.datetime.now(tz=datetime.timezone.utc),
+                'status': 'completed'
+                }}
         )
         assert update_result.acknowledged == True
-    
-    async def mark_as_completed(self):
-        "Mark calculation as completed in MongoDB document"
-        self.finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
-        await self.store_result({'finished_at': self.finished_at, 'status': 'completed'})
 
     @abc.abstractmethod
     async def calculate(self, cursor):
@@ -248,8 +249,8 @@ class NearestNeighbors(Calculation):
                     print("This is a neighbor")
                     nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
         self.nearest_neighbors = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
-        await self.mark_as_completed()
-        return self
+        await self.store_result(self.nearest_neighbors)
+        return self  # TODO remove
 
 
 class DistanceCalculation(Calculation):
@@ -361,7 +362,7 @@ class DistanceCalculation(Calculation):
         dist_mx_df: DataFrame = await self._dmx_df_from_amx_tsv()
         dist_mx_dict = dist_mx_df.to_dict(orient='index')
         await self._save_dmx_as_json(dist_mx_dict)
-        await self.mark_as_completed()
+        await self.store_result("Distance matrix stored on filesystem")
         return self
 
 
@@ -382,11 +383,11 @@ class TreeCalculation(Calculation):
         try:
             dist_df: DataFrame = DataFrame.from_dict(distances, orient='index')
             tree = make_tree(dist_df, self.method)
-            await self.store_result({'tree': tree})
-            await self.mark_as_completed()
+            await self.store_result(tree)
         except ValueError:
             raise
 
+    # TODO replace with a new method get_result on Calculation
     async def get_tree(self):
-        return await self.get_field('tree')
+        return await self.get_field('result')
 
