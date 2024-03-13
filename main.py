@@ -35,7 +35,7 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
         cutoff=rq.cutoff,
         unknowns_are_diffs=rq.unknowns_are_diffs
     )
-    nn.id = await nn.save()
+    nn.id = await nn.insert_document()
 
     # Get input profile or fail if sequence not found
     try:
@@ -78,7 +78,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
             finished_at=None,
             id=None
     )
-    dc.id = await dc.save()
+    dc.id = await dc.insert_document()
     
     # Query MongoDB for the allele profiles
     try:
@@ -162,7 +162,7 @@ async def hc_tree_from_rq(rq: HCTreeCalcRequest):
 @app.get("/v1/hc_tree/from_dmx_job/", tags=["cgMLST"])
 async def hc_tree_from_dmx_job(dmx_job:str, method:str, background_tasks: BackgroundTasks):
     tc = calculations.TreeCalculation(dmx_job, method)
-    tc.id = await tc.save()
+    tc.id = await tc.insert_document()
     background_tasks.add_task(tc.calculate)
     return JSONResponse(
     status_code=202,  # Accepted
