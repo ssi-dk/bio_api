@@ -31,3 +31,4 @@ class NearestNeighborsRequest(BaseModel):
     profile_field_path: str
     input_mongo_id: str
     cutoff: int
+    unknowns_are_diffs: bool

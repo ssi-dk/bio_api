@@ -64,7 +64,8 @@ def call_nearest_neighbors(
         seq_collection: str,
         input_mongo_id: str,
         profile_field_path: str,
-        cutoff: int
+        cutoff: int,
+        unknowns_are_diffs: bool
     ):
     url = base_url + '/v1/nearest_neighbors/'
     rest_response = requests.post(
@@ -73,7 +74,8 @@ def call_nearest_neighbors(
             'seq_collection': seq_collection,
             'input_mongo_id':  input_mongo_id,
             'profile_field_path': profile_field_path,
-            'cutoff': cutoff
+            'cutoff': cutoff,
+            'unknowns_are_diffs': unknowns_are_diffs
             }
     )
     return rest_response
