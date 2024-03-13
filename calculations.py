@@ -101,6 +101,9 @@ class Calculation(metaclass=abc.ABCMeta):
     def find(cls, id: str):
         """Return a class instance based on a particular MongoDB document.
 
+        The class instance only contains the attributes that exist in the abstract Calculation class,
+        and is primaryly intended for getting a status for the calculation.
+
         If id cannot be converted to an ObjectId, a bson.errors.InvalidId exception will be returned.
         If id can be converted but a document does not exist in this collection, None will be returned.
         """
@@ -144,6 +147,7 @@ class NearestNeighbors(Calculation):
     input_mongo_id: str
     cutoff: int
     input_sequence: dict or None
+    unknowns_are_diffs: bool = True
 
     def __init__(
             self,
@@ -151,11 +155,13 @@ class NearestNeighbors(Calculation):
             profile_field_path: str or None = None,
             input_mongo_id: str or None = None,
             cutoff: int or None=None,
+            unknowns_are_diffs: bool = True,
             **kwargs):
         super().__init__(**kwargs)
         self.seq_collection = seq_collection
         self.profile_field_path = profile_field_path
         self.input_mongo_id = input_mongo_id
+        self.unknowns_are_diffs = unknowns_are_diffs
         self.cutoff = cutoff
     
     async def save(self):

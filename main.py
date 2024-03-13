@@ -32,7 +32,8 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
         seq_collection=rq.seq_collection,
         profile_field_path=rq.profile_field_path,
         input_mongo_id=rq.input_mongo_id,
-        cutoff=rq.cutoff
+        cutoff=rq.cutoff,
+        unknowns_are_diffs=rq.unknowns_are_diffs
     )
     nn.id = await nn.save()
 
