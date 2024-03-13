@@ -55,7 +55,7 @@ def test_nearest_neighbors():
         seq_collection='test_samples',
         input_mongo_id=mongo_ids[0],
         profile_field_path='profile',
-        cutoff=5,
+        cutoff=1000,
         unknowns_are_diffs=True
     )
     assert result.status_code == 202

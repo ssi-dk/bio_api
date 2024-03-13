@@ -243,7 +243,9 @@ class NearestNeighbors(Calculation):
                 print("Ignoring reference sequence.")
             else:
                 diff_count = self.profile_diffs(other_sequence[self.profile_field_path])
+                print(f"Diff count: {str(diff_count)}")
                 if diff_count <= self.cutoff:
+                    print("This is a neighbor")
                     nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
         self.nearest_neighbors = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
         print(f"Saving _id {self.id}")
