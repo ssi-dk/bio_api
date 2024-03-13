@@ -121,7 +121,7 @@ class Calculation(metaclass=abc.ABCMeta):
          doc = mongo_api.db[self.collection].find_one({'_id': ObjectId(self.id)}, {field: True})
          return doc[field]
     
-    async def update(self, fields: dict):
+    async def store_result(self, fields: dict):
         "Update the MongoDB document that corresponds with the class instance"
         print(f"My collection: {self.collection}")
         update_result = mongo_api.db[self.collection].update_one(
@@ -132,7 +132,7 @@ class Calculation(metaclass=abc.ABCMeta):
     async def mark_as_completed(self):
         "Mark calculation as completed in MongoDB document"
         self.finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
-        await self.update({'finished_at': self.finished_at, 'status': 'completed'})
+        await self.store_result({'finished_at': self.finished_at, 'status': 'completed'})
 
     @abc.abstractmethod
     async def calculate(self, cursor):
@@ -382,7 +382,7 @@ class TreeCalculation(Calculation):
         try:
             dist_df: DataFrame = DataFrame.from_dict(distances, orient='index')
             tree = make_tree(dist_df, self.method)
-            await self.update({'tree': tree})
+            await self.store_result({'tree': tree})
             await self.mark_as_completed()
         except ValueError:
             raise
