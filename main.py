@@ -200,7 +200,7 @@ async def hc_tree_result(job_id:str):
     if tc is None:
         err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
-    tree = await tc.get_tree()
+    tree = await tc.get_result()
     return JSONResponse(
         content={
             'job_id': tc.id,

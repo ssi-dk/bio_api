@@ -121,6 +121,9 @@ class Calculation(metaclass=abc.ABCMeta):
          doc = mongo_api.db[self.collection].find_one({'_id': ObjectId(self.id)}, {field: True})
          return doc[field]
     
+    async def get_result(self):
+        return await self.get_field('result')
+
     async def store_result(self, result):
         """Update the MongoDB document that corresponds with the class instance with a result.
         Also insert a timestamp for when the calculation was completed and mark the calculation as completed.
@@ -386,8 +389,4 @@ class TreeCalculation(Calculation):
             await self.store_result(tree)
         except ValueError:
             raise
-
-    # TODO replace with a new method get_result on Calculation
-    async def get_tree(self):
-        return await self.get_field('result')
 
