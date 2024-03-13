@@ -187,6 +187,29 @@ class NearestNeighbors(Calculation):
         # TODO assert that reference sequence has the requested profile field
         return reference_profile
     
+    def profile_diffs(self, other_profile:dict):
+        """Count the number of differences between two allele profiles."""
+        diff_count = 0
+        for locus in self.input_sequence[self.profile_field_path].keys():
+            try:
+                ref_allele = int(self.input_sequence[self.profile_field_path][locus])
+            except ValueError:
+                if self.unknowns_are_diffs:
+                    # Ref allele not intable - counting a difference.
+                    diff_count += 1
+                # No reason to compare alleles if ref allele is not intable
+                continue
+            try:
+                other_allele = int(other_profile[locus])
+                if ref_allele != other_allele:
+                    # Both are intable but they are not equal - counting a difference.
+                    diff_count += 1
+            except ValueError:
+                if self.unknowns_are_diffs:
+                    # Other allele not intable - counting as difference.
+                    diff_count += 1
+        return diff_count
+    
     async def calculate(self):
         print(f"Sequence collection: {self.seq_collection}")
         print(f"Profile field path: {self.profile_field_path}")
@@ -211,15 +234,15 @@ class NearestNeighbors(Calculation):
         )
         sequences_to_compare_with = mongo_api.db[self.seq_collection].aggregate(pipeline)
 
-        # nearest_neighbors = list()
-        # for other_sequence in sequences_to_compare_with:
-        #     if other_sequence['_id'] == reference_sequence['sequence_id']:
-        #         print("Ignoring reference sequence.")
-        #     else:
-        #         diff_count = profile_diffs(other_sequence['allele_profile']['alleles'], reference_sequence['allele_profile']['alleles'], unknowns_are_diffs)
-        #         if diff_count <= cutoff:
-        #             nearest_neighbors.append({'sequence_id': other_sequence['sequence_id'], 'diff_count': diff_count})
-        # return sorted(nearest_neighbors, key=lambda x : x['diff_count'])
+        nearest_neighbors = list()
+        for other_sequence in sequences_to_compare_with:
+            if other_sequence['_id'] == self.input_sequence['_id']:  # TODO use 'is'?
+                print("Ignoring reference sequence.")
+            else:
+                diff_count = self.profile_diffs(other_sequence[self.profile_field_path])
+                if diff_count <= self.cutoff:
+                    nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
+        return sorted(nearest_neighbors, key=lambda x : x['diff_count'])
 
 
 class DistanceCalculation(Calculation):
