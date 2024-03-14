@@ -61,6 +61,51 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
         }
     )
 
+# TODO This is almost 100% copy-paste from distance matrix. A more elegant coding pattern is needed.
+@app.get("/v1/nearest_neigbors/status/", tags=["Nearest Neighbors"])
+async def nn_status(job_id: str):
+    """
+    Get job status of a nearest neighbors calculation
+    """
+    try:
+        nn = calculations.NearestNeighbors.find(job_id)
+    except InvalidId as e:
+        return JSONResponse(status_code=422, content={'error': str(e)})
+    if nn is None:
+        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
+        return JSONResponse(status_code=404, content={'error': err_msg})
+    return JSONResponse(
+        content={
+            'job_id': nn.id,
+            'created_at': nn.created_at.isoformat(),
+            'finished_at': nn.finished_at.isoformat(),
+            'status': nn.status
+        }
+    )
+
+@app.get("/v1/nearest_neigbors/result/", tags=["Nearest Neighbors"])
+async def dist_status(job_id: str):
+    """
+    Get result of a nearest neighbors calculation
+    """
+    try:
+        nn = calculations.NearestNeighbors.find(job_id)
+    except InvalidId as e:
+        return JSONResponse(status_code=422, content={'error': str(e)})
+    if nn is None:
+        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
+        return JSONResponse(status_code=404, content={'error': err_msg})
+    return JSONResponse(
+        content={
+            'job_id': nn.id,
+            'created_at': nn.created_at.isoformat(),
+            'finished_at': nn.finished_at.isoformat(),
+            'status': nn.status,
+            'result': nn.result
+        }
+    )
+
+
 @app.post("/v1/distance_calculation/from_cgmlst", tags=["cgMLST"])
 async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: BackgroundTasks):
     """
