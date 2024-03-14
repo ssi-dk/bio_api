@@ -251,6 +251,7 @@ class NearestNeighbors(Calculation):
                     nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
         self.result = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
         await self.store_result(self.result)
+        print("Nearest neighbors calculation is finished!")
 
 
 class DistanceCalculation(Calculation):
@@ -363,6 +364,7 @@ class DistanceCalculation(Calculation):
         dist_mx_dict = dist_mx_df.to_dict(orient='index')
         await self._save_dmx_as_json(dist_mx_dict)
         await self.store_result("Distance matrix stored on filesystem")
+        print("Distance matrix calculation is finished!")
 
 
 class TreeCalculation(Calculation):
@@ -385,4 +387,5 @@ class TreeCalculation(Calculation):
             await self.store_result(tree)
         except ValueError:
             raise
+        print("Tree calculation is finished!")
 
