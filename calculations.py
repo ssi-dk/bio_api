@@ -64,18 +64,21 @@ class Calculation(metaclass=abc.ABCMeta):
     created_at: datetime.datetime or None
     finished_at: datetime.datetime or None
     status: str
+    result: str or None = None
 
     def __init__(
             self,
             status: str = 'init',
             created_at: datetime.datetime or None = None,
             finished_at: datetime.datetime or None = None,
-            id: str or None = None
+            id: str or None = None,
+            result = None
             ):
         self.status = status
         self.created_at = created_at if created_at else datetime.datetime.now(tz=datetime.timezone.utc)
         self.finished_at = finished_at
         self.id = id
+        self.result = result
     
     @abc.abstractproperty
     def collection(self):
@@ -115,6 +118,7 @@ class Calculation(metaclass=abc.ABCMeta):
             created_at=doc['created_at'],
             finished_at=doc['finished_at'],
             status=doc['status'],
+            result=doc['result'],
             )
     
     async def get_field(self, field):
