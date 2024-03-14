@@ -95,13 +95,21 @@ async def dist_status(job_id: str):
     if nn is None:
         err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
+    
+    # Need to convert ObjectIDs to str before returning as JSON
+    result: list = nn.result
+    r: dict
+    for r in result:
+        r['id'] = str(r['_id'])
+        r.pop('_id')
+
     return JSONResponse(
         content={
             'job_id': nn.id,
             'created_at': nn.created_at.isoformat(),
             'finished_at': nn.finished_at.isoformat(),
             'status': nn.status,
-            'result': nn.result
+            'result': result
         }
     )
 
