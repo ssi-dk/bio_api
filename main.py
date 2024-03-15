@@ -11,7 +11,7 @@ from bson.errors import InvalidId
 
 import calculations
 
-from pydantic_classes import DMXFromMongoRequest, HCTreeCalcRequest
+from pydantic_classes import DMXFromMongoRequest, HCTreeCalcRequest, NearestNeighborsRequest
 from tree_maker import make_tree
 
 app = FastAPI(title="Bio API", description="REST API for controlling bioinformatic calculations", version="0.1.0")
@@ -26,6 +26,94 @@ def timed_msg(msg: str):
 def root():
     return JSONResponse(content={"message": "Hello World"})
 
+@app.post("/v1/nearest_neighbors/", tags=["Nearest Neighbors"])
+async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: BackgroundTasks):
+    nn = calculations.NearestNeighbors(
+        seq_collection=rq.seq_collection,
+        profile_field_path=rq.profile_field_path,
+        input_mongo_id=rq.input_mongo_id,
+        cutoff=rq.cutoff,
+        unknowns_are_diffs=rq.unknowns_are_diffs
+    )
+    nn.id = await nn.insert_document()
+
+    # Get input profile or fail if sequence not found
+    try:
+        nn.input_sequence = await nn.query_mongodb_for_input_profile()
+    except calculations.MissingDataException as e:
+        return JSONResponse(
+            status_code=422, # Unprocessable Content
+            content={
+                'job_id': nn.id,
+                'message': str(e)
+            }
+        )       
+
+    # Initiate the calculation
+    background_tasks.add_task(nn.calculate)
+
+    return JSONResponse(
+        status_code=202,
+        content={
+            'job_id': nn.id,
+            'created_at': nn.created_at.isoformat(),
+            'status': nn.status
+        }
+    )
+
+# TODO This is almost 100% copy-paste from distance matrix. A more elegant coding pattern is needed.
+@app.get("/v1/nearest_neigbors/status/", tags=["Nearest Neighbors"])
+async def nn_status(job_id: str):
+    """
+    Get job status of a nearest neighbors calculation
+    """
+    try:
+        nn = calculations.NearestNeighbors.find(job_id)
+    except InvalidId as e:
+        return JSONResponse(status_code=422, content={'error': str(e)})
+    if nn is None:
+        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
+        return JSONResponse(status_code=404, content={'error': err_msg})
+    return JSONResponse(
+        content={
+            'job_id': nn.id,
+            'created_at': nn.created_at.isoformat(),
+            'finished_at': nn.finished_at.isoformat(),
+            'status': nn.status
+        }
+    )
+
+@app.get("/v1/nearest_neigbors/result/", tags=["Nearest Neighbors"])
+async def dist_status(job_id: str):
+    """
+    Get result of a nearest neighbors calculation
+    """
+    try:
+        nn = calculations.NearestNeighbors.find(job_id)
+    except InvalidId as e:
+        return JSONResponse(status_code=422, content={'error': str(e)})
+    if nn is None:
+        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
+        return JSONResponse(status_code=404, content={'error': err_msg})
+    
+    # Need to convert ObjectIDs to str before returning as JSON
+    result: list = nn.result
+    r: dict
+    for r in result:
+        r['id'] = str(r['_id'])
+        r.pop('_id')
+
+    return JSONResponse(
+        content={
+            'job_id': nn.id,
+            'created_at': nn.created_at.isoformat(),
+            'finished_at': nn.finished_at.isoformat(),
+            'status': nn.status,
+            'result': result
+        }
+    )
+
+
 @app.post("/v1/distance_calculation/from_cgmlst", tags=["cgMLST"])
 async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: BackgroundTasks):
     """
@@ -34,7 +122,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
     
     # Initialize DistanceCalculation object
     dc = calculations.DistanceCalculation(
-            seq_collection=rq.collection,
+            seq_collection=rq.seq_collection,
             seqid_field_path=rq.seqid_field_path,
             profile_field_path=rq.profile_field_path,
             seq_mongo_ids=rq.mongo_ids,
@@ -43,7 +131,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
             finished_at=None,
             id=None
     )
-    dc.id = await dc.save()
+    dc.id = await dc.insert_document()
     
     # Query MongoDB for the allele profiles
     try:
@@ -127,7 +215,7 @@ async def hc_tree_from_rq(rq: HCTreeCalcRequest):
 @app.get("/v1/hc_tree/from_dmx_job/", tags=["cgMLST"])
 async def hc_tree_from_dmx_job(dmx_job:str, method:str, background_tasks: BackgroundTasks):
     tc = calculations.TreeCalculation(dmx_job, method)
-    tc.id = await tc.save()
+    tc.id = await tc.insert_document()
     background_tasks.add_task(tc.calculate)
     return JSONResponse(
     status_code=202,  # Accepted
@@ -165,7 +253,7 @@ async def hc_tree_result(job_id:str):
     if tc is None:
         err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
-    tree = await tc.get_tree()
+    tree = await tc.get_result()
     return JSONResponse(
         content={
             'job_id': tc.id,

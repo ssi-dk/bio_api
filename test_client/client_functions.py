@@ -8,7 +8,7 @@ def call_hello_world():
     return rest_response
 
 def call_dmx_from_mongodb(
-    collection:str,
+    seq_collection:str,
     seqid_field_path: str,
     profile_field_path:str,
     mongo_ids:list):
@@ -16,7 +16,7 @@ def call_dmx_from_mongodb(
     rest_response = requests.post(
         url,
         json={
-            'collection': collection,
+            'seq_collection': seq_collection,
             'seqid_field_path': seqid_field_path,
             'profile_field_path': profile_field_path,
             'mongo_ids': mongo_ids
@@ -58,4 +58,24 @@ def call_hc_tree_status(job_id):
 def call_hc_tree_result(job_id):
     url = base_url + '/v1/hc_tree/result/'
     rest_response = requests.get(url, params={'job_id': job_id})
+    return rest_response
+
+def call_nearest_neighbors(
+        seq_collection: str,
+        input_mongo_id: str,
+        profile_field_path: str,
+        cutoff: int,
+        unknowns_are_diffs: bool
+    ):
+    url = base_url + '/v1/nearest_neighbors/'
+    rest_response = requests.post(
+        url,
+        json={
+            'seq_collection': seq_collection,
+            'input_mongo_id':  input_mongo_id,
+            'profile_field_path': profile_field_path,
+            'cutoff': cutoff,
+            'unknowns_are_diffs': unknowns_are_diffs
+            }
+    )
     return rest_response

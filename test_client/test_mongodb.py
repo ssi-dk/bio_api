@@ -10,11 +10,11 @@ connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/
 connection = pymongo.MongoClient(connection_string)
 db = connection.get_database()
 print(f"Connection string: {connection_string}")
-mongo_ids = profile2mongo(db, 'input_data/BN_alleles_export_5.tsv', 'test_samples')
+mongo_ids = profile2mongo(db, 'input_data/BN_alleles_export_50.tsv', 'test_samples')
 
 def test_dmx_and_tree_from_mongodb():
     result = client_functions.call_dmx_from_mongodb(
-        collection='test_samples',
+        seq_collection='test_samples',
         seqid_field_path='name',
         profile_field_path='profile',
         mongo_ids=mongo_ids
@@ -28,7 +28,7 @@ def test_dmx_and_tree_from_mongodb():
     assert result.status_code == 200
     j = result.json()
     assert 'status' in j
-    assert j['status'] == 'finished'
+    assert j['status'] == 'completed'
     assert 'job_id' in j
     dmx_job = j['job_id']
 
@@ -43,11 +43,23 @@ def test_dmx_and_tree_from_mongodb():
     assert result.status_code == 200
     j = result.json()
     assert 'status' in j
-    assert j['status'] == 'finished'
+    assert j['status'] == 'completed'
 
     result = client_functions.call_hc_tree_result(tree_job)
     assert result.status_code == 200
     j = result.json()
     assert 'tree' in j
+
+def test_nearest_neighbors():
+    result = client_functions.call_nearest_neighbors(
+        seq_collection='test_samples',
+        input_mongo_id=mongo_ids[0],
+        profile_field_path='profile',
+        cutoff=1000,
+        unknowns_are_diffs=True
+    )
+    assert result.status_code == 202
+    # assert 'job_id' in result.json()
+    # job_id = result.json()['job_id']
 
 # db['test_samples'].drop()

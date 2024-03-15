@@ -41,36 +41,6 @@ class MongoAPI:
     ):
         self.connection = pymongo.MongoClient(connection_string)
         self.db = self.connection.get_database()
-    
-    async def create_dmx_job(self, rq:DMXFromMongoRequest):
-        created_at = datetime.datetime.now(tz=datetime.timezone.utc)
-        result = self.db['dmx_jobs'].insert_one({
-            'created_at': created_at,
-            'status': 'new',
-            'collection': rq.collection,
-            'seqid_field_path': rq.seqid_field_path,
-            'profile_field_path': rq.profile_field_path,
-            'mongo_ids': rq.mongo_ids
-            })
-        assert result.acknowledged == True
-        return (str(result.inserted_id), created_at)
-
-    async def mark_job_as_finished(self, job_id):
-        finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
-        result = self.db['bio_api_jobs'].update_one(
-            {'_id': ObjectId(job_id)},
-            {'$set': {'status': 'finished', 'finished_at': finished_at}}
-        )
-        assert result.acknowledged == True
-        return finished_at
-
-    # Might throw pymongo.errors.DocumentTooLarge
-    async def write_result_to_job(self, job_id, result):
-        result = self.db['bio_api_jobs'].update_one(
-            {'_id': ObjectId(job_id)},
-            {'$set': {'result': result}}
-        )
-        assert result.acknowledged == True
 
     async def get_field_data(
             self,
@@ -94,24 +64,27 @@ class Calculation(metaclass=abc.ABCMeta):
     created_at: datetime.datetime or None
     finished_at: datetime.datetime or None
     status: str
+    result: str or None = None
 
     def __init__(
             self,
             status: str = 'init',
             created_at: datetime.datetime or None = None,
             finished_at: datetime.datetime or None = None,
-            id: str or None = None
+            id: str or None = None,
+            result = None
             ):
         self.status = status
         self.created_at = created_at if created_at else datetime.datetime.now(tz=datetime.timezone.utc)
         self.finished_at = finished_at
         self.id = id
+        self.result = result
     
     @abc.abstractproperty
     def collection(self):
         return 'my_collection'
     
-    async def save(self, **attrs):
+    async def insert_document(self, **attrs):
         global_attrs = {
             'created_at': self.created_at,
             'finished_at': self.finished_at,
@@ -131,6 +104,9 @@ class Calculation(metaclass=abc.ABCMeta):
     def find(cls, id: str):
         """Return a class instance based on a particular MongoDB document.
 
+        The class instance only contains the attributes that exist in the abstract Calculation class,
+        and is primaryly intended for getting a status for the calculation.
+
         If id cannot be converted to an ObjectId, a bson.errors.InvalidId exception will be returned.
         If id can be converted but a document does not exist in this collection, None will be returned.
         """
@@ -142,28 +118,141 @@ class Calculation(metaclass=abc.ABCMeta):
             created_at=doc['created_at'],
             finished_at=doc['finished_at'],
             status=doc['status'],
+            result=doc['result'],
             )
     
     async def get_field(self, field):
          doc = mongo_api.db[self.collection].find_one({'_id': ObjectId(self.id)}, {field: True})
          return doc[field]
     
-    async def update(self, fields: dict):
-        "Update the MongoDB document that corresponds with the class instance"
+    async def get_result(self):
+        return await self.get_field('result')
+
+    async def store_result(self, result):
+        """Update the MongoDB document that corresponds with the class instance with a result.
+        Also insert a timestamp for when the calculation was completed and mark the calculation as completed.
+        """
         print(f"My collection: {self.collection}")
         update_result = mongo_api.db[self.collection].update_one(
-            {'_id': ObjectId(self.id)}, {'$set': fields}
+            {'_id': ObjectId(self.id)}, {'$set': {
+                'result': result,
+                'finished_at': datetime.datetime.now(tz=datetime.timezone.utc),
+                'status': 'completed'
+                }}
         )
         assert update_result.acknowledged == True
-    
-    async def mark_as_finished(self):
-        "Mark calculation as finished in MongoDB document"
-        self.finished_at = datetime.datetime.now(tz=datetime.timezone.utc)
-        await self.update({'finished_at': self.finished_at, 'status': 'finished'})
 
     @abc.abstractmethod
     async def calculate(self, cursor):
         pass
+
+
+class NearestNeighbors(Calculation):
+    collection = 'nearest_neighbors'
+
+    seq_collection: str
+    profile_field_path: str
+    input_mongo_id: str
+    cutoff: int
+    input_sequence: dict or None
+    unknowns_are_diffs: bool = True
+
+    def __init__(
+            self,
+            seq_collection: str or None=None,
+            profile_field_path: str or None = None,
+            input_mongo_id: str or None = None,
+            cutoff: int or None=None,
+            unknowns_are_diffs: bool = True,
+            **kwargs):
+        super().__init__(**kwargs)
+        self.seq_collection = seq_collection
+        self.profile_field_path = profile_field_path
+        self.input_mongo_id = input_mongo_id
+        self.unknowns_are_diffs = unknowns_are_diffs
+        self.cutoff = cutoff
+    
+    async def insert_document(self):
+        await super().insert_document(
+            seq_collection=self.seq_collection,
+            profile_field_path=self.profile_field_path,
+            input_mongo_id=self.input_mongo_id,
+            cutoff=self.cutoff,
+            unknowns_are_diffs = self.unknowns_are_diffs,
+        )
+        return self.id
+
+    async def query_mongodb_for_input_profile(self):
+        "Get a the allele profile for the input sequence from MongoDB"
+        profile_count, cursor = await mongo_api.get_field_data(
+            collection=self.seq_collection,
+            field_paths=[self.profile_field_path],
+            mongo_ids=[self.input_mongo_id]
+            )
+        if profile_count == 0:
+            message = f"Could not find the requested input sequence with mongo id {self.input_mongo_id}."
+            raise MissingDataException(message)
+        reference_profile = next(cursor)
+        # TODO assert that reference sequence has the requested profile field
+        return reference_profile
+    
+    def profile_diffs(self, other_profile:dict):
+        """Count the number of differences between two allele profiles."""
+        diff_count = 0
+        for locus in self.input_sequence[self.profile_field_path].keys():
+            try:
+                ref_allele = int(self.input_sequence[self.profile_field_path][locus])
+            except ValueError:
+                if self.unknowns_are_diffs:
+                    # Ref allele not intable - counting a difference.
+                    diff_count += 1
+                # No reason to compare alleles if ref allele is not intable
+                continue
+            try:
+                other_allele = int(other_profile[locus])
+                if ref_allele != other_allele:
+                    # Both are intable but they are not equal - counting a difference.
+                    diff_count += 1
+            except ValueError:
+                if self.unknowns_are_diffs:
+                    # Other allele not intable - counting as difference.
+                    diff_count += 1
+        return diff_count
+    
+    async def calculate(self):
+        print(f"Sequence collection: {self.seq_collection}")
+        print(f"Profile field path: {self.profile_field_path}")
+        comparable_sequences_count = mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})
+        print(f"Comparable sequences found: {str(comparable_sequences_count)}")
+        
+        pipeline = list()
+        pipeline.append(
+            {'$match':
+                {
+                    self.profile_field_path: {'$exists': True},
+                }
+            }
+        )
+        pipeline.append(
+            {'$project':
+                {
+                    # '_id': '_id', Probaly get this automatically
+                    self.profile_field_path: 1,  # TODO un-nest dotted fields
+                }
+            }
+        )
+        sequences_to_compare_with = mongo_api.db[self.seq_collection].aggregate(pipeline)
+
+        nearest_neighbors = list()
+        for other_sequence in sequences_to_compare_with:
+            if not other_sequence['_id'] == self.input_sequence['_id']:
+                diff_count = self.profile_diffs(other_sequence[self.profile_field_path])
+                if diff_count <= self.cutoff:
+                    nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
+        self.result = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
+        await self.store_result(self.result)
+        print("Nearest neighbors calculation is finished!")
+
 
 class DistanceCalculation(Calculation):
     collection = 'dist_calculations'
@@ -186,8 +275,8 @@ class DistanceCalculation(Calculation):
         self.profile_field_path = profile_field_path
         self.seq_mongo_ids = seq_mongo_ids
     
-    async def save(self):
-        await super().save(
+    async def insert_document(self):
+        await super().insert_document(
             seq_collection=self.seq_collection,
             seqid_field_path=self.seqid_field_path,
             profile_field_path=self.profile_field_path,
@@ -219,7 +308,6 @@ class DistanceCalculation(Calculation):
             mongo_ids=self.seq_mongo_ids
             )
         if len(self.seq_mongo_ids) != profile_count:
-            self.update_my_document({'status': 'error', 'profile_count': profile_count})
             message = "Could not find the requested number of sequences. " + \
                 f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(profile_count)}"
             raise MissingDataException(message)
@@ -275,8 +363,8 @@ class DistanceCalculation(Calculation):
         dist_mx_df: DataFrame = await self._dmx_df_from_amx_tsv()
         dist_mx_dict = dist_mx_df.to_dict(orient='index')
         await self._save_dmx_as_json(dist_mx_dict)
-        await self.mark_as_finished()
-        return self
+        await self.store_result("Distance matrix stored on filesystem")
+        print("Distance matrix calculation is finished!")
 
 
 class TreeCalculation(Calculation):
@@ -296,11 +384,8 @@ class TreeCalculation(Calculation):
         try:
             dist_df: DataFrame = DataFrame.from_dict(distances, orient='index')
             tree = make_tree(dist_df, self.method)
-            await self.update({'tree': tree})
-            await self.mark_as_finished()
+            await self.store_result(tree)
         except ValueError:
             raise
-
-    async def get_tree(self):
-        return await self.get_field('tree')
+        print("Tree calculation is finished!")
 

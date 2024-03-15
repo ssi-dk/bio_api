@@ -41,12 +41,12 @@ def profile2mongo(db, filename: str, collection: str='samples', max_items:int=No
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
                     prog='profile2mongo',
-                    description='Import an allele profile TSV file to MongoDB',
+                    description='Import a .tsv file with allele profiles to MongoDB',
     )
 
     parser.add_argument('filename')
-    parser.add_argument('--max_items', type=int, help="Limit the number of items to process")
-    parser.add_argument('--dmx', help="Calculate dist matrix", action="store_true")
+    parser.add_argument('--max_items', type=int, help="Limit the number of items to import")
+    parser.add_argument('--dmx', help="Calculate a distance matrix with the imported profiles", action="store_true")
     args = parser.parse_args()
     connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
     connection = pymongo.MongoClient(connection_string)
@@ -55,14 +55,13 @@ if __name__ == '__main__':
     print(f"Max items: {args.max_items}")
     max_items = int(args.max_items) if args.max_items else None
     inserted_ids = profile2mongo(db, args.filename, max_items=max_items)
-    #inserted_ids = profile2mongo(db, args.filename)
     print("These are the _id strings of the MongoDB documents:")
     print(inserted_ids)
 
     if args.dmx:
         print("--dmx option set; calculating distance matrix")
         response = client_functions.call_dmx_from_mongodb(
-            collection='samples',
+            seq_collection='samples',
             seqid_field_path='name',
             profile_field_path='profile',
             mongo_ids=inserted_ids)
