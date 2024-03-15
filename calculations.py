@@ -245,13 +245,9 @@ class NearestNeighbors(Calculation):
 
         nearest_neighbors = list()
         for other_sequence in sequences_to_compare_with:
-            if other_sequence['_id'] == self.input_sequence['_id']:  # TODO use 'is'?
-                print("Ignoring reference sequence.")
-            else:
+            if not other_sequence['_id'] == self.input_sequence['_id']:
                 diff_count = self.profile_diffs(other_sequence[self.profile_field_path])
-                print(f"Diff count: {str(diff_count)}")
                 if diff_count <= self.cutoff:
-                    print("This is a neighbor")
                     nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
         self.result = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
         await self.store_result(self.result)
