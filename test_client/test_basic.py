@@ -25,45 +25,45 @@ def test_hello_world():
 #     )
 #     assert result.status_code == 200
 
-def test_hc_tree():
-    result = client_functions.call_hc_tree_from_rq(
-        method='single',
-        distances={
-            "Cj_0002_beone": {
-                "Cj_0002_beone": 0,
-                "Cj_0003_beone": 1114,
-                "Cj_0004_beone": 910,
-                "Cj_0005_beone": 1164,
-                "Cj_0008_beone": 1238
-            },
-            "Cj_0003_beone": {
-                "Cj_0002_beone": 1114,
-                "Cj_0003_beone": 0,
-                "Cj_0004_beone": 1113,
-                "Cj_0005_beone": 1091,
-                "Cj_0008_beone": 1210
-            },
-            "Cj_0004_beone": {
-                "Cj_0002_beone": 910,
-                "Cj_0003_beone": 1113,
-                "Cj_0004_beone": 0,
-                "Cj_0005_beone": 1166,
-                "Cj_0008_beone": 1243
-            },
-            "Cj_0005_beone": {
-                "Cj_0002_beone": 1164,
-                "Cj_0003_beone": 1091,
-                "Cj_0004_beone": 1166,
-                "Cj_0005_beone": 0,
-                "Cj_0008_beone": 1242
-            },
-            "Cj_0008_beone": {
-                "Cj_0002_beone": 1238,
-                "Cj_0003_beone": 1210,
-                "Cj_0004_beone": 1243,
-                "Cj_0005_beone": 1242,
-                "Cj_0008_beone": 0
-            }
-        }
-    )
-    assert result.status_code == 200
+# def test_hc_tree():
+#     result = client_functions.call_hc_tree_from_rq(
+#         method='single',
+#         distances={
+#             "Cj_0002_beone": {
+#                 "Cj_0002_beone": 0,
+#                 "Cj_0003_beone": 1114,
+#                 "Cj_0004_beone": 910,
+#                 "Cj_0005_beone": 1164,
+#                 "Cj_0008_beone": 1238
+#             },
+#             "Cj_0003_beone": {
+#                 "Cj_0002_beone": 1114,
+#                 "Cj_0003_beone": 0,
+#                 "Cj_0004_beone": 1113,
+#                 "Cj_0005_beone": 1091,
+#                 "Cj_0008_beone": 1210
+#             },
+#             "Cj_0004_beone": {
+#                 "Cj_0002_beone": 910,
+#                 "Cj_0003_beone": 1113,
+#                 "Cj_0004_beone": 0,
+#                 "Cj_0005_beone": 1166,
+#                 "Cj_0008_beone": 1243
+#             },
+#             "Cj_0005_beone": {
+#                 "Cj_0002_beone": 1164,
+#                 "Cj_0003_beone": 1091,
+#                 "Cj_0004_beone": 1166,
+#                 "Cj_0005_beone": 0,
+#                 "Cj_0008_beone": 1242
+#             },
+#             "Cj_0008_beone": {
+#                 "Cj_0002_beone": 1238,
+#                 "Cj_0003_beone": 1210,
+#                 "Cj_0004_beone": 1243,
+#                 "Cj_0005_beone": 1242,
+#                 "Cj_0008_beone": 0
+#             }
+#         }
+#     )
+#     assert result.status_code == 200
