@@ -159,7 +159,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
     )
 
 @app.get("/v1/distance_calculation/status/", tags=["cgMLST"])
-async def dist_status(job_id: str):
+async def dmx_status(job_id: str):
     """
     Get job status of a distance calculation
     """
@@ -180,7 +180,7 @@ async def dist_status(job_id: str):
     )
 
 @app.get("/v1/distance_calculation/result/", tags=["cgMLST"])
-async def dist_result(job_id: str):
+async def dmx_result(job_id: str):
     """
     Get result of a distance calculation
     """
