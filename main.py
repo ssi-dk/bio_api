@@ -114,7 +114,7 @@ async def nn_result(job_id: str):
     )
 
 
-@app.post("/v1/distance_calculation/from_cgmlst", tags=["cgMLST"])
+@app.post("/v1/distance_calculation/from_cgmlst", tags=["Distance Calculation"])
 async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: BackgroundTasks):
     """
     Run a distance calculation from selected cgMLST profiles in MongoDB
@@ -158,7 +158,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
         }
     )
 
-@app.get("/v1/distance_calculation/status/", tags=["cgMLST"])
+@app.get("/v1/distance_calculation/status/", tags=["Distance Calculation"])
 async def dmx_status(job_id: str):
     """
     Get job status of a distance calculation
@@ -179,7 +179,7 @@ async def dmx_status(job_id: str):
         }
     )
 
-@app.get("/v1/distance_calculation/result/", tags=["cgMLST"])
+@app.get("/v1/distance_calculation/result/", tags=["Distance Calculation"])
 async def dmx_result(job_id: str):
     """
     Get result of a distance calculation
@@ -200,7 +200,7 @@ async def dmx_result(job_id: str):
         }
     )
 
-@app.post("/v1/hc_tree/from_request/", tags=["cgMLST"])
+@app.post("/v1/hc_tree/from_request/", tags=["HC Tree"])
 async def hc_tree_from_rq(rq: HCTreeCalcRequest):
     content = {"method": rq.method}
     try:
@@ -212,7 +212,7 @@ async def hc_tree_from_rq(rq: HCTreeCalcRequest):
         print(traceback.format_exc())
     return JSONResponse(content=content)
 
-@app.get("/v1/hc_tree/from_dmx_job/", tags=["cgMLST"])
+@app.get("/v1/hc_tree/from_dmx_job/", tags=["HC Tree"])
 async def hc_tree_from_dmx_job(dmx_job:str, method:str, background_tasks: BackgroundTasks):
     tc = calculations.TreeCalculation(dmx_job, method)
     tc.id = await tc.insert_document()
@@ -226,7 +226,7 @@ async def hc_tree_from_dmx_job(dmx_job:str, method:str, background_tasks: Backgr
     }
 )
 
-@app.get("/v1/hc_tree/status/", tags=["cgMLST"])
+@app.get("/v1/hc_tree/status/", tags=["HC Tree"])
 async def hc_tree_status(job_id:str):
     try:
         tc = calculations.TreeCalculation.find(job_id)
@@ -244,7 +244,7 @@ async def hc_tree_status(job_id:str):
         }
     )
 
-@app.get("/v1/hc_tree/result/", tags=["cgMLST"])
+@app.get("/v1/hc_tree/result/", tags=["HC Tree"])
 async def hc_tree_result(job_id:str):
     try:
         tc = calculations.TreeCalculation.find(job_id)
