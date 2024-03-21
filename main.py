@@ -26,7 +26,7 @@ def timed_msg(msg: str):
 def root():
     return JSONResponse(content={"message": "Hello World"})
 
-@app.post("/v1/nearest_neighbors/", tags=["Nearest Neighbors"])
+@app.post("/v1/nearest_neighbors/", tags=["Nearest Neighbors"], status_code=202)
 async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: BackgroundTasks):
     nn = calculations.NearestNeighbors(
         seq_collection=rq.seq_collection,
@@ -114,7 +114,7 @@ async def nn_result(job_id: str):
     )
 
 
-@app.post("/v1/distance_calculation/from_cgmlst", tags=["Distance Calculation"])
+@app.post("/v1/distance_calculation/from_cgmlst", tags=["Distance Calculation"], status_code=202)
 async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: BackgroundTasks):
     """
     Run a distance calculation from selected cgMLST profiles in MongoDB
@@ -214,7 +214,7 @@ async def dmx_result(job_id: str):
 #         print(traceback.format_exc())
 #     return JSONResponse(content=content)
 
-@app.get("/v1/hc_tree/from_dmx_job/", tags=["HC Tree"])
+@app.get("/v1/hc_tree/from_dmx_job/", tags=["HC Tree"], status_code=202)
 async def hc_tree_from_dmx_job(dmx_job:str, method:str, background_tasks: BackgroundTasks):
     tc = calculations.TreeCalculation(dmx_job, method)
     tc.id = await tc.insert_document()
