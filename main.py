@@ -196,7 +196,7 @@ async def dmx_result(job_id: str):
     return JSONResponse(
         content={
             'job_id': dc.id,
-            'distances': distances
+            'result': distances
         }
     )
 
@@ -260,6 +260,6 @@ async def hc_tree_result(job_id:str):
             'created_at': tc.created_at.isoformat(),
             'finished_at': tc.finished_at.isoformat(),
             'status': tc.status,
-            'tree': tree
+            'result': tree
         }
     )
