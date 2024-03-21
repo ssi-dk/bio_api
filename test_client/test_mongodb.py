@@ -48,7 +48,7 @@ def test_dmx_and_tree_from_mongodb():
     result = client_functions.call_hc_tree_result(tree_job)
     assert result.status_code == 200
     j = result.json()
-    assert 'tree' in j
+    assert 'result' in j
 
 def test_nearest_neighbors():
     result = client_functions.call_nearest_neighbors(
