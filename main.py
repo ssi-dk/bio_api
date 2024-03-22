@@ -81,7 +81,7 @@ async def nn_status(job_id: str):
     )
 
 @app.get("/v1/nearest_neighbors/{job_id}", tags=["Nearest Neighbors"])
-async def nn_result(job_id: str):
+async def nn_result(job_id: str, level:str='full'):
     """
     Get result of a nearest neighbors calculation
     """
@@ -99,15 +99,19 @@ async def nn_result(job_id: str):
     for r in result:
         r['id'] = str(r['_id'])
         r.pop('_id')
+    
+    content = {
+        'job_id': nn.id,
+        'created_at': nn.created_at.isoformat(),
+        'finished_at': nn.finished_at.isoformat(),
+        'status': nn.status
+        }
+    
+    if level == 'full':
+        content['result'] = result
 
     return JSONResponse(
-        content={
-            'job_id': nn.id,
-            'created_at': nn.created_at.isoformat(),
-            'finished_at': nn.finished_at.isoformat(),
-            'status': nn.status,
-            'result': result
-        }
+        content=content
     )
 
 
@@ -177,7 +181,7 @@ async def dmx_status(job_id: str):
     )
 
 @app.get("/v1/distance_calculations/{job_id}", tags=["Distance Calculation"])
-async def dmx_result(job_id: str):
+async def dmx_result(job_id: str, level:str='full'):
     """
     Get result of a distance calculation
     """
@@ -190,11 +194,18 @@ async def dmx_result(job_id: str):
         return JSONResponse(status_code=404, content={'error': err_msg})
     with open(Path(dc.folder, 'distance_matrix.json')) as f:
         distances = load(f)
-    return JSONResponse(
-        content={
-            'job_id': dc.id,
-            'result': distances
+    content = {
+        'job_id': dc.id,
+        'created_at': dc.created_at.isoformat(),
+        'finished_at': dc.finished_at.isoformat(),
+        'status': dc.status
         }
+    
+    if level == 'full':
+        content['result'] = distances
+
+    return JSONResponse(
+        content=content
     )
 
 
@@ -244,7 +255,7 @@ async def hc_tree_status(job_id:str):
     )
 
 @app.get("/v1/trees/{job_id}", tags=["HC Tree"])
-async def hc_tree_result(job_id:str):
+async def hc_tree_result(job_id:str, level:str='full'):
     try:
         tc = calculations.TreeCalculation.find(job_id)
     except InvalidId as e:
@@ -253,12 +264,16 @@ async def hc_tree_result(job_id:str):
         err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
     tree = await tc.get_result()
-    return JSONResponse(
-        content={
-            'job_id': tc.id,
-            'created_at': tc.created_at.isoformat(),
-            'finished_at': tc.finished_at.isoformat(),
-            'status': tc.status,
-            'result': tree
+    content = {
+        'job_id': tc.id,
+        'created_at': tc.created_at.isoformat(),
+        'finished_at': tc.finished_at.isoformat(),
+        'status': tc.status
         }
+    
+    if level == 'full':
+        content['result'] = tree
+
+    return JSONResponse(
+        content=content
     )
