@@ -176,7 +176,7 @@ async def dmx_status(job_id: str):
         }
     )
 
-@app.get("/v1/distance_calculation/result/", tags=["Distance Calculation"])
+@app.get("/v1/distance_calculations/{job_id}", tags=["Distance Calculation"])
 async def dmx_result(job_id: str):
     """
     Get result of a distance calculation
