@@ -23,7 +23,7 @@ def timed_msg(msg: str):
 def root():
     return JSONResponse(content={"message": "Hello World"})
 
-@app.post("/v1/nearest_neighbors/", tags=["Nearest Neighbors"], status_code=202)
+@app.post("/v1/nearest_neighbors", tags=["Nearest Neighbors"], status_code=202)
 async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: BackgroundTasks):
     nn = calculations.NearestNeighbors(
         seq_collection=rq.seq_collection,
@@ -58,39 +58,17 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
         }
     )
 
-# TODO This is almost 100% copy-paste from distance matrix. A more elegant coding pattern is needed.
-@app.get("/v1/nearest_neigbors/status/", tags=["Nearest Neighbors"])
-async def nn_status(job_id: str):
-    """
-    Get job status of a nearest neighbors calculation
-    """
-    try:
-        nn = calculations.NearestNeighbors.find(job_id)
-    except InvalidId as e:
-        return JSONResponse(status_code=422, content={'error': str(e)})
-    if nn is None:
-        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
-        return JSONResponse(status_code=404, content={'error': err_msg})
-    return JSONResponse(
-        content={
-            'job_id': nn.id,
-            'created_at': nn.created_at.isoformat(),
-            'finished_at': nn.finished_at.isoformat(),
-            'status': nn.status
-        }
-    )
-
-@app.get("/v1/nearest_neigbors/result/", tags=["Nearest Neighbors"])
-async def nn_result(job_id: str):
+@app.get("/v1/nearest_neighbors/{nn_id}", tags=["Nearest Neighbors"])
+async def nn_result(nn_id: str, level:str='full'):
     """
     Get result of a nearest neighbors calculation
     """
     try:
-        nn = calculations.NearestNeighbors.find(job_id)
+        nn = calculations.NearestNeighbors.find(nn_id)
     except InvalidId as e:
         return JSONResponse(status_code=422, content={'error': str(e)})
     if nn is None:
-        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
+        err_msg = f"A document with id {nn_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
     
     # Need to convert ObjectIDs to str before returning as JSON
@@ -99,19 +77,22 @@ async def nn_result(job_id: str):
     for r in result:
         r['id'] = str(r['_id'])
         r.pop('_id')
+    
+    content = {
+        'job_id': nn.id,
+        'created_at': nn.created_at.isoformat(),
+        'finished_at': nn.finished_at.isoformat(),
+        'status': nn.status
+        }
+    
+    if level == 'full':
+        content['result'] = result
 
     return JSONResponse(
-        content={
-            'job_id': nn.id,
-            'created_at': nn.created_at.isoformat(),
-            'finished_at': nn.finished_at.isoformat(),
-            'status': nn.status,
-            'result': result
-        }
+        content=content
     )
 
-
-@app.post("/v1/distance_calculation/from_cgmlst", tags=["Distance Calculation"], status_code=202)
+@app.post("/v1/distance_calculations", tags=["Distances"], status_code=202)
 async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: BackgroundTasks):
     """
     Run a distance calculation from selected cgMLST profiles in MongoDB
@@ -155,63 +136,35 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
         }
     )
 
-@app.get("/v1/distance_calculation/status/", tags=["Distance Calculation"])
-async def dmx_status(job_id: str):
-    """
-    Get job status of a distance calculation
-    """
-    try:
-        dc = calculations.DistanceCalculation.find(job_id)
-    except InvalidId as e:
-        return JSONResponse(status_code=422, content={'error': str(e)})
-    if dc is None:
-        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
-        return JSONResponse(status_code=404, content={'error': err_msg})
-    return JSONResponse(
-        content={
-            'job_id': dc.id,
-            'created_at': dc.created_at.isoformat(),
-            'finished_at': dc.finished_at.isoformat(),
-            'status': dc.status
-        }
-    )
-
-@app.get("/v1/distance_calculation/result/", tags=["Distance Calculation"])
-async def dmx_result(job_id: str):
+@app.get("/v1/distance_calculations/{dc_id}", tags=["Distances"])
+async def dmx_result(dc_id: str, level:str='full'):
     """
     Get result of a distance calculation
     """
     try:
-        dc = calculations.DistanceCalculation.find(job_id)
+        dc = calculations.DistanceCalculation.find(dc_id)
     except InvalidId as e:
         return JSONResponse(status_code=422, content={'error': str(e)})
     if dc is None:
-        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
+        err_msg = f"A document with id {dc_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
     with open(Path(dc.folder, 'distance_matrix.json')) as f:
         distances = load(f)
-    return JSONResponse(
-        content={
-            'job_id': dc.id,
-            'result': distances
+    content = {
+        'job_id': dc.id,
+        'created_at': dc.created_at.isoformat(),
+        'finished_at': dc.finished_at.isoformat(),
+        'status': dc.status
         }
+    
+    if level == 'full':
+        content['result'] = distances
+
+    return JSONResponse(
+        content=content
     )
 
-
-# Probably we will not need this
-# @app.post("/v1/hc_tree/from_request/", tags=["HC Tree"])
-# async def hc_tree_from_rq(rq: HCTreeCalcRequest):
-#     content = {"method": rq.method}
-#     try:
-#         dist_df: DataFrame = DataFrame.from_dict(rq.distances, orient='index')
-#         tree = make_tree(dist_df, rq.method)
-#         content['tree'] = tree
-#     except ValueError as e:
-#         content['error'] = str(e)
-#         print(traceback.format_exc())
-#     return JSONResponse(content=content)
-
-@app.post("/v1/hc_tree/from_dmx_job/", tags=["HC Tree"], status_code=202)
+@app.post("/v1/trees", tags=["Trees"], status_code=202)
 async def hc_tree_from_dmx_job(rq: HCTreeCalcFromDMXJobRequest, background_tasks: BackgroundTasks):
     tc = calculations.TreeCalculation(rq.dmx_job, rq.method)
     tc.id = await tc.insert_document()
@@ -225,40 +178,26 @@ async def hc_tree_from_dmx_job(rq: HCTreeCalcFromDMXJobRequest, background_tasks
     }
 )
 
-@app.get("/v1/hc_tree/status/", tags=["HC Tree"])
-async def hc_tree_status(job_id:str):
+@app.get("/v1/trees/{tc_id}", tags=["Trees"])
+async def hc_tree_result(tc_id:str, level:str='full'):
     try:
-        tc = calculations.TreeCalculation.find(job_id)
+        tc = calculations.TreeCalculation.find(tc_id)
     except InvalidId as e:
         return JSONResponse(status_code=422, content={'error': str(e)})
     if tc is None:
-        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
-        return JSONResponse(status_code=404, content={'error': err_msg})
-    return JSONResponse(
-        content={
-            'job_id': tc.id,
-            'created_at': tc.created_at.isoformat(),
-            'finished_at': tc.finished_at.isoformat(),
-            'status': tc.status
-        }
-    )
-
-@app.get("/v1/hc_tree/result/", tags=["HC Tree"])
-async def hc_tree_result(job_id:str):
-    try:
-        tc = calculations.TreeCalculation.find(job_id)
-    except InvalidId as e:
-        return JSONResponse(status_code=422, content={'error': str(e)})
-    if tc is None:
-        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
+        err_msg = f"A document with id {tc_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
     tree = await tc.get_result()
-    return JSONResponse(
-        content={
-            'job_id': tc.id,
-            'created_at': tc.created_at.isoformat(),
-            'finished_at': tc.finished_at.isoformat(),
-            'status': tc.status,
-            'result': tree
+    content = {
+        'job_id': tc.id,
+        'created_at': tc.created_at.isoformat(),
+        'finished_at': tc.finished_at.isoformat(),
+        'status': tc.status
         }
+    
+    if level == 'full':
+        content['result'] = tree
+
+    return JSONResponse(
+        content=content
     )

@@ -7,12 +7,42 @@ def call_hello_world():
     rest_response = requests.get(url)
     return rest_response
 
+def call_nearest_neighbors(
+        seq_collection: str,
+        input_mongo_id: str,
+        profile_field_path: str,
+        cutoff: int,
+        unknowns_are_diffs: bool
+    ):
+    url = base_url + '/v1/nearest_neighbors'
+    rest_response = requests.post(
+        url,
+        json={
+            'seq_collection': seq_collection,
+            'input_mongo_id':  input_mongo_id,
+            'profile_field_path': profile_field_path,
+            'cutoff': cutoff,
+            'unknowns_are_diffs': unknowns_are_diffs
+            }
+    )
+    return rest_response
+
+def call_nn_status(job_id: str):
+    url = base_url + f'/v1/nearest_neighbors/{job_id}'
+    rest_response = requests.get(url, params={'level': 'status'})
+    return rest_response
+
+def call_nn_result(job_id: str):
+    url = base_url + f'/v1/nearest_neighbors/{job_id}'
+    rest_response = requests.get(url)
+    return rest_response
+
 def call_dmx_from_mongodb(
     seq_collection:str,
     seqid_field_path: str,
     profile_field_path:str,
     mongo_ids:list):
-    url = base_url + '/v1/distance_calculation/from_cgmlst'
+    url = base_url + '/v1/distance_calculations'
     rest_response = requests.post(
         url,
         json={
@@ -25,28 +55,17 @@ def call_dmx_from_mongodb(
     return rest_response
 
 def call_dmx_status(job_id:str):
-    url = base_url + '/v1/distance_calculation/status/'
-    rest_response = requests.get(url, params={'job_id': job_id})
+    url = base_url + f'/v1/distance_calculations/{job_id}'
+    rest_response = requests.get(url, params={'level': 'status'})
     return rest_response
 
 def call_dmx_result(job_id: str):
-    url = base_url + '/v1/distance_calculation/result/'
-    rest_response = requests.get(url, params={'job_id': job_id})
+    url = base_url + f'/v1/distance_calculations/{job_id}'
+    rest_response = requests.get(url)
     return rest_response
 
-def call_hc_tree_from_rq(distances: dict, method: str):
-    url = base_url + '/v1/hc_tree/from_request/'
-    response = requests.post(
-        url,
-        json={
-            'distances': distances,
-            'method': method
-        }
-    )
-    return response
-
 def call_hc_tree_from_dmx_job(dmx_job: str, method:str):
-    url = base_url + '/v1/hc_tree/from_dmx_job/'
+    url = base_url + '/v1/trees'
     rest_response = requests.post(
         url,
         json={
@@ -57,31 +76,11 @@ def call_hc_tree_from_dmx_job(dmx_job: str, method:str):
     return rest_response
 
 def call_hc_tree_status(job_id):
-    url = base_url + '/v1/hc_tree/status/'
-    rest_response = requests.get(url, params={'job_id': job_id})
+    url = base_url + f'/v1/trees/{job_id}'
+    rest_response = requests.get(url, params={'level': 'status'})
     return rest_response
 
 def call_hc_tree_result(job_id):
-    url = base_url + '/v1/hc_tree/result/'
+    url = base_url + f'/v1/trees/{job_id}'
     rest_response = requests.get(url, params={'job_id': job_id})
-    return rest_response
-
-def call_nearest_neighbors(
-        seq_collection: str,
-        input_mongo_id: str,
-        profile_field_path: str,
-        cutoff: int,
-        unknowns_are_diffs: bool
-    ):
-    url = base_url + '/v1/nearest_neighbors/'
-    rest_response = requests.post(
-        url,
-        json={
-            'seq_collection': seq_collection,
-            'input_mongo_id':  input_mongo_id,
-            'profile_field_path': profile_field_path,
-            'cutoff': cutoff,
-            'unknowns_are_diffs': unknowns_are_diffs
-            }
-    )
     return rest_response
