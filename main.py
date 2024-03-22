@@ -58,17 +58,17 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
         }
     )
 
-@app.get("/v1/nearest_neighbors/{job_id}", tags=["Nearest Neighbors"])
-async def nn_result(job_id: str, level:str='full'):
+@app.get("/v1/nearest_neighbors/{nn_id}", tags=["Nearest Neighbors"])
+async def nn_result(nn_id: str, level:str='full'):
     """
     Get result of a nearest neighbors calculation
     """
     try:
-        nn = calculations.NearestNeighbors.find(job_id)
+        nn = calculations.NearestNeighbors.find(nn_id)
     except InvalidId as e:
         return JSONResponse(status_code=422, content={'error': str(e)})
     if nn is None:
-        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
+        err_msg = f"A document with id {nn_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
     
     # Need to convert ObjectIDs to str before returning as JSON
