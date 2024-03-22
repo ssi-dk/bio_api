@@ -10,7 +10,6 @@ import abc
 import pymongo
 from bson.objectid import ObjectId
 from pandas import DataFrame, read_table
-from pydantic_classes import DMXFromMongoRequest, HCTreeCalcRequest
 from tree_maker import make_tree
 
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')

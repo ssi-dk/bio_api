@@ -11,7 +11,7 @@ from bson.errors import InvalidId
 
 import calculations
 
-from pydantic_classes import DMXFromMongoRequest, HCTreeCalcRequest, NearestNeighborsRequest
+from pydantic_classes import NearestNeighborsRequest,  DMXFromMongoRequest, HCTreeCalcFromDMXJobRequest
 from tree_maker import make_tree
 
 app = FastAPI(title="Bio API", description="REST API for controlling bioinformatic calculations", version="0.1.0")
@@ -214,9 +214,9 @@ async def dmx_result(job_id: str):
 #         print(traceback.format_exc())
 #     return JSONResponse(content=content)
 
-@app.get("/v1/hc_tree/from_dmx_job/", tags=["HC Tree"], status_code=202)
-async def hc_tree_from_dmx_job(dmx_job:str, method:str, background_tasks: BackgroundTasks):
-    tc = calculations.TreeCalculation(dmx_job, method)
+@app.post("/v1/hc_tree/from_dmx_job/", tags=["HC Tree"], status_code=202)
+async def hc_tree_from_dmx_job(rq: HCTreeCalcFromDMXJobRequest, background_tasks: BackgroundTasks):
+    tc = calculations.TreeCalculation(rq.dmx_job, rq.method)
     tc.id = await tc.insert_document()
     background_tasks.add_task(tc.calculate)
     return JSONResponse(

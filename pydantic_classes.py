@@ -1,5 +1,16 @@
 from pydantic import BaseModel
 
+
+class NearestNeighborsRequest(BaseModel):
+    """
+    Parameters for a REST request for a nearest neighbors calculation.
+    """
+    seq_collection: str
+    profile_field_path: str
+    input_mongo_id: str
+    cutoff: int
+    unknowns_are_diffs: bool
+
 class DMXFromMongoRequest(BaseModel):
     """
     Parameters for a REST request for a distance calculation.
@@ -14,21 +25,10 @@ class DMXFromMongoRequest(BaseModel):
     profile_field_path: str
     mongo_ids: list
 
-class HCTreeCalcRequest(BaseModel):
+class HCTreeCalcFromDMXJobRequest(BaseModel):
     """
     Parameters for a REST request for a tree calculation based on hierarchical clustering.
     Distances are taken directly from the request.
     """
-    distances: dict
+    dmx_job: str
     method: str
-
-
-class NearestNeighborsRequest(BaseModel):
-    """
-    Parameters for a REST request for a nearest neighbors calculation.
-    """
-    seq_collection: str
-    profile_field_path: str
-    input_mongo_id: str
-    cutoff: int
-    unknowns_are_diffs: bool
