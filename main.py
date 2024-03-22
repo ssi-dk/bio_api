@@ -211,9 +211,11 @@ async def dmx_result(job_id: str):
 #         print(traceback.format_exc())
 #     return JSONResponse(content=content)
 
-@app.post("/v1/hc_tree/from_dmx_job", tags=["HC Tree"], status_code=202)
-async def hc_tree_from_dmx_job(rq: HCTreeCalcFromDMXJobRequest, background_tasks: BackgroundTasks):
-    tc = calculations.TreeCalculation(rq.dmx_job, rq.method)
+@app.get("/v1/distance_matrices/{dmx_id}/trees/{method}", tags=["HC Tree"], status_code=202)
+async def hc_tree_from_dmx_job(dmx_id:str, method:str, background_tasks: BackgroundTasks):
+    #TODO check that dmx exists
+    #TODO check that dmx has status complete
+    tc = calculations.TreeCalculation(dmx_id, method)
     tc.id = await tc.insert_document()
     background_tasks.add_task(tc.calculate)
     return JSONResponse(
