@@ -28,8 +28,8 @@ def call_nearest_neighbors(
     return rest_response
 
 def call_nn_result(job_id: str):
-    url = base_url + '/v1/nearest_neighbors/result/'
-    rest_response = requests.get(url, params={'job_id': job_id})
+    url = base_url + f'/v1/nearest_neighbors/{job_id}'
+    rest_response = requests.get(url)
     return rest_response
 
 def call_dmx_from_mongodb(
