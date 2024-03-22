@@ -80,7 +80,7 @@ async def nn_status(job_id: str):
         }
     )
 
-@app.get("/v1/nearest_neigbors/result/", tags=["Nearest Neighbors"])
+@app.get("/v1/nearest_neighbors/result/", tags=["Nearest Neighbors"])
 async def nn_result(job_id: str):
     """
     Get result of a nearest neighbors calculation

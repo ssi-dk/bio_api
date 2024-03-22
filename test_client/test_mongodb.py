@@ -22,9 +22,15 @@ def test_nearest_neighbors():
         unknowns_are_diffs=True
     )
     assert result.status_code == 202
-    # assert 'job_id' in result.json()
-    # job_id = result.json()['job_id']
+    assert 'job_id' in result.json()
+    job_id = result.json()['job_id']
+    sleep(1)
 
+    result = client_functions.call_nn_result(job_id=job_id)
+    assert result.status_code == 200
+    j = result.json()
+    assert 'status' in j
+    assert j['status'] == 'completed'
 
 def test_dmx_and_tree_from_mongodb():
     result = client_functions.call_dmx_from_mongodb(
