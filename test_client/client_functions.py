@@ -14,7 +14,7 @@ def call_nearest_neighbors(
         cutoff: int,
         unknowns_are_diffs: bool
     ):
-    url = base_url + '/v1/nearest_neighborss/'
+    url = base_url + '/v1/nearest_neighbors/'
     rest_response = requests.post(
         url,
         json={
