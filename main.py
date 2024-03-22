@@ -164,7 +164,7 @@ async def dmx_result(dc_id: str, level:str='full'):
         content=content
     )
 
-@app.post("/v1/hc_tree/from_dmx_job", tags=["Trees"], status_code=202)
+@app.post("/v1/trees", tags=["Trees"], status_code=202)
 async def hc_tree_from_dmx_job(rq: HCTreeCalcFromDMXJobRequest, background_tasks: BackgroundTasks):
     tc = calculations.TreeCalculation(rq.dmx_job, rq.method)
     tc.id = await tc.insert_document()

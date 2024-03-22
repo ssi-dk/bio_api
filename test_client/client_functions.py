@@ -64,19 +64,8 @@ def call_dmx_result(job_id: str):
     rest_response = requests.get(url)
     return rest_response
 
-def call_hc_tree_from_rq(distances: dict, method: str):
-    url = base_url + '/v1/hc_tree/from_request'
-    response = requests.post(
-        url,
-        json={
-            'distances': distances,
-            'method': method
-        }
-    )
-    return response
-
 def call_hc_tree_from_dmx_job(dmx_job: str, method:str):
-    url = base_url + '/v1/hc_tree/from_dmx_job'
+    url = base_url + '/v1/trees'
     rest_response = requests.post(
         url,
         json={
