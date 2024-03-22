@@ -90,10 +90,6 @@ class Calculation(metaclass=abc.ABCMeta):
             'status': self.status,
             }
         doc_to_save = dict(global_attrs, **attrs)
-        print()
-        print("Doc to save:")
-        print(doc_to_save)
-        print()
         mongo_save = mongo_api.db[self.collection].insert_one(doc_to_save)
         assert mongo_save.acknowledged == True
         self.id = str(mongo_save.inserted_id)
@@ -250,7 +246,6 @@ class NearestNeighbors(Calculation):
                     nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
         self.result = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
         await self.store_result(self.result)
-        print("Nearest neighbors calculation is finished!")
 
 
 class DistanceCalculation(Calculation):
@@ -386,5 +381,4 @@ class TreeCalculation(Calculation):
             await self.store_result(tree)
         except ValueError:
             raise
-        print("Tree calculation is finished!")
 
