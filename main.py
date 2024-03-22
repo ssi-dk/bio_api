@@ -58,28 +58,6 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
         }
     )
 
-# TODO This is almost 100% copy-paste from distance matrix. A more elegant coding pattern is needed.
-@app.get("/v1/nearest_neigborsx/status", tags=["Nearest Neighbors"])
-async def nn_status(job_id: str):
-    """
-    Get job status of a nearest neighbors calculation
-    """
-    try:
-        nn = calculations.NearestNeighbors.find(job_id)
-    except InvalidId as e:
-        return JSONResponse(status_code=422, content={'error': str(e)})
-    if nn is None:
-        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
-        return JSONResponse(status_code=404, content={'error': err_msg})
-    return JSONResponse(
-        content={
-            'job_id': nn.id,
-            'created_at': nn.created_at.isoformat(),
-            'finished_at': nn.finished_at.isoformat(),
-            'status': nn.status
-        }
-    )
-
 @app.get("/v1/nearest_neighbors/{job_id}", tags=["Nearest Neighbors"])
 async def nn_result(job_id: str, level:str='full'):
     """
@@ -113,7 +91,6 @@ async def nn_result(job_id: str, level:str='full'):
     return JSONResponse(
         content=content
     )
-
 
 @app.post("/v1/distance_calculations", tags=["Distance Calculation"], status_code=202)
 async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: BackgroundTasks):
@@ -156,27 +133,6 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
             'created_at': dc.created_at.isoformat(),
             'status': dc.status,
             'profile_count': profile_count,
-        }
-    )
-
-@app.get("/v1/distance_calculation/status", tags=["Distance Calculation"])
-async def dmx_status(job_id: str):
-    """
-    Get job status of a distance calculation
-    """
-    try:
-        dc = calculations.DistanceCalculation.find(job_id)
-    except InvalidId as e:
-        return JSONResponse(status_code=422, content={'error': str(e)})
-    if dc is None:
-        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
-        return JSONResponse(status_code=404, content={'error': err_msg})
-    return JSONResponse(
-        content={
-            'job_id': dc.id,
-            'created_at': dc.created_at.isoformat(),
-            'finished_at': dc.finished_at.isoformat(),
-            'status': dc.status
         }
     )
 
@@ -235,24 +191,6 @@ async def hc_tree_from_dmx_job(rq: HCTreeCalcFromDMXJobRequest, background_tasks
         'status': tc.status,
     }
 )
-
-@app.get("/v1/hc_tree/status", tags=["HC Tree"])
-async def hc_tree_status(job_id:str):
-    try:
-        tc = calculations.TreeCalculation.find(job_id)
-    except InvalidId as e:
-        return JSONResponse(status_code=422, content={'error': str(e)})
-    if tc is None:
-        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
-        return JSONResponse(status_code=404, content={'error': err_msg})
-    return JSONResponse(
-        content={
-            'job_id': tc.id,
-            'created_at': tc.created_at.isoformat(),
-            'finished_at': tc.finished_at.isoformat(),
-            'status': tc.status
-        }
-    )
 
 @app.get("/v1/trees/{job_id}", tags=["HC Tree"])
 async def hc_tree_result(job_id:str, level:str='full'):
