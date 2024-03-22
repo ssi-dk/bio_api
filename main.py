@@ -164,20 +164,6 @@ async def dmx_result(job_id: str, level:str='full'):
         content=content
     )
 
-
-# Probably we will not need this
-# @app.post("/v1/hc_tree/from_request/", tags=["HC Tree"])
-# async def hc_tree_from_rq(rq: HCTreeCalcRequest):
-#     content = {"method": rq.method}
-#     try:
-#         dist_df: DataFrame = DataFrame.from_dict(rq.distances, orient='index')
-#         tree = make_tree(dist_df, rq.method)
-#         content['tree'] = tree
-#     except ValueError as e:
-#         content['error'] = str(e)
-#         print(traceback.format_exc())
-#     return JSONResponse(content=content)
-
 @app.post("/v1/hc_tree/from_dmx_job", tags=["HC Tree"], status_code=202)
 async def hc_tree_from_dmx_job(rq: HCTreeCalcFromDMXJobRequest, background_tasks: BackgroundTasks):
     tc = calculations.TreeCalculation(rq.dmx_job, rq.method)
