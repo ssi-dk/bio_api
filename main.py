@@ -136,17 +136,17 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
         }
     )
 
-@app.get("/v1/distance_calculations/{job_id}", tags=["Distances"])
-async def dmx_result(job_id: str, level:str='full'):
+@app.get("/v1/distance_calculations/{dc_id}", tags=["Distances"])
+async def dmx_result(dc_id: str, level:str='full'):
     """
     Get result of a distance calculation
     """
     try:
-        dc = calculations.DistanceCalculation.find(job_id)
+        dc = calculations.DistanceCalculation.find(dc_id)
     except InvalidId as e:
         return JSONResponse(status_code=422, content={'error': str(e)})
     if dc is None:
-        err_msg = f"A document with id {job_id} was not found in collection {calculations.DistanceCalculation.collection}."
+        err_msg = f"A document with id {dc_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
     with open(Path(dc.folder, 'distance_matrix.json')) as f:
         distances = load(f)
