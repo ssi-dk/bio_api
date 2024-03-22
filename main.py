@@ -92,7 +92,7 @@ async def nn_result(job_id: str, level:str='full'):
         content=content
     )
 
-@app.post("/v1/distance_calculations", tags=["Distance Calculation"], status_code=202)
+@app.post("/v1/distance_calculations", tags=["Distances"], status_code=202)
 async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: BackgroundTasks):
     """
     Run a distance calculation from selected cgMLST profiles in MongoDB
@@ -136,7 +136,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
         }
     )
 
-@app.get("/v1/distance_calculations/{job_id}", tags=["Distance Calculation"])
+@app.get("/v1/distance_calculations/{job_id}", tags=["Distances"])
 async def dmx_result(job_id: str, level:str='full'):
     """
     Get result of a distance calculation
@@ -164,7 +164,7 @@ async def dmx_result(job_id: str, level:str='full'):
         content=content
     )
 
-@app.post("/v1/hc_tree/from_dmx_job", tags=["HC Tree"], status_code=202)
+@app.post("/v1/hc_tree/from_dmx_job", tags=["Trees"], status_code=202)
 async def hc_tree_from_dmx_job(rq: HCTreeCalcFromDMXJobRequest, background_tasks: BackgroundTasks):
     tc = calculations.TreeCalculation(rq.dmx_job, rq.method)
     tc.id = await tc.insert_document()
@@ -178,7 +178,7 @@ async def hc_tree_from_dmx_job(rq: HCTreeCalcFromDMXJobRequest, background_tasks
     }
 )
 
-@app.get("/v1/trees/{job_id}", tags=["HC Tree"])
+@app.get("/v1/trees/{job_id}", tags=["Trees"])
 async def hc_tree_result(job_id:str, level:str='full'):
     try:
         tc = calculations.TreeCalculation.find(job_id)
