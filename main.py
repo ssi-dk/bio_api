@@ -1,18 +1,15 @@
 from os import getenv
-import traceback
 from datetime import datetime
 from json import load
 from pathlib import Path
 
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.responses import JSONResponse
-from pandas import DataFrame
 from bson.errors import InvalidId
 
 import calculations
 
 from pydantic_classes import NearestNeighborsRequest,  DMXFromMongoRequest, HCTreeCalcFromDMXJobRequest
-from tree_maker import make_tree
 
 app = FastAPI(title="Bio API", description="REST API for controlling bioinformatic calculations", version="0.1.0")
 
