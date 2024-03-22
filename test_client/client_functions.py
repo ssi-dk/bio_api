@@ -37,7 +37,7 @@ def call_dmx_from_mongodb(
     seqid_field_path: str,
     profile_field_path:str,
     mongo_ids:list):
-    url = base_url + '/v1/distance_calculation/from_cgmlst'
+    url = base_url + '/v1/distance_calculations'
     rest_response = requests.post(
         url,
         json={

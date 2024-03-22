@@ -111,7 +111,7 @@ async def nn_result(job_id: str):
     )
 
 
-@app.post("/v1/distance_calculation/from_cgmlst", tags=["Distance Calculation"], status_code=202)
+@app.post("/v1/distance_calculations/", tags=["Distance Calculation"], status_code=202)
 async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: BackgroundTasks):
     """
     Run a distance calculation from selected cgMLST profiles in MongoDB
