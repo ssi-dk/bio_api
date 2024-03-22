@@ -85,7 +85,7 @@ async def nn_result(nn_id: str, level:str='full'):
         'status': nn.status
         }
     
-    if level == 'full':
+    if level == 'full' and content['status'] == 'completed':
         content['result'] = result
 
     return JSONResponse(
@@ -157,7 +157,7 @@ async def dmx_result(dc_id: str, level:str='full'):
         'status': dc.status
         }
     
-    if level == 'full':
+    if level == 'full' and content['status'] == 'completed':
         content['result'] = distances
 
     return JSONResponse(
@@ -195,7 +195,7 @@ async def hc_tree_result(tc_id:str, level:str='full'):
         'status': tc.status
         }
     
-    if level == 'full':
+    if level == 'full' and content['status'] == 'completed':
         content['result'] = tree
 
     return JSONResponse(
