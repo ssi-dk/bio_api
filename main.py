@@ -59,7 +59,7 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
     )
 
 # TODO This is almost 100% copy-paste from distance matrix. A more elegant coding pattern is needed.
-@app.get("/v1/nearest_neigbors/status/", tags=["Nearest Neighbors"])
+@app.get("/v1/nearest_neigborsx/status/", tags=["Nearest Neighbors"])
 async def nn_status(job_id: str):
     """
     Get job status of a nearest neighbors calculation
