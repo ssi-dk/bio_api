@@ -23,7 +23,7 @@ def timed_msg(msg: str):
 def root():
     return JSONResponse(content={"message": "Hello World"})
 
-@app.post("/v1/nearest_neighbors/", tags=["Nearest Neighbors"], status_code=202)
+@app.post("/v1/nearest_neighbors", tags=["Nearest Neighbors"], status_code=202)
 async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: BackgroundTasks):
     nn = calculations.NearestNeighbors(
         seq_collection=rq.seq_collection,
@@ -59,7 +59,7 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
     )
 
 # TODO This is almost 100% copy-paste from distance matrix. A more elegant coding pattern is needed.
-@app.get("/v1/nearest_neigborsx/status/", tags=["Nearest Neighbors"])
+@app.get("/v1/nearest_neigborsx/status", tags=["Nearest Neighbors"])
 async def nn_status(job_id: str):
     """
     Get job status of a nearest neighbors calculation
@@ -155,7 +155,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
         }
     )
 
-@app.get("/v1/distance_calculation/status/", tags=["Distance Calculation"])
+@app.get("/v1/distance_calculation/status", tags=["Distance Calculation"])
 async def dmx_status(job_id: str):
     """
     Get job status of a distance calculation
@@ -211,7 +211,7 @@ async def dmx_result(job_id: str):
 #         print(traceback.format_exc())
 #     return JSONResponse(content=content)
 
-@app.post("/v1/hc_tree/from_dmx_job/", tags=["HC Tree"], status_code=202)
+@app.post("/v1/hc_tree/from_dmx_job", tags=["HC Tree"], status_code=202)
 async def hc_tree_from_dmx_job(rq: HCTreeCalcFromDMXJobRequest, background_tasks: BackgroundTasks):
     tc = calculations.TreeCalculation(rq.dmx_job, rq.method)
     tc.id = await tc.insert_document()
@@ -225,7 +225,7 @@ async def hc_tree_from_dmx_job(rq: HCTreeCalcFromDMXJobRequest, background_tasks
     }
 )
 
-@app.get("/v1/hc_tree/status/", tags=["HC Tree"])
+@app.get("/v1/hc_tree/status", tags=["HC Tree"])
 async def hc_tree_status(job_id:str):
     try:
         tc = calculations.TreeCalculation.find(job_id)
@@ -243,7 +243,7 @@ async def hc_tree_status(job_id:str):
         }
     )
 
-@app.get("/v1/hc_tree/result/", tags=["HC Tree"])
+@app.get("/v1/hc_tree/result", tags=["HC Tree"])
 async def hc_tree_result(job_id:str):
     try:
         tc = calculations.TreeCalculation.find(job_id)
