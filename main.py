@@ -243,7 +243,7 @@ async def hc_tree_status(job_id:str):
         }
     )
 
-@app.get("/v1/hc_tree/result", tags=["HC Tree"])
+@app.get("/v1/trees/{job_id}", tags=["HC Tree"])
 async def hc_tree_result(job_id:str):
     try:
         tc = calculations.TreeCalculation.find(job_id)
