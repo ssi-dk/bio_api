@@ -27,6 +27,11 @@ def call_nearest_neighbors(
     )
     return rest_response
 
+def call_nn_status(job_id: str):
+    url = base_url + f'/v1/nearest_neighbors/{job_id}'
+    rest_response = requests.get(url, params={'level': 'status'})
+    return rest_response
+
 def call_nn_result(job_id: str):
     url = base_url + f'/v1/nearest_neighbors/{job_id}'
     rest_response = requests.get(url)
