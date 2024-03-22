@@ -50,8 +50,8 @@ def call_dmx_from_mongodb(
     return rest_response
 
 def call_dmx_status(job_id:str):
-    url = base_url + '/v1/distance_calculation/status'
-    rest_response = requests.get(url, params={'job_id': job_id})
+    url = base_url + f'/v1/distance_calculations/{job_id}'
+    rest_response = requests.get(url, params={'level': 'status'})
     return rest_response
 
 def call_dmx_result(job_id: str):
@@ -82,8 +82,8 @@ def call_hc_tree_from_dmx_job(dmx_job: str, method:str):
     return rest_response
 
 def call_hc_tree_status(job_id):
-    url = base_url + '/v1/hc_tree/status'
-    rest_response = requests.get(url, params={'job_id': job_id})
+    url = base_url + f'/v1/trees/{job_id}'
+    rest_response = requests.get(url, params={'level': 'status'})
     return rest_response
 
 def call_hc_tree_result(job_id):
