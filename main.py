@@ -23,7 +23,7 @@ def timed_msg(msg: str):
 def root():
     return JSONResponse(content={"message": "Hello World"})
 
-@app.post("/v1/nearest_neighbors/", tags=["Nearest Neighbors"], status_code=202)
+@app.post("/v1/nearest_neighborss/", tags=["Nearest Neighbors"], status_code=202)
 async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: BackgroundTasks):
     nn = calculations.NearestNeighbors(
         seq_collection=rq.seq_collection,
