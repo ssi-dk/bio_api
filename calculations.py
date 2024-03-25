@@ -114,7 +114,7 @@ class Calculation(metaclass=abc.ABCMeta):
         return cls(**doc)
     
     async def get_field(self, field):
-        doc = mongo_api.db[self.collection].find_one({'_id': ObjectId(self.id)}, {field: True})
+        doc = mongo_api.db[self.collection].find_one({'_id': self._id}, {field: True})
         return doc[field]
     
     async def get_result(self):
