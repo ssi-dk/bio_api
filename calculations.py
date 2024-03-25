@@ -1,4 +1,3 @@
-from bson.objectid import ObjectId
 import datetime
 from os import getenv
 from pathlib import Path
