@@ -71,22 +71,17 @@ async def nn_result(nn_id: str, level:str='full'):
         err_msg = f"A document with id {nn_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
     
-    # Need to convert ObjectIDs to str before returning as JSON
+    content:dict = nn.to_dict()
+    
+    #TODO Need to convert ObjectIDs in neighbor list to str before returning as JSON. Do i calculations, not here.
     result: list = nn.result
     r: dict
     for r in result:
         r['id'] = str(r['_id'])
         r.pop('_id')
     
-    content = {
-        'job_id': nn.id,
-        'created_at': nn.created_at.isoformat(),
-        'finished_at': nn.finished_at.isoformat(),
-        'status': nn.status
-        }
-    
-    if level == 'full' and content['status'] == 'completed':
-        content['result'] = result
+    if level == 'full' and content['status'] != 'completed':
+        content.pop['result']
 
     return JSONResponse(
         content=content
@@ -146,7 +141,7 @@ async def dmx_result(dc_id: str, level:str='full'):
     if dc is None:
         err_msg = f"A document with id {dc_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
-    content = dc.__repr__()
+    content = dc.to_dict()
     
     if dc.status == 'completed':
         content['finished_at'] = dc.finished_at.isoformat()
@@ -181,16 +176,11 @@ async def hc_tree_result(tc_id:str, level:str='full'):
     if tc is None:
         err_msg = f"A document with id {tc_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
-    tree = await tc.get_result()
-    content = {
-        'job_id': tc.id,
-        'created_at': tc.created_at.isoformat(),
-        'finished_at': tc.finished_at.isoformat(),
-        'status': tc.status
-        }
+
+    content = tc.to_dict()
     
-    if level == 'full' and content['status'] == 'completed':
-        content['result'] = tree
+    if level == 'full' and content['status'] != 'completed':
+        content.pop('result')
 
     return JSONResponse(
         content=content

@@ -78,14 +78,13 @@ class Calculation(metaclass=abc.ABCMeta):
         self._id = _id
         self.result = result
     
-    def __repr__(self):
+    def to_dict(self):
         content = dict()
-        print(vars(self).items())
         for key, value in vars(self).items():
             if isinstance(value, datetime.datetime):
                 content[key] = value.isoformat()
-            elif isinstance(value, ObjectId):
-                content[key] = str(value)
+            elif key == '_id':
+                content['id'] = str(value)
             else:
                 content[key] = value
         return content
@@ -287,7 +286,7 @@ class DistanceCalculation(Calculation):
     @property
     def folder(self):
         "Return the folder corresponding to the class instance"
-        return Path(DMX_DIR, self.id)
+        return Path(DMX_DIR, self.to_dict()['id'])
 
     @property
     def allele_mx_filepath(self):
