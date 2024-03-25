@@ -104,7 +104,6 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
             seqid_field_path=rq.seqid_field_path,
             profile_field_path=rq.profile_field_path,
             seq_mongo_ids=rq.mongo_ids,
-            status='new',
             created_at=datetime.now(),
             finished_at=None,
             id=None
