@@ -58,7 +58,6 @@ mongo_api = MongoAPI(connection_string)
 
 class Calculation(metaclass=abc.ABCMeta):
     # Abstract base class
-    id: str or None
     created_at: datetime.datetime or None
     finished_at: datetime.datetime or None
     status: str
