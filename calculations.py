@@ -113,7 +113,7 @@ class Calculation(metaclass=abc.ABCMeta):
             created_at=doc['created_at'],
             finished_at=doc['finished_at'],
             status=doc['status'],
-            result=doc['result'],
+            result=doc.get('result', None)
             )
     
     async def get_field(self, field):

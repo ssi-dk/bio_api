@@ -148,17 +148,17 @@ async def dmx_result(dc_id: str, level:str='full'):
     if dc is None:
         err_msg = f"A document with id {dc_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
-    with open(Path(dc.folder, 'distance_matrix.json')) as f:
-        distances = load(f)
     content = {
         'job_id': dc.id,
         'created_at': dc.created_at.isoformat(),
-        'finished_at': dc.finished_at.isoformat(),
         'status': dc.status
         }
     
-    if level == 'full' and content['status'] == 'completed':
-        content['result'] = distances
+    if dc.status == 'completed':
+        content['finished_at'] = dc.finished_at.isoformat()
+        if level == 'full':
+            with open(Path(dc.folder, 'distance_matrix.json')) as f:
+                content['result'] = load(f)
 
     return JSONResponse(
         content=content
