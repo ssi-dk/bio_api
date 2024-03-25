@@ -101,8 +101,8 @@ class Calculation(metaclass=abc.ABCMeta):
         doc_to_save = dict(global_attrs, **attrs)
         mongo_save = mongo_api.db[self.collection].insert_one(doc_to_save)
         assert mongo_save.acknowledged == True
-        self.id = str(mongo_save.inserted_id)
-        return self.id
+        self._id = mongo_save.inserted_id
+        return self._id
     
     @classmethod
     def find(cls, id: str):
@@ -125,8 +125,10 @@ class Calculation(metaclass=abc.ABCMeta):
         Also insert a timestamp for when the calculation was completed and mark the calculation as completed.
         """
         print(f"My collection: {self.collection}")
+        print("My _id:")
+        print(self._id)
         update_result = mongo_api.db[self.collection].update_one(
-            {'_id': ObjectId(self.id)}, {'$set': {
+            {'_id': self._id}, {'$set': {
                 'result': result,
                 'finished_at': datetime.datetime.now(tz=datetime.timezone.utc),
                 'status': 'completed'
@@ -172,7 +174,7 @@ class NearestNeighbors(Calculation):
             cutoff=self.cutoff,
             unknowns_are_diffs = self.unknowns_are_diffs,
         )
-        return self.id
+        return self._id
 
     async def query_mongodb_for_input_profile(self):
         "Get a the allele profile for the input sequence from MongoDB"
@@ -274,7 +276,7 @@ class DistanceCalculation(Calculation):
             seq_mongo_ids=self.seq_mongo_ids,
         )
         Path(self.folder).mkdir()
-        return self.id
+        return self._id
     
     @property
     def folder(self):

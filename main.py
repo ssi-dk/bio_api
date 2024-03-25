@@ -32,7 +32,7 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
         cutoff=rq.cutoff,
         unknowns_are_diffs=rq.unknowns_are_diffs
     )
-    nn.id = await nn.insert_document()
+    nn._id = await nn.insert_document()
 
     # Get input profile or fail if sequence not found
     try:
@@ -41,7 +41,7 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
         return JSONResponse(
             status_code=422, # Unprocessable Content
             content={
-                'job_id': nn.id,
+                'job_id': str(nn._id),
                 'message': str(e)
             }
         )       
@@ -52,7 +52,7 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
     return JSONResponse(
         status_code=202,
         content={
-            'job_id': nn.id,
+            'job_id': str(nn._id),
             'created_at': nn.created_at.isoformat(),
             'status': nn.status
         }
@@ -102,7 +102,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
             created_at=datetime.now(),
             finished_at=None,
     )
-    dc.id = await dc.insert_document()
+    dc._id = await dc.insert_document()
     
     # Query MongoDB for the allele profiles
     try:
@@ -111,7 +111,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
         return JSONResponse(
             status_code=422, # Unprocessable Content
             content={
-                'job_id': dc.id,
+                'job_id': str(dc._id),
                 'message': str(e)
             }
         )
@@ -122,7 +122,7 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
     return JSONResponse(
         status_code=202,  # Accepted
         content={
-            'job_id': dc.id,
+            'job_id': str(dc._id),
             'created_at': dc.created_at.isoformat(),
             'status': dc.status,
             'profile_count': profile_count,
@@ -156,12 +156,12 @@ async def dmx_result(dc_id: str, level:str='full'):
 @app.post("/v1/trees", tags=["Trees"], status_code=202)
 async def hc_tree_from_dmx_job(rq: HCTreeCalcFromDMXJobRequest, background_tasks: BackgroundTasks):
     tc = calculations.TreeCalculation(rq.dmx_job, rq.method)
-    tc.id = await tc.insert_document()
+    tc._id = await tc.insert_document()
     background_tasks.add_task(tc.calculate)
     return JSONResponse(
     status_code=202,  # Accepted
     content={
-        'job_id': tc.id,
+        'job_id': str(tc._id),
         'created_at': tc.created_at.isoformat(),
         'status': tc.status,
     }
