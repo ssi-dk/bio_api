@@ -73,13 +73,6 @@ async def nn_result(nn_id: str, level:str='full'):
     
     content:dict = nn.to_dict()
     
-    #TODO Need to convert ObjectIDs in neighbor list to str before returning as JSON. Do i calculations, not here.
-    result: list = nn.result
-    r: dict
-    for r in result:
-        r['id'] = str(r['_id'])
-        r.pop('_id')
-    
     if level == 'full' and content['status'] != 'completed':
         content.pop['result']
 

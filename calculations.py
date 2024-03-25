@@ -245,7 +245,16 @@ class NearestNeighbors(Calculation):
                     nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
         self.result = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
         await self.store_result(self.result)
+    
+    def to_dict(self):
+        content = super().to_dict()
+        if 'result' in content:
+            r: dict
+            for r in content['result']:
+                r['id'] = str(r['_id'])
+                r.pop('_id')
 
+        return content
 
 class DistanceCalculation(Calculation):
     collection = 'dist_calculations'
