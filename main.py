@@ -106,7 +106,6 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
             seq_mongo_ids=rq.mongo_ids,
             created_at=datetime.now(),
             finished_at=None,
-            id=None
     )
     dc.id = await dc.insert_document()
     
@@ -147,11 +146,7 @@ async def dmx_result(dc_id: str, level:str='full'):
     if dc is None:
         err_msg = f"A document with id {dc_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
-    content = {
-        'job_id': dc.id,
-        'created_at': dc.created_at.isoformat(),
-        'status': dc.status
-        }
+    content = dc.__repr__()
     
     if dc.status == 'completed':
         content['finished_at'] = dc.finished_at.isoformat()

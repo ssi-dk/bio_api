@@ -69,14 +69,26 @@ class Calculation(metaclass=abc.ABCMeta):
             status: str = 'init',
             created_at: datetime.datetime or None = None,
             finished_at: datetime.datetime or None = None,
-            id: str or None = None,
+            _id: ObjectId or None = None,
             result = None
             ):
         self.status = status
         self.created_at = created_at if created_at else datetime.datetime.now(tz=datetime.timezone.utc)
         self.finished_at = finished_at
-        self.id = id
+        self._id = _id
         self.result = result
+    
+    def __repr__(self):
+        content = dict()
+        print(vars(self).items())
+        for key, value in vars(self).items():
+            if isinstance(value, datetime.datetime):
+                content[key] = value.isoformat()
+            elif isinstance(value, ObjectId):
+                content[key] = str(value)
+            else:
+                content[key] = value
+        return content
     
     @abc.abstractproperty
     def collection(self):
@@ -107,13 +119,7 @@ class Calculation(metaclass=abc.ABCMeta):
         doc = mongo_api.db[cls.collection].find_one({'_id': ObjectId(id)})
         if doc is None:
             return None
-        return cls(
-            id=str(doc['_id']),
-            created_at=doc['created_at'],
-            finished_at=doc['finished_at'],
-            status=doc['status'],
-            result=doc.get('result', None)
-            )
+        return cls(**doc)
     
     async def get_field(self, field):
          doc = mongo_api.db[self.collection].find_one({'_id': ObjectId(self.id)}, {field: True})
