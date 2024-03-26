@@ -37,6 +37,17 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
     # Get input profile or fail if sequence not found
     try:
         nn.input_sequence = await nn.query_mongodb_for_input_profile()
+    except InvalidId as e:
+        nn.status = 'error'
+        nn.result = str(e)
+        await nn.update()
+        return JSONResponse(
+            status_code=400, # Bad Request
+            content={
+                'job_id': str(nn._id),
+                'message': str(e)
+            }
+        )
     except calculations.MissingDataException as e:
         nn.status = 'error'
         nn.result = str(e)
