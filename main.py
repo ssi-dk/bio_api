@@ -104,6 +104,9 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
     try:
         profile_count, cursor = await dc.query_mongodb_for_allele_profiles()
     except calculations.MissingDataException as e:
+        dc.status = 'error'
+        dc.result = str(e)
+        await dc.update()    
         return JSONResponse(
             status_code=422, # Unprocessable Content
             content={
