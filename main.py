@@ -114,6 +114,17 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
     # Query MongoDB for the allele profiles
     try:
         profile_count, cursor = await dc.query_mongodb_for_allele_profiles()
+    except InvalidId as e:
+        dc.status = 'error'
+        dc.result = str(e)
+        await dc.update()
+        return JSONResponse(
+            status_code=400, # Bad Request
+            content={
+                'job_id': str(dc._id),
+                'message': str(e)
+            }
+        )
     except calculations.MissingDataException as e:
         dc.status = 'error'
         dc.result = str(e)
