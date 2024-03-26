@@ -125,6 +125,8 @@ class Calculation(metaclass=abc.ABCMeta):
         """Update the MongoDB document that corresponds with the class instance with a result.
         Also insert a timestamp for when the calculation was completed and mark the calculation as completed.
         """
+        # TODO maybe merge with update?
+        print("Store result.")
         print(f"My collection: {self.collection}")
         print("My _id:")
         print(self._id)
@@ -133,7 +135,26 @@ class Calculation(metaclass=abc.ABCMeta):
                 'result': result,
                 'finished_at': datetime.datetime.now(tz=datetime.timezone.utc),
                 'status': 'completed'
-                }}
+                }
+            }
+        )
+        assert update_result.acknowledged == True
+
+    async def update(self):
+        """Update the MongoDB document that corresponds with the class instance.
+        """
+        print("Update.")
+        print(f"My collection: {self.collection}")
+        print("My _id:")
+        print(self._id)
+        print("__dict__:")
+        print(self.__dict__)
+        update_result = mongo_api.db[self.collection].update_one(
+            {'_id': self._id}, {'$set': {
+                    **self.__dict__
+                    # **vars(self)?
+                }
+            }
         )
         assert update_result.acknowledged == True
 
