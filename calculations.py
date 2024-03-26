@@ -94,9 +94,10 @@ class Calculation(metaclass=abc.ABCMeta):
     
     async def insert_document(self, **attrs):
         global_attrs = {
+            'status': self.status,
             'created_at': self.created_at,
             'finished_at': self.finished_at,
-            'status': self.status,
+            'result': self.result
             }
         doc_to_save = dict(global_attrs, **attrs)
         mongo_save = mongo_api.db[self.collection].insert_one(doc_to_save)
