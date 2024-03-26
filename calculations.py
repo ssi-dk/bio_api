@@ -151,8 +151,7 @@ class Calculation(metaclass=abc.ABCMeta):
         print(self.__dict__)
         update_result = mongo_api.db[self.collection].update_one(
             {'_id': self._id}, {'$set': {
-                    **self.__dict__
-                    # **vars(self)?
+                    **vars(self)
                 }
             }
         )
