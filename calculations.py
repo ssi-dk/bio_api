@@ -13,6 +13,11 @@ from tree_maker import make_tree
 
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 
+
+class MissingDataException(Exception):
+    pass
+
+
 def hoist(dict_element, field_path:str):
     """
     'Hoists' a deep dictionary element up to the surface :-)
@@ -30,8 +35,6 @@ def strs2ObjectIds(id_strings: list):
         output.append(ObjectId(id_str))
     return output
 
-class MissingDataException(Exception):
-    pass
 
 class MongoAPI:
     def __init__(self,
