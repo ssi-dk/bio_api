@@ -32,33 +32,26 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
         cutoff=rq.cutoff,
         unknowns_are_diffs=rq.unknowns_are_diffs
     )
-    nn._id = await nn.insert_document()
 
     # Get input profile or fail if sequence not found
     try:
         nn.input_sequence = await nn.query_mongodb_for_input_profile()
     except InvalidId as e:
-        nn.status = 'error'
-        nn.result = str(e)
-        await nn.update()
         return JSONResponse(
             status_code=400, # Bad Request
             content={
-                'job_id': str(nn._id),
-                'message': str(e)
+                'error': str(e)
             }
         )
     except calculations.MissingDataException as e:
-        nn.status = 'error'
-        nn.result = str(e)
-        await nn.update()
         return JSONResponse(
             status_code=404, # Not found
             content={
-                'job_id': str(nn._id),
-                'message': str(e)
+                'error': str(e)
             }
-        )       
+        )
+    
+    nn._id = await nn.insert_document()
 
     # Initiate the calculation
     background_tasks.add_task(nn.calculate)
