@@ -80,7 +80,7 @@ async def nn_result(nn_id: str, level:str='full'):
     try:
         nn = calculations.NearestNeighbors.find(nn_id)
     except InvalidId as e:
-        return JSONResponse(status_code=422, content={'error': str(e)})
+        return JSONResponse(status_code=400, content={'error': str(e)})
     if nn is None:
         err_msg = f"A document with id {nn_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
@@ -158,7 +158,7 @@ async def dmx_result(dc_id: str, level:str='full'):
     try:
         dc = calculations.DistanceCalculation.find(dc_id)
     except InvalidId as e:
-        return JSONResponse(status_code=422, content={'error': str(e)})
+        return JSONResponse(status_code=400, content={'error': str(e)})
     if dc is None:
         err_msg = f"A document with id {dc_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
@@ -204,7 +204,7 @@ async def hc_tree_result(tc_id:str, level:str='full'):
     try:
         tc = calculations.TreeCalculation.find(tc_id)
     except InvalidId as e:
-        return JSONResponse(status_code=422, content={'error': str(e)})
+        return JSONResponse(status_code=400, content={'error': str(e)})
     if tc is None:
         err_msg = f"A document with id {tc_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
