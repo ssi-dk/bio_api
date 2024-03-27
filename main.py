@@ -35,6 +35,8 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
 
     # Get input profile or fail if sequence not found
     try:
+        # Add the input sequence to the nn object so we can run calculate() without arguments.
+        # Note that the input sequence will not be stored as part of the nn object.
         nn.input_sequence = await nn.query_mongodb_for_input_profile()
     except InvalidId as e:
         return JSONResponse(
@@ -50,7 +52,16 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
                 'error': str(e)
             }
         )
-    
+
+    # Check that at least the input sequence has the profile field, otherwise there's no reason to run the calculation
+    if not nn.profile_field_path in nn.input_sequence:
+        return JSONResponse(
+            status_code=422, # Unprocessable content
+            content={
+                'error': f"Input sequence {nn.input_sequence['_id']} does not have a field named '{nn.profile_field_path}'."
+            }
+        )
+
     nn._id = await nn.insert_document()
 
     # Initiate the calculation
