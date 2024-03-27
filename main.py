@@ -53,7 +53,7 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
         nn.result = str(e)
         await nn.update()
         return JSONResponse(
-            status_code=422, # Unprocessable Content
+            status_code=404, # Not found
             content={
                 'job_id': str(nn._id),
                 'message': str(e)

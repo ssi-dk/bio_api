@@ -205,7 +205,7 @@ class NearestNeighbors(Calculation):
             mongo_ids=[self.input_mongo_id]
             )
         if profile_count == 0:
-            message = f"Could not find the requested input sequence with mongo id {self.input_mongo_id}."
+            message = f"Could not find a document with id {self.input_mongo_id} in collection {self.seq_collection}."
             raise MissingDataException(message)
         reference_profile = next(cursor)
         # TODO assert that reference sequence has the requested profile field
