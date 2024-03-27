@@ -124,7 +124,7 @@ class Calculation(metaclass=abc.ABCMeta):
     async def get_result(self):
         return await self.get_field('result')
 
-    async def store_result(self, result):
+    async def store_result(self, result, status:str='completed'):
         """Update the MongoDB document that corresponds with the class instance with a result.
         Also insert a timestamp for when the calculation was completed and mark the calculation as completed.
         """
@@ -137,7 +137,7 @@ class Calculation(metaclass=abc.ABCMeta):
             {'_id': self._id}, {'$set': {
                 'result': result,
                 'finished_at': datetime.datetime.now(tz=datetime.timezone.utc),
-                'status': 'completed'
+                'status': status
                 }
             }
         )
@@ -347,9 +347,15 @@ class DistanceCalculation(Calculation):
         try:
             while True:
                 mongo_item = next(cursor)
-                sequence_id = hoist(mongo_item, self.seqid_field_path)
-                allele_profile = hoist(mongo_item, self.profile_field_path)
-                full_dict[sequence_id] = allele_profile
+                try:
+                    sequence_id = hoist(mongo_item, self.seqid_field_path)
+                except KeyError:
+                    raise MissingDataException(f"Sequence document with id {str(mongo_item['_id'])} does not contain sequence id field path '{self.seqid_field_path}'.")
+                try:
+                    allele_profile = hoist(mongo_item, self.profile_field_path)
+                    full_dict[sequence_id] = allele_profile
+                except KeyError:
+                    raise MissingDataException(f"Sequence document with id {str(mongo_item['_id'])} does not contain profile field path '{self.profile_field_path}'.")
         except StopIteration:
             pass
 
@@ -385,13 +391,16 @@ class DistanceCalculation(Calculation):
             dump(dist_mx_dict, dist_mx_file_obj)
 
     async def calculate(self, cursor):
-        allele_mx_df: DataFrame = await self._amx_df_from_mongodb_cursor(cursor)
-        await self._save_amx_df_as_tsv(allele_mx_df)
-        dist_mx_df: DataFrame = await self._dmx_df_from_amx_tsv()
-        dist_mx_dict = dist_mx_df.to_dict(orient='index')
-        await self._save_dmx_as_json(dist_mx_dict)
-        await self.store_result("Distance matrix stored on filesystem")
-        print("Distance matrix calculation is finished!")
+        try:
+            allele_mx_df: DataFrame = await self._amx_df_from_mongodb_cursor(cursor)
+            await self._save_amx_df_as_tsv(allele_mx_df)
+            dist_mx_df: DataFrame = await self._dmx_df_from_amx_tsv()
+            dist_mx_dict = dist_mx_df.to_dict(orient='index')
+            await self._save_dmx_as_json(dist_mx_dict)
+            await self.store_result("Distance matrix stored on filesystem")
+            print("Distance matrix calculation is finished!")
+        except MissingDataException as e:
+            await self.store_result(str(e), 'error')
 
 
 class TreeCalculation(Calculation):
