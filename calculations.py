@@ -169,8 +169,8 @@ class NearestNeighbors(Calculation):
     profile_field_path: str
     input_mongo_id: str
     cutoff: int
-    input_sequence: dict or None
     unknowns_are_diffs: bool = True
+    input_sequence: dict or None
 
     def __init__(
             self,
@@ -194,6 +194,7 @@ class NearestNeighbors(Calculation):
             input_mongo_id=self.input_mongo_id,
             cutoff=self.cutoff,
             unknowns_are_diffs = self.unknowns_are_diffs,
+            # self.input_sequence is intentionally not stored as it is already stored in the sequence document
         )
         return self._id
 
