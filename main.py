@@ -63,8 +63,6 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
         )
 
     nn._id = await nn.insert_document()
-
-    # Initiate the calculation
     background_tasks.add_task(nn.calculate)
 
     return JSONResponse(
@@ -113,35 +111,26 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
             created_at=datetime.now(),
             finished_at=None,
     )
-    dc._id = await dc.insert_document()
     
     # Query MongoDB for the allele profiles
     try:
         profile_count, cursor = await dc.query_mongodb_for_allele_profiles()
     except InvalidId as e:
-        dc.status = 'error'
-        dc.result = str(e)
-        await dc.update()
         return JSONResponse(
             status_code=400, # Bad Request
             content={
-                'job_id': str(dc._id),
-                'message': str(e)
+                'error': str(e)
             }
         )
     except calculations.MissingDataException as e:
-        dc.status = 'error'
-        dc.result = str(e)
-        await dc.update()    
         return JSONResponse(
             status_code=422, # Unprocessable Content
             content={
-                'job_id': str(dc._id),
                 'message': str(e)
             }
         )
 
-    # Initiate the calculation
+    dc._id = await dc.insert_document()
     background_tasks.add_task(dc.calculate, cursor)
 
     return JSONResponse(
