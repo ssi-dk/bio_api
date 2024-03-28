@@ -421,6 +421,7 @@ class TreeCalculation(Calculation):
             dist_df: DataFrame = DataFrame.from_dict(distances, orient='index')
             tree = make_tree(dist_df, self.method)
             await self.store_result(tree)
-        except ValueError:
-            raise
+        except ValueError as e:
+            await self.store_result(str(e), 'error')
+
 
