@@ -173,12 +173,12 @@ async def hc_tree_from_dmx_job(rq: HCTreeCalcFromDMXJobRequest, background_tasks
     if dc is None:
         return JSONResponse(
             status_code=404,
-            content={'Error': f"Distance matrix job with id {rq.dmx_job} does not exist."}
+            content={'error': f"Distance matrix job with id {rq.dmx_job} does not exist."}
         )
     if dc.status != 'completed':
         return JSONResponse(
             status_code=422,
-            content={'Error': f"Distance matrix job with id {rq.dmx_job} has status '{dc.status}'."}
+            content={'error': f"Distance matrix job with id {rq.dmx_job} has status '{dc.status}'."}
         )
     tc = calculations.TreeCalculation(rq.dmx_job, rq.method)
     tc._id = await tc.insert_document()
