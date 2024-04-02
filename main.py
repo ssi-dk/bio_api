@@ -32,21 +32,37 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
         cutoff=rq.cutoff,
         unknowns_are_diffs=rq.unknowns_are_diffs
     )
-    nn._id = await nn.insert_document()
 
     # Get input profile or fail if sequence not found
     try:
+        # Add the input sequence to the nn object so we can run calculate() without arguments.
+        # Note that the input sequence will not be stored as part of the nn object.
         nn.input_sequence = await nn.query_mongodb_for_input_profile()
+    except InvalidId as e:
+        return JSONResponse(
+            status_code=400, # Bad Request
+            content={
+                'error': str(e)
+            }
+        )
     except calculations.MissingDataException as e:
         return JSONResponse(
-            status_code=422, # Unprocessable Content
+            status_code=404, # Not found
             content={
-                'job_id': str(nn._id),
-                'message': str(e)
+                'error': str(e)
             }
-        )       
+        )
 
-    # Initiate the calculation
+    # Check that at least the input sequence has the profile field, otherwise there's no reason to run the calculation
+    if not nn.profile_field_path in nn.input_sequence:
+        return JSONResponse(
+            status_code=422, # Unprocessable content
+            content={
+                'error': f"Input sequence {nn.input_sequence['_id']} does not have a field named '{nn.profile_field_path}'."
+            }
+        )
+
+    nn._id = await nn.insert_document()
     background_tasks.add_task(nn.calculate)
 
     return JSONResponse(
@@ -66,7 +82,7 @@ async def nn_result(nn_id: str, level:str='full'):
     try:
         nn = calculations.NearestNeighbors.find(nn_id)
     except InvalidId as e:
-        return JSONResponse(status_code=422, content={'error': str(e)})
+        return JSONResponse(status_code=400, content={'error': str(e)})
     if nn is None:
         err_msg = f"A document with id {nn_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
@@ -95,21 +111,26 @@ async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: Background
             created_at=datetime.now(),
             finished_at=None,
     )
-    dc._id = await dc.insert_document()
     
     # Query MongoDB for the allele profiles
     try:
         profile_count, cursor = await dc.query_mongodb_for_allele_profiles()
+    except InvalidId as e:
+        return JSONResponse(
+            status_code=400, # Bad Request
+            content={
+                'error': str(e)
+            }
+        )
     except calculations.MissingDataException as e:
         return JSONResponse(
             status_code=422, # Unprocessable Content
             content={
-                'job_id': str(dc._id),
                 'message': str(e)
             }
         )
 
-    # Initiate the calculation
+    dc._id = await dc.insert_document()
     background_tasks.add_task(dc.calculate, cursor)
 
     return JSONResponse(
@@ -130,7 +151,7 @@ async def dmx_result(dc_id: str, level:str='full'):
     try:
         dc = calculations.DistanceCalculation.find(dc_id)
     except InvalidId as e:
-        return JSONResponse(status_code=422, content={'error': str(e)})
+        return JSONResponse(status_code=400, content={'error': str(e)})
     if dc is None:
         err_msg = f"A document with id {dc_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
@@ -148,6 +169,17 @@ async def dmx_result(dc_id: str, level:str='full'):
 
 @app.post("/v1/trees", tags=["Trees"], status_code=202)
 async def hc_tree_from_dmx_job(rq: HCTreeCalcFromDMXJobRequest, background_tasks: BackgroundTasks):
+    dc = calculations.DistanceCalculation.find(rq.dmx_job)
+    if dc is None:
+        return JSONResponse(
+            status_code=404,
+            content={'error': f"Distance matrix job with id {rq.dmx_job} does not exist."}
+        )
+    if dc.status != 'completed':
+        return JSONResponse(
+            status_code=422,
+            content={'error': f"Distance matrix job with id {rq.dmx_job} has status '{dc.status}'."}
+        )
     tc = calculations.TreeCalculation(rq.dmx_job, rq.method)
     tc._id = await tc.insert_document()
     background_tasks.add_task(tc.calculate)
@@ -165,7 +197,7 @@ async def hc_tree_result(tc_id:str, level:str='full'):
     try:
         tc = calculations.TreeCalculation.find(tc_id)
     except InvalidId as e:
-        return JSONResponse(status_code=422, content={'error': str(e)})
+        return JSONResponse(status_code=400, content={'error': str(e)})
     if tc is None:
         err_msg = f"A document with id {tc_id} was not found in collection {calculations.DistanceCalculation.collection}."
         return JSONResponse(status_code=404, content={'error': err_msg})
