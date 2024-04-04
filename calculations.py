@@ -91,7 +91,9 @@ class Calculation(metaclass=abc.ABCMeta):
                 content[key] = value
         return content
     
-    @abc.abstractproperty
+    # https://stackoverflow.com/questions/2736255/abstract-attributes-in-python
+    @property
+    @abc.abstractmethod
     def collection(self):
         return 'my_collection'
     
