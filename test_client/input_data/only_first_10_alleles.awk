@@ -1,0 +1,1 @@
+awk 'BEGIN { OFS = "\t" } ;  {print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11}' BN_alleles_export_25.tsv > BN_alleles_export_25_10.tsv
