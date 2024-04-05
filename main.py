@@ -54,7 +54,9 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
         )
 
     # Check that at least the input sequence has the profile field, otherwise there's no reason to run the calculation
-    if not nn.profile_field_path in nn.input_sequence:
+    try:
+        _p = nn.input_profile
+    except KeyError:
         return JSONResponse(
             status_code=422, # Unprocessable content
             content={

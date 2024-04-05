@@ -18,13 +18,20 @@ class MissingDataException(Exception):
     pass
 
 
-def hoist(dict_element, field_path:str):
+def hoist(var, dotted_field_path:str):
     """
-    'Hoists' a deep dictionary element up to the surface :-)
+    'Hoists' a value from a nested dictionary element up to the surface.
+
+    Example:
+    var = {'my': {'nested': {'dictionary': 123}}}
+    dotted_field_path = 'my.nested.diectionary'
+    print(hoist(var, dotted_field_path))
+
+    The above example should return 123.
     """
-    for path_element in field_path.split('.'):
-            dict_element = dict_element[path_element]
-    return dict_element
+    for path_element in dotted_field_path.split('.'):
+            var = var[path_element]
+    return var
 
 def strs2ObjectIds(id_strings: list):
     """
@@ -177,6 +184,10 @@ class NearestNeighbors(Calculation):
     unknowns_are_diffs: bool = True
     input_sequence: dict or None
 
+    @property
+    def input_profile(self):
+        return hoist(self.input_sequence, self.profile_field_path)
+
     def __init__(
             self,
             seq_collection: str or None=None,
@@ -220,9 +231,9 @@ class NearestNeighbors(Calculation):
     def profile_diffs(self, other_profile:dict):
         """Count the number of differences between two allele profiles."""
         diff_count = 0
-        for locus in self.input_sequence[self.profile_field_path].keys():
+        for locus in self.input_profile.keys():
             try:
-                ref_allele = int(self.input_sequence[self.profile_field_path][locus])
+                ref_allele = int(self.input_profile[locus])
             except ValueError:
                 if self.unknowns_are_diffs:
                     # Ref allele not intable - counting a difference.
@@ -243,7 +254,7 @@ class NearestNeighbors(Calculation):
     async def calculate(self):
         print(f"Sequence collection: {self.seq_collection}")
         print(f"Profile field path: {self.profile_field_path}")
-        comparable_sequences_count = mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})
+        comparable_sequences_count = mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})  # hoist?
         print(f"Comparable sequences found: {str(comparable_sequences_count)}")
         
         pipeline = list()
@@ -267,7 +278,7 @@ class NearestNeighbors(Calculation):
         nearest_neighbors = list()
         for other_sequence in sequences_to_compare_with:
             if not other_sequence['_id'] == self.input_sequence['_id']:
-                diff_count = self.profile_diffs(other_sequence[self.profile_field_path])
+                diff_count = self.profile_diffs(hoist(other_sequence, self.profile_field_path))
                 if diff_count <= self.cutoff:
                     nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
         self.result = sorted(nearest_neighbors, key=lambda x : x['diff_count'])

@@ -10,14 +10,20 @@ connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/
 connection = pymongo.MongoClient(connection_string)
 db = connection.get_database()
 print(f"Connection string: {connection_string}")
-mongo_ids = profile2mongo(db, 'input_data/BN_alleles_export_50.tsv', collection='test_samples')
+mongo_ids = profile2mongo(
+    db,
+    'input_data/BN_alleles_export_50.tsv',
+    collection='test_samples',
+    seqid_field_path='sequence.id',
+    profile_field_path='cgmlst.profile'
+    )
 
 
 def test_nearest_neighbors():
     result = client_functions.call_nearest_neighbors(
         seq_collection='test_samples',
         input_mongo_id=mongo_ids[0],
-        profile_field_path='profile',
+        profile_field_path='cgmlst.profile',
         cutoff=1000,
         unknowns_are_diffs=True
     )
@@ -43,8 +49,8 @@ def test_dmx_and_tree_from_mongodb():
     # Initiate distance calculation
     result = client_functions.call_dmx_from_mongodb(
         seq_collection='test_samples',
-        seqid_field_path='name',
-        profile_field_path='profile',
+        seqid_field_path='sequence.id',
+        profile_field_path='cgmlst.profile',
         mongo_ids=mongo_ids
     )
     assert result.status_code == 202
