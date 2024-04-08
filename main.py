@@ -27,6 +27,7 @@ def root():
 async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: BackgroundTasks):
     nn = calculations.NearestNeighbors(
         seq_collection=rq.seq_collection,
+        filtering = rq.filtering,
         profile_field_path=rq.profile_field_path,
         input_mongo_id=rq.input_mongo_id,
         cutoff=rq.cutoff,

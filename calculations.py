@@ -68,17 +68,17 @@ mongo_api = MongoAPI(connection_string)
 
 class Calculation(metaclass=abc.ABCMeta):
     # Abstract base class
-    created_at: datetime.datetime or None
-    finished_at: datetime.datetime or None
+    created_at: datetime.datetime | None
+    finished_at: datetime.datetime | None
     status: str
     result: str or None = None
 
     def __init__(
             self,
             status: str = 'init',
-            created_at: datetime.datetime or None = None,
-            finished_at: datetime.datetime or None = None,
-            _id: ObjectId or None = None,
+            created_at: datetime.datetime | None = None,
+            finished_at: datetime.datetime | None = None,
+            _id: ObjectId | None = None,
             result = None
             ):
         self.status = status
@@ -178,11 +178,12 @@ class NearestNeighbors(Calculation):
     collection = 'nearest_neighbors'
 
     seq_collection: str
+    filtering: dict = dict()
     profile_field_path: str
     input_mongo_id: str
     cutoff: int
     unknowns_are_diffs: bool = True
-    input_sequence: dict or None
+    input_sequence: dict | None
 
     @property
     def input_profile(self):
@@ -190,14 +191,17 @@ class NearestNeighbors(Calculation):
 
     def __init__(
             self,
-            seq_collection: str or None=None,
-            profile_field_path: str or None = None,
-            input_mongo_id: str or None = None,
-            cutoff: int or None=None,
+            seq_collection: str | None = None,
+            filtering: dict | None = None,
+            profile_field_path: str | None = None,
+            input_mongo_id: str | None = None,
+            cutoff: int | None=None,
             unknowns_are_diffs: bool = True,
             **kwargs):
         super().__init__(**kwargs)
         self.seq_collection = seq_collection
+        if filtering:  # Only apply if there is a filtering, otherwise keep default = dict()
+            self.filtering = filtering
         self.profile_field_path = profile_field_path
         self.input_mongo_id = input_mongo_id
         self.unknowns_are_diffs = unknowns_are_diffs
@@ -207,6 +211,7 @@ class NearestNeighbors(Calculation):
         await super().insert_document(
             seq_collection=self.seq_collection,
             profile_field_path=self.profile_field_path,
+            filtering=self.filtering,
             input_mongo_id=self.input_mongo_id,
             cutoff=self.cutoff,
             unknowns_are_diffs = self.unknowns_are_diffs,
@@ -225,7 +230,6 @@ class NearestNeighbors(Calculation):
             message = f"Could not find a document with id {self.input_mongo_id} in collection {self.seq_collection}."
             raise MissingDataException(message)
         reference_profile = next(cursor)
-        # TODO assert that reference sequence has the requested profile field
         return reference_profile
     
     def profile_diffs(self, other_profile:dict):
@@ -254,10 +258,22 @@ class NearestNeighbors(Calculation):
     async def calculate(self):
         print(f"Sequence collection: {self.seq_collection}")
         print(f"Profile field path: {self.profile_field_path}")
-        comparable_sequences_count = mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})  # hoist?
+        comparable_sequences_count = mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})
         print(f"Comparable sequences found: {str(comparable_sequences_count)}")
         
         pipeline = list()
+
+        print("Filters to apply to sequences before running nearest neighbors:")
+        for k, v in self.filtering.items():
+            print(f"{k} must be {v}")
+            pipeline.append(
+            {'$match':
+                {
+                    k: {'$eq': v},
+                }
+            }
+        )
+
         pipeline.append(
             {'$match':
                 {
@@ -268,8 +284,7 @@ class NearestNeighbors(Calculation):
         pipeline.append(
             {'$project':
                 {
-                    # '_id': '_id', Probaly get this automatically
-                    self.profile_field_path: 1,  # TODO un-nest dotted fields
+                    self.profile_field_path: 1,
                 }
             }
         )
@@ -304,10 +319,10 @@ class DistanceCalculation(Calculation):
 
     def __init__(
             self,
-            seq_collection: str or None=None,
-            seqid_field_path: str or None = None,
-            profile_field_path: str or None = None,
-            seq_mongo_ids: list or None = None,
+            seq_collection: str | None=None,
+            seqid_field_path: str | None = None,
+            profile_field_path: str | None = None,
+            seq_mongo_ids: list | None = None,
             **kwargs):
         super().__init__(**kwargs)
         self.seq_collection = seq_collection
@@ -421,7 +436,7 @@ class TreeCalculation(Calculation):
     method: str
     collection = 'tree_calculations'
 
-    def __init__(self, dmx_job:str or None = None, method:str or None = None, **kwargs):
+    def __init__(self, dmx_job:str | None = None, method:str | None = None, **kwargs):
         super().__init__(**kwargs)
         self.dmx_job = dmx_job
         self.method = method

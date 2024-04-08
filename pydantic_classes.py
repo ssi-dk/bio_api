@@ -1,3 +1,5 @@
+import typing
+
 from pydantic import BaseModel
 
 
@@ -6,6 +8,7 @@ class NearestNeighborsRequest(BaseModel):
     Parameters for a REST request for a nearest neighbors calculation.
     """
     seq_collection: str
+    filtering: typing.Optional[dict] = None
     profile_field_path: str
     input_mongo_id: str
     cutoff: int

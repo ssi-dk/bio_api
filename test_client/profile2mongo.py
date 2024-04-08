@@ -24,6 +24,8 @@ def profile2mongo(
             collection: str='samples',
             seqid_field_path: str='name',
             profile_field_path: str='profile',
+            species_field_path: str='species',
+            species: str='Salmonella enterica',
             max_items: int=None):
     df = read_csv(filename, sep='\t')
     df = df[['name']].assign(
@@ -45,12 +47,13 @@ def profile2mongo(
             except ValueError:
                 pass
 
-        # Add the (possibly nested) keys defined in seqid_field_path and profile_field_path.
-        # The values are taken from they keys 'name' and 'profile' respectively, and these keys are deleted in the same go.
+        # Add some (possibly nested) mongo fields that are important for testing.
         dictified_seqid_path = dictify_path(seqid_field_path, document.pop('name'))
         document.update(dictified_seqid_path)
         dictified_profile_path = dictify_path(profile_field_path, document.pop('profile'))
         document.update(dictified_profile_path)
+        dictified_species_path = dictify_path(species_field_path, species)
+        document.update(dictified_species_path)
 
         result = db[collection].insert_one(document)
         assert result.acknowledged == True
@@ -68,6 +71,8 @@ if __name__ == '__main__':
     parser.add_argument('--collection', type=str, help="name of collection to import to", default='samples')
     parser.add_argument('--seqid_field_path', type=str, help="path for seqid field - dots are translated into nested fields", default='name')
     parser.add_argument('--profile_field_path', type=str, help="path for profile field - dots are translated into nested fields", default='profile')
+    parser.add_argument('--species_field_path', type=str, help="path for species field - dots are translated into nested fields", default='species')
+    parser.add_argument('--species', type=str, help="Species to insert in species_field_path", default='Salmonella enterica')
     parser.add_argument('--max_items', type=int, help="limit the number of items to import")
     parser.add_argument('--dmx', help="calculate a distance matrix with the imported profiles", action="store_true")
     args = parser.parse_args()
@@ -86,6 +91,8 @@ if __name__ == '__main__':
         collection=args.collection,
         seqid_field_path=args.seqid_field_path,
         profile_field_path=args.profile_field_path,
+        species_field_path=args.species_field_path,
+        species=args.species,
         max_items=max_items
         )
     print("These are the _id strings of the MongoDB documents:")
