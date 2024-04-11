@@ -8,7 +8,7 @@ In general "mongo ids" in this document means strings that MongoDB can turn into
 # General principles of Bio API
 At least for now, all operations in Bio API concern initialization of calculations and retrieving the results of these. Currently, all calculations are done inside Bio API, though it is planned that in later versions Bio API should also be able to control calculations in an HPC environment.
 
-# Data storage
+## Data storage
 Bio API is built for using MongoDB as the primary data storage (although it would be possible to adapt the code to other database backends or even using another API for data storage).
 
 Bio API assumes that all relevant sequence data reside in MongoDB documents (and it never changes these documents in any way). However, it does not make any assumptions concerning collection names and field names for sequence data. Thus, it is up to the client code to 'know' the structure of the sequence documents.
@@ -17,16 +17,15 @@ Bio API stores its own data in collections with hard-coded names.
 
 Generally, everything concerning a particular calculation is stored in a MongoDB document - both input parameters, calculation metadata, and calculation results. However, distance matrices are actually stored in a filesystem. This is because distance matrices tend to grow very large and outgrow the maximum size of a MongoDB document. That means that one should remember to reserve a relatively large filesystem storage area for distance matrices and keep an eye of the amount of free disk space. The location of the filesystem for distance matrices is set via the environment variable DMX_DIR.
 
-## General structuring principles for API requests and responses
+## General structuring principles for requests and responses
 All requests and responses are JSON-formatted.
 
 ### Use of POST and GET requests
 Initializing calculations its done in POST requests, and getting calculation status and results is done in GET requests.
 
-### POST request structure
+### POST requests and responses
 The structure of the POST requests for the different calculation types are described in paragraphs below for each individual calculation type.
 
-### Responses to POST requests
 For now, the responses to all successful POST requests are structured in the same way and consist of just these three fields:
 
 - job_id: the stringified version of the MongoDB ObjectID of the document that contains the calculation object
