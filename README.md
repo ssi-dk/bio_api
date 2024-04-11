@@ -61,22 +61,20 @@ Nearest neighbors is a comparison algorithm that compares the allele profile of 
 - cutoff: integer value indicating the maximum allelic distance (maximum number of differences) between the input profile and the compared profile
 - unknowns_are_diffs: Boolean value that indicates whether an unknown value in an allele profile should count as 'different' or 'equal'
 
-### Output structure
+### GET request output structure
 Nearest Neighbors will output its result as a list of {"id": "string", "diff_count": 0} elements where id is a stringified mongo id of a sequence and diff_count is the number of differences. The list will be sorted with the sequence with the smallest difference first.
 
 ## Distance matrices
 The main input for generating a distance matrix is a list of mongo ids for the sequences which must be compared. The output is in essence a classic distance matrix with the same ID's on both axis; however, the format is adapted to fit within the JSON standard.
 
 ### POST request input fields
-"seq_collection": "string",
-  "seqid_field_path": "string",
-  "profile_field_path": "string",
-  "seq_mongo_ids": [
-    "string"
-  ]
+- seq_collection: name of the MongoDB collection where the sequences exist
+- seqid_field_path: field (or dotted field path) of the 'sequence ID' field that the user wants to see
+- profile_field_path: field (or dotted field path) that holds the allele profile
+- seq_mongo_ids: mongo ids of the input sequences
 
-### Output structure
-TODO
+### GET request output structure
+The "result" field contains a dictionary of dictionaries containing the 'sequence IDs' as keys in both the inner and outer dictionaries, and the distance between each individual sequence pair as value.
 
 ## Trees
 TODO
@@ -84,6 +82,6 @@ TODO
 ### POST request input fields
 TODO
 
-### Output structure
+### GET request output structure
 TODO
 
