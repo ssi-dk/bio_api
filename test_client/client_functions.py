@@ -9,6 +9,7 @@ def call_hello_world():
 
 def call_nearest_neighbors(
         seq_collection: str,
+        filtering: dict,
         input_mongo_id: str,
         profile_field_path: str,
         cutoff: int,
@@ -19,6 +20,7 @@ def call_nearest_neighbors(
         url,
         json={
             'seq_collection': seq_collection,
+            'filtering': filtering,
             'input_mongo_id':  input_mongo_id,
             'profile_field_path': profile_field_path,
             'cutoff': cutoff,
@@ -49,7 +51,7 @@ def call_dmx_from_mongodb(
             'seq_collection': seq_collection,
             'seqid_field_path': seqid_field_path,
             'profile_field_path': profile_field_path,
-            'mongo_ids': mongo_ids
+            'seq_mongo_ids': mongo_ids
             }
     )
     return rest_response

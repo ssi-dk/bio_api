@@ -5,27 +5,31 @@ from pathlib import Path
 
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import HTTPException
 from bson.errors import InvalidId
 
 import calculations
 
-from pydantic_classes import NearestNeighborsRequest,  DMXFromMongoRequest, HCTreeCalcFromDMXJobRequest
+import pydantic_classes as pc
 
-app = FastAPI(title="Bio API", description="REST API for controlling bioinformatic calculations", version="0.1.0")
+app = FastAPI(title="Bio API", description="REST API for controlling bioinformatic calculations", version="0.2.0")
 
 MANUAL_MX_DIR = getenv('BIO_API_TEST_INPUT_DIR', '/test_input')
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 
-def timed_msg(msg: str):
-    print(datetime.now().isoformat(), msg)
+additional_responses = {
+    400: {"model": pc.Message},
+    404: {"model": pc.Message}
+    }
 
-@app.get("/", tags=["Test"])
-def root():
-    return JSONResponse(content={"message": "Hello World"})
-
-@app.post("/v1/nearest_neighbors", tags=["Nearest Neighbors"], status_code=202)
-async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: BackgroundTasks):
-    nn = calculations.NearestNeighbors(
+@app.post("/v1/nearest_neighbors",
+    tags=["Nearest Neighbors"],
+    status_code=201,
+    response_model=pc.CommonPOSTResponse,
+    responses=additional_responses
+    )
+async def nearest_neighbors(rq: pc.NearestNeighborsRequest, background_tasks: BackgroundTasks):
+    calc = calculations.NearestNeighbors(
         seq_collection=rq.seq_collection,
         filtering = rq.filtering,
         profile_field_path=rq.profile_field_path,
@@ -38,178 +42,188 @@ async def nearest_neighbors(rq: NearestNeighborsRequest, background_tasks: Backg
     try:
         # Add the input sequence to the nn object so we can run calculate() without arguments.
         # Note that the input sequence will not be stored as part of the nn object.
-        nn.input_sequence = await nn.query_mongodb_for_input_profile()
+        calc.input_sequence = await calc.query_mongodb_for_input_profile()
     except InvalidId as e:
-        return JSONResponse(
-            status_code=400, # Bad Request
-            content={
-                'error': str(e)
-            }
-        )
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+            )
     except calculations.MissingDataException as e:
-        return JSONResponse(
-            status_code=404, # Not found
-            content={
-                'error': str(e)
-            }
-        )
+        raise HTTPException(
+            status_code=404,
+            detail=str(e)
+            )
 
     # Check that at least the input sequence has the profile field, otherwise there's no reason to run the calculation
     try:
-        _p = nn.input_profile
+        _p = calc.input_profile
     except KeyError:
-        return JSONResponse(
-            status_code=422, # Unprocessable content
-            content={
-                'error': f"Input sequence {nn.input_sequence['_id']} does not have a field named '{nn.profile_field_path}'."
-            }
-        )
+        raise HTTPException(
+            status_code=404,
+            detail=f"Input sequence {calc.input_sequence['_id']} does not have a field named '{calc.profile_field_path}'."
+            )
+    calc._id = await calc.insert_document()
+    background_tasks.add_task(calc.calculate)
 
-    nn._id = await nn.insert_document()
-    background_tasks.add_task(nn.calculate)
-
-    return JSONResponse(
-        status_code=202,
-        content={
-            'job_id': str(nn._id),
-            'created_at': nn.created_at.isoformat(),
-            'status': nn.status
-        }
+    return pc.CommonPOSTResponse(
+        job_id=str(calc._id),
+        created_at=calc.created_at.isoformat(),
+        status=calc.status
     )
 
-@app.get("/v1/nearest_neighbors/{nn_id}", tags=["Nearest Neighbors"])
+@app.get("/v1/nearest_neighbors/{nn_id}",
+    tags=["Nearest Neighbors"],
+    response_model=pc.NearestNeighborsGETResponse,
+    responses=additional_responses
+    )
 async def nn_result(nn_id: str, level:str='full'):
     """
     Get result of a nearest neighbors calculation
     """
     try:
-        nn = calculations.NearestNeighbors.find(nn_id)
+        calc = calculations.NearestNeighbors.find(nn_id)
     except InvalidId as e:
-        return JSONResponse(status_code=400, content={'error': str(e)})
-    if nn is None:
-        err_msg = f"A document with id {nn_id} was not found in collection {calculations.DistanceCalculation.collection}."
-        return JSONResponse(status_code=404, content={'error': err_msg})
-    
-    content:dict = nn.to_dict()
-    
-    if level == 'full' and content['status'] != 'completed':
-        content.pop['result']
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+            )
+    if calc is None:
+        raise HTTPException(
+            status_code=400,
+            detail=f"A document with id {nn_id} was not found in collection {calculations.DistanceCalculation.collection}."
+            )
 
-    return JSONResponse(
-        content=content
+    content:dict = calc.to_dict()
+    
+    if level != 'full' and content['status'] == 'completed':
+        content['result'] = None
+
+    return pc.NearestNeighborsGETResponse(**content)
+
+@app.post("/v1/distance_calculations",
+    response_model=pc.CommonPOSTResponse,
+    tags=["Distances"],
+    status_code=201,
+    responses=additional_responses
     )
-
-@app.post("/v1/distance_calculations", tags=["Distances"], status_code=202)
-async def dmx_from_mongodb(rq: DMXFromMongoRequest, background_tasks: BackgroundTasks):
+async def dmx_from_mongodb(rq: pc.DistanceMatrixRequest, background_tasks: BackgroundTasks):
     """
     Run a distance calculation from selected cgMLST profiles in MongoDB
     """
     
     # Initialize DistanceCalculation object
-    dc = calculations.DistanceCalculation(
+    calc = calculations.DistanceCalculation(
             seq_collection=rq.seq_collection,
             seqid_field_path=rq.seqid_field_path,
             profile_field_path=rq.profile_field_path,
-            seq_mongo_ids=rq.mongo_ids,
+            seq_mongo_ids=rq.seq_mongo_ids,
             created_at=datetime.now(),
             finished_at=None,
     )
     
     # Query MongoDB for the allele profiles
     try:
-        profile_count, cursor = await dc.query_mongodb_for_allele_profiles()
+        _profile_count, cursor = await calc.query_mongodb_for_allele_profiles()
     except InvalidId as e:
-        return JSONResponse(
+        return HTTPException(
             status_code=400, # Bad Request
-            content={
-                'error': str(e)
-            }
+           detail=str(e)
         )
     except calculations.MissingDataException as e:
-        return JSONResponse(
-            status_code=422, # Unprocessable Content
-            content={
-                'message': str(e)
-            }
-        )
+        raise HTTPException(
+            status_code=404,
+            detail=str(e)
+            )
 
-    dc._id = await dc.insert_document()
-    background_tasks.add_task(dc.calculate, cursor)
+    calc._id = await calc.insert_document()
+    background_tasks.add_task(calc.calculate, cursor)
 
-    return JSONResponse(
-        status_code=202,  # Accepted
-        content={
-            'job_id': str(dc._id),
-            'created_at': dc.created_at.isoformat(),
-            'status': dc.status,
-            'profile_count': profile_count,
-        }
+    return pc.CommonPOSTResponse(
+        job_id=str(calc._id),
+        created_at=calc.created_at.isoformat(),
+        status=calc.status
     )
 
-@app.get("/v1/distance_calculations/{dc_id}", tags=["Distances"])
+@app.get("/v1/distance_calculations/{dc_id}",
+    tags=["Distances"],
+    response_model=pc.DistanceMatrixGETResponse,
+    responses=additional_responses
+)
 async def dmx_result(dc_id: str, level:str='full'):
     """
     Get result of a distance calculation
     """
     try:
-        dc = calculations.DistanceCalculation.find(dc_id)
+        calc = calculations.DistanceCalculation.find(dc_id)
     except InvalidId as e:
-        return JSONResponse(status_code=400, content={'error': str(e)})
-    if dc is None:
-        err_msg = f"A document with id {dc_id} was not found in collection {calculations.DistanceCalculation.collection}."
-        return JSONResponse(status_code=404, content={'error': err_msg})
-    content = dc.to_dict()
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+            )
+
+    if calc is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"A document with id {dc_id} was not found in collection {calculations.DistanceCalculation.collection}."
+            )
+
+    content = calc.to_dict()
     
-    if dc.status == 'completed':
-        content['finished_at'] = dc.finished_at.isoformat()
+    if calc.status == 'completed':
+        content['finished_at'] = calc.finished_at.isoformat()
         if level == 'full':
-            with open(Path(dc.folder, 'distance_matrix.json')) as f:
+            # Add result from file
+            with open(Path(calc.folder, 'distance_matrix.json')) as f:
                 content['result'] = load(f)
+        else:
+            content['result'] = None
 
-    return JSONResponse(
-        content=content
+    return pc.DistanceMatrixGETResponse(**content)
+
+@app.post("/v1/trees",
+    response_model=pc.CommonPOSTResponse,
+    tags=["Trees"],
+    status_code=201,
+    responses=additional_responses
     )
-
-@app.post("/v1/trees", tags=["Trees"], status_code=202)
-async def hc_tree_from_dmx_job(rq: HCTreeCalcFromDMXJobRequest, background_tasks: BackgroundTasks):
-    dc = calculations.DistanceCalculation.find(rq.dmx_job)
-    if dc is None:
-        return JSONResponse(
+async def hc_tree_from_dmx_job(rq: pc.HCTreeCalcRequest, background_tasks: BackgroundTasks):
+    calc = calculations.DistanceCalculation.find(rq.dmx_job)
+    if calc is None:
+        return HTTPException(
             status_code=404,
             content={'error': f"Distance matrix job with id {rq.dmx_job} does not exist."}
         )
-    if dc.status != 'completed':
-        return JSONResponse(
-            status_code=422,
-            content={'error': f"Distance matrix job with id {rq.dmx_job} has status '{dc.status}'."}
-        )
+    if calc.status != 'completed':
+        raise HTTPException(
+            status_code=400,
+            detail=str(f"Distance matrix job with id {rq.dmx_job} has status '{calc.status}'.")
+            )
     tc = calculations.TreeCalculation(rq.dmx_job, rq.method)
     tc._id = await tc.insert_document()
     background_tasks.add_task(tc.calculate)
-    return JSONResponse(
-    status_code=202,  # Accepted
-    content={
-        'job_id': str(tc._id),
-        'created_at': tc.created_at.isoformat(),
-        'status': tc.status,
-    }
+    return pc.CommonPOSTResponse(
+        job_id=str(tc._id),
+        created_at=tc.created_at.isoformat(),
+        status=tc.status
 )
 
-@app.get("/v1/trees/{tc_id}", tags=["Trees"])
+@app.get("/v1/trees/{tc_id}",
+    tags=["Trees"],
+    response_model=pc.HCTreeCalcGETResponse,
+    responses=additional_responses
+    )
 async def hc_tree_result(tc_id:str, level:str='full'):
     try:
-        tc = calculations.TreeCalculation.find(tc_id)
+        calc = calculations.TreeCalculation.find(tc_id)
     except InvalidId as e:
-        return JSONResponse(status_code=400, content={'error': str(e)})
-    if tc is None:
-        err_msg = f"A document with id {tc_id} was not found in collection {calculations.DistanceCalculation.collection}."
-        return JSONResponse(status_code=404, content={'error': err_msg})
+        return HTTPException(status_code=400, detail=str(e))
+    if calc is None:
+        return HTTPException(
+            status_code=404,
+            detail=f"A document with id {tc_id} was not found in collection {calculations.DistanceCalculation.collection}.")
 
-    content = tc.to_dict()
-    
-    if level == 'full' and content['status'] != 'completed':
-        content.pop('result')
+    content = calc.to_dict()
+    if level != 'full' and content['status'] == 'completed':
+        content['result'] = None
 
-    return JSONResponse(
-        content=content
-    )
+    return pc.HCTreeCalcGETResponse(**content)

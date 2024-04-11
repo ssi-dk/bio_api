@@ -93,7 +93,7 @@ class Calculation(metaclass=abc.ABCMeta):
             if isinstance(value, datetime.datetime):
                 content[key] = value.isoformat()
             elif key == '_id':
-                content['id'] = str(value)
+                content['job_id'] = str(value)
             else:
                 content[key] = value
         return content
@@ -200,8 +200,7 @@ class NearestNeighbors(Calculation):
             **kwargs):
         super().__init__(**kwargs)
         self.seq_collection = seq_collection
-        if filtering:  # Only apply if there is a filtering, otherwise keep default = dict()
-            self.filtering = filtering
+        self.filtering = filtering
         self.profile_field_path = profile_field_path
         self.input_mongo_id = input_mongo_id
         self.unknowns_are_diffs = unknowns_are_diffs
@@ -302,6 +301,7 @@ class NearestNeighbors(Calculation):
     def to_dict(self):
         content = super().to_dict()
         if 'result' in content:
+            # Add id, remove _id from result
             r: dict
             for r in content['result']:
                 r['id'] = str(r['_id'])
@@ -343,7 +343,7 @@ class DistanceCalculation(Calculation):
     @property
     def folder(self):
         "Return the folder corresponding to the class instance"
-        return Path(DMX_DIR, self.to_dict()['id'])
+        return Path(DMX_DIR, self.to_dict()['job_id'])
 
     @property
     def allele_mx_filepath(self):
@@ -441,6 +441,13 @@ class TreeCalculation(Calculation):
         self.dmx_job = dmx_job
         self.method = method
     
+    async def insert_document(self):
+        await super().insert_document(
+            dmx_job=self.dmx_job,
+            method=self.method
+        )
+        return self._id
+
     async def calculate(self):
         dc = DistanceCalculation.find(self.dmx_job)
         with open(Path(dc.folder, 'distance_matrix.json')) as f:
