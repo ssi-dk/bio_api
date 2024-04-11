@@ -1,5 +1,5 @@
 # About this document
-The main purpose of the README is to deliver a prosaic description of the input and output fields of Bio API. Please also see the ApenAPI specification the Bio API exhibits at <bio_api_url>/docs.
+The main purpose of the README is to deliver a prosaic description of the input and output fields of Bio API. Please also see the OpenAPI (Swagger) specification the Bio API exhibits at <bio_api_url>/docs.
 
 In most cases, nested MongoDB fields can be specified using dotted notation (like "my.nested.mongodb.field").
 
@@ -9,18 +9,18 @@ In general "mongo ids" in this document means strings that MongoDB can turn into
 At least for now, all operations in Bio API concern initialization of calculations and retrieving the results of these. Currently, all calculations are done inside Bio API, though it is planned that in later versions Bio API should also be able to control calculations in an HPC environment.
 
 ## Filesystem storage for distance matrices
-Generally, everything concerning a particular calculation is stored in a MongoDB document - both input parameters and calculation results. However, there is one exception: the distance matrices are actually stored in a filesystem, and distance matrices tend to grow very large and outgrow the maximum size of a MongoDB document. That means that one should remember to reserve a relatively large filesystem storage area for distance matrices and keep an eye of the amount of free disk space. The location of the filesystem for distance matrices is set via the environment variable DMX_DIR.
+Generally, everything concerning a particular calculation is stored in a MongoDB document - both input parameters and calculation results. However, there is one exception: the distance matrices are actually stored in a filesystem, as distance matrices tend to grow very large and outgrow the maximum size of a MongoDB document. That means that one should remember to reserve a relatively large filesystem storage area for distance matrices and keep an eye of the amount of free disk space. The location of the filesystem for distance matrices is set via the environment variable DMX_DIR.
 
 ## General structuring principles for API requests and responses
 All requests and responses are JSON-formatted.
 
-## POST and GET requests
+### Use of POST and GET requests
 Initializing calculations its done in POST requests, and getting calculation status and results is done in GET requests.
 
-## POST requests
+### POST request structure
 The structure of the POST requests for the different calculation types are described in paragraphs below for each individual calculation type.
 
-## Responses to POST requests
+### Responses to POST requests
 
 For now, the responses to all successful POST requests are structured in the same way and consist of just these three fields:
 
@@ -28,8 +28,6 @@ For now, the responses to all successful POST requests are structured in the sam
 - created_at: a string containing an ISO timestamp for when the object was created
 - status: this will in fact always be 'init' when the object is just created. Other possible statuses are 'error' and 'completed'.
 
-# Nearest Neighbors, distance matrices, and trees
-=======
 Of course, some error scenarios are also possible. These will result in a response with a suitable HTTP status code and a message body containing just a "detail" field with details of the error.
 
 ### GET requests
