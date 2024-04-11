@@ -35,7 +35,7 @@ To get the status and possibly the result of calculation you send its job_id in 
 Per default, the GET request will result in a response which contains everything that is stored in the calculation object, which means:
 - All input parameters
 - All status/meta information (these fields are the same as in the POST response plus a 'finished_at' field if the calculation is finished)
-- The full result
+- The full result, which will always be located in a root level field named 'result' (but the structure of the fields' content will vary depending on the calculation type).
 
 However, the GET request takes a 'level' parameter which defaults to 'full', and if this parameter is set to anything else than 'full' (for instance 'status'), the actual result will not be sent with the response. This is handy if you just want to check the status of a long-running job so as to avoid the request-response cycle to hang for at long time, possibly leading to a timeout.
 
@@ -44,7 +44,7 @@ This functionality implements generating trees in Newick file format from cgMLST
 
 The typical workflow is here that you start by defining af group of sequences that you want to look at using Nearest Neighbors. Then, with the mongo ids of those sequences as input, you first generate a distance matrix (which is an intermediate result that is stored separately), and then you generate a tree from that distance matrix, choosing a particular tree-generation method.
 
-## Nearest neighbors
+## Nearest Neighbors
 Nearest neighbors is a comparison algorithm that compares the allele profile of one sequence with a (typically large) set of other allele profiles. It counts the number of allelic differences between the profiles. If a certain profile has a difference count that is smaller than a cutoff value the profiles' mongo ID is reported back to the client.
 
 ### POST request input fields
@@ -55,5 +55,6 @@ Nearest neighbors is a comparison algorithm that compares the allele profile of 
 - cutoff: integer value indicating the maximum allelic distance (maximum number of differences) between the input profile and the compared profile
 - unknowns_are_diffs: Boolean value that indicates whether an unknown value in an allele profile should count as 'different' or 'equal'
 
-### Output fields
+### Output structure
+Nearest Neighbors will output its result as a list of {"id": "string", "diff_count": 0} elements where id is a stringified mongo id of a sequence and diff_count is the number of differences. The list will be sorted with the sequence with the smallest difference first.
 
