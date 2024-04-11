@@ -8,8 +8,14 @@ In general "mongo ids" in this document means strings that MongoDB can turn into
 # General principles of Bio API
 At least for now, all operations in Bio API concern initialization of calculations and retrieving the results of these. Currently, all calculations are done inside Bio API, though it is planned that in later versions Bio API should also be able to control calculations in an HPC environment.
 
-## Filesystem storage for distance matrices
-Generally, everything concerning a particular calculation is stored in a MongoDB document - both input parameters and calculation results. However, there is one exception: the distance matrices are actually stored in a filesystem, as distance matrices tend to grow very large and outgrow the maximum size of a MongoDB document. That means that one should remember to reserve a relatively large filesystem storage area for distance matrices and keep an eye of the amount of free disk space. The location of the filesystem for distance matrices is set via the environment variable DMX_DIR.
+# Data storage
+Bio API is built for using MongoDB as the primary data storage (although it would be possible to adapt the code to other database backends or even using another API for data storage).
+
+Bio API assumes that all relevant sequence data reside in MongoDB documents (and it never changes these documents in any way). However, it does not make any assumptions concerning collection names and field names for sequence data. Thus, it is up to the client code to 'know' the structure of the sequence documents.
+
+Bio API stores its own data in collections with hard-coded names.
+
+Generally, everything concerning a particular calculation is stored in a MongoDB document - both input parameters, calculation metadata, and calculation results. However, distance matrices are actually stored in a filesystem. This is because distance matrices tend to grow very large and outgrow the maximum size of a MongoDB document. That means that one should remember to reserve a relatively large filesystem storage area for distance matrices and keep an eye of the amount of free disk space. The location of the filesystem for distance matrices is set via the environment variable DMX_DIR.
 
 ## General structuring principles for API requests and responses
 All requests and responses are JSON-formatted.
@@ -59,10 +65,15 @@ Nearest neighbors is a comparison algorithm that compares the allele profile of 
 Nearest Neighbors will output its result as a list of {"id": "string", "diff_count": 0} elements where id is a stringified mongo id of a sequence and diff_count is the number of differences. The list will be sorted with the sequence with the smallest difference first.
 
 ## Distance matrices
-TODO
+The main input for generating a distance matrix is a list of mongo ids for the sequences which must be compared. The output is in essence a classic distance matrix with the same ID's on both axis; however, the format is adapted to fit within the JSON standard.
 
 ### POST request input fields
-TODO
+"seq_collection": "string",
+  "seqid_field_path": "string",
+  "profile_field_path": "string",
+  "seq_mongo_ids": [
+    "string"
+  ]
 
 ### Output structure
 TODO
