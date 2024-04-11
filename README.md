@@ -77,11 +77,11 @@ The main input for generating a distance matrix is a list of mongo ids for the s
 The "result" field contains a dictionary of dictionaries containing the 'sequence IDs' as keys in both the inner and outer dictionaries, and the distance between each individual sequence pair as value.
 
 ## Trees
-TODO
+A tree represents the distances between the elements in the distance matrix in a hierarchical way, using a particular tree generation method. The tree is formatted in Newick format. It can be relevant to produce more trees from the same distance matrix using different tree generation methods as the methods produce (of course) slightly different trees.
 
 ### POST request input fields
-TODO
+- dmx_job: the job_id of the distance matrix calculation to use
+- method: a tree calculation method. Allowed methods are 'single', 'complete', and probably others (this has to be investigated).
 
 ### GET request output structure
-TODO
-
+The result of the tree generation calculation is the generated tree in Newick format.
