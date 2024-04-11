@@ -21,7 +21,6 @@ Initializing calculations its done in POST requests, and getting calculation sta
 The structure of the POST requests for the different calculation types are described in paragraphs below for each individual calculation type.
 
 ### Responses to POST requests
-
 For now, the responses to all successful POST requests are structured in the same way and consist of just these three fields:
 
 - job_id: the stringified version of the MongoDB ObjectID of the document that contains the calculation object
@@ -30,15 +29,20 @@ For now, the responses to all successful POST requests are structured in the sam
 
 Of course, some error scenarios are also possible. These will result in a response with a suitable HTTP status code and a message body containing just a "detail" field with details of the error.
 
-### GET requests
-To get the status and possibly the result of calculation you send its job_id in a GET request. This means that the client application must have somehow remembered this id when it was sent back to the client with the POST response. Without the job_id you cannot get any result back from Bio API.
+### GET requests and responses
+To get the status and possibly the result of calculation you send its job_id in a GET request. This means that the client application must have somehow remembered this id when it was sent back to the client with the POST response. Without the job_id you cannot get a result back from Bio API.
 
-Per default, the GET request will result in a response which contains everything that is stored in the calculation object, including the full result. However, the GET request takes a 'level' parameter which defaults to 'full', and if this parameter is set to anything else than 'full' (for instance 'status'), the actual result will not be sent with the response. This is handy if you just want to check the status of a long-running job so as to avoid the request-response cycle to hang for at long time, possible leading to a timeout.
+Per default, the GET request will result in a response which contains everything that is stored in the calculation object, which means:
+- All input parameters
+- All status/meta information (these fields are the same as in the POST response plus a 'finished_at' field if the calculation is finished)
+- The full result
+
+However, the GET request takes a 'level' parameter which defaults to 'full', and if this parameter is set to anything else than 'full' (for instance 'status'), the actual result will not be sent with the response. This is handy if you just want to check the status of a long-running job so as to avoid the request-response cycle to hang for at long time, possibly leading to a timeout.
 
 # Nearest Neighbors, distance matrices, and trees
 This functionality implements generating trees in Newick file format from cgMLST allele profiles. The allele profiles must exist in a MongoDB database in a certain field (possibly a nested field) on the sequence documents.
 
-The typical workflow is here that you start by defining af group of sequences that you want to look at using Nearest Neigbors. Then, with the mongo ids of those seuqences as input, you first generate a distance matrix (which is an intermediate result that is stored separately), and then you generate a tree from that distance matrix, choosing a particular tree-generation method.
+The typical workflow is here that you start by defining af group of sequences that you want to look at using Nearest Neighbors. Then, with the mongo ids of those sequences as input, you first generate a distance matrix (which is an intermediate result that is stored separately), and then you generate a tree from that distance matrix, choosing a particular tree-generation method.
 
 ## Nearest neighbors
 Nearest neighbors is a comparison algorithm that compares the allele profile of one sequence with a (typically large) set of other allele profiles. It counts the number of allelic differences between the profiles. If a certain profile has a difference count that is smaller than a cutoff value the profiles' mongo ID is reported back to the client.
