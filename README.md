@@ -58,3 +58,21 @@ Nearest neighbors is a comparison algorithm that compares the allele profile of 
 ### Output structure
 Nearest Neighbors will output its result as a list of {"id": "string", "diff_count": 0} elements where id is a stringified mongo id of a sequence and diff_count is the number of differences. The list will be sorted with the sequence with the smallest difference first.
 
+## Distance matrices
+TODO
+
+### POST request input fields
+TODO
+
+### Output structure
+TODO
+
+## Trees
+TODO
+
+### POST request input fields
+TODO
+
+### Output structure
+TODO
+
