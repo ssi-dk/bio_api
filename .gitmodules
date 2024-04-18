@@ -1,0 +1,4 @@
+[submodule "test_client/microreact_integration"]
+	path = test_client/microreact_integration
+	url = git@github.com:ssi-dk/microreact_integration.git
+	branch = main
