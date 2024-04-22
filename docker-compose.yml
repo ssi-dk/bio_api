@@ -4,7 +4,8 @@ services:
     volumes:
       - ./data/mongodb:/data/db
       - ./dumps/mongodb:/dumps
-
+    ports:
+      - "27017:27017"
 #    rabbitmq:
 #      image: rabbitmq
 #      healthcheck:
