@@ -13,8 +13,8 @@ RUN mamba install -c bioconda --file requirements_bioconda.txt
 VOLUME /dmx_data
 
 # Document which ports are exposed
-# EXPOSE 7000
+EXPOSE 7000
 
 # Start Uvicorn and listen on port
 WORKDIR /app
-# ENTRYPOINT ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7000", "--reload"]
+ENTRYPOINT ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
