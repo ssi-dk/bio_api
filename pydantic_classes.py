@@ -53,7 +53,7 @@ class CommonPOSTResponse(BaseModel):
     """Common response class for all clculation responses (both POST and GET)"""
     job_id: str
     created_at: str
-    status: str
+    status: typing.Literal['init', 'completed', 'error']
 
 
 class CommonGETResponse(CommonPOSTResponse):
