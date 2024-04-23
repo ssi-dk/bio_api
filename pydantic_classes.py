@@ -1,4 +1,5 @@
 import typing
+from enum import Enum
 
 from pydantic import BaseModel
 
@@ -49,11 +50,17 @@ class Message(BaseModel):
     detail: str
 
 
+class Status(str, Enum):
+    init = "init"
+    completed = "completed"
+    error = "error"
+
+
 class CommonPOSTResponse(BaseModel):
     """Common response class for all clculation responses (both POST and GET)"""
     job_id: str
     created_at: str
-    status: typing.Literal['init', 'completed', 'error']
+    status: Status
 
 
 class CommonGETResponse(CommonPOSTResponse):
