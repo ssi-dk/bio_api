@@ -2,6 +2,7 @@ from os import getenv
 from pandas import read_csv
 import argparse
 import pymongo
+import json
 
 import client_functions
 
@@ -96,7 +97,7 @@ if __name__ == '__main__':
         max_items=max_items
         )
     print("These are the _id strings of the MongoDB documents:")
-    print(inserted_ids)
+    print(json.dumps(inserted_ids))
 
     if args.dmx:
         print("--dmx option set; calculating distance matrix")
