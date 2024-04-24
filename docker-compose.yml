@@ -33,7 +33,8 @@ services:
     ports:
       - "8000:8000"
     tty: true
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    entrypoint: ["uvicorn"]
+    command: ["main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     depends_on:
         mongodb:
           condition: service_started
