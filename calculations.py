@@ -425,6 +425,9 @@ class DistanceCalculation(Calculation):
             dist_mx_df: DataFrame = await self._dmx_df_from_amx_tsv()
             dist_mx_dict = dist_mx_df.to_dict(orient='index')
             await self._save_dmx_as_json(dist_mx_dict)
+            # We do not store the distance matrix in MongoDB because it might grow to more than 16 MB.
+            # Instead we store the list of sequence ID's.
+            # print(allele_mx_df[0])
             await self.store_result("Distance matrix stored on filesystem")
             print("Distance matrix calculation is finished!")
         except MissingDataException as e:
