@@ -61,7 +61,7 @@ class MongoAPI:
         cursor = self.db[collection].find(filter, {field_path: True for field_path in field_paths})
         return document_count, cursor
 
-connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
+connection_string = getenv('BIO_API_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
 print(f"Connection string: {connection_string}")
 mongo_api = MongoAPI(connection_string)
 
