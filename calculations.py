@@ -431,7 +431,7 @@ class DistanceCalculation(Calculation):
             await self._save_dmx_as_json(dist_mx_dict)
             # We do not store the distance matrix in MongoDB because it might grow to more than 16 MB.
             # Instead we just store a dictionary of sequence IDs and their related mongo IDs.
-            await self.store_result({'mongo_ids': mongo_ids_dict})
+            await self.store_result({'seq_to_mongo': mongo_ids_dict})
             print("Distance matrix calculation is finished!")
         except MissingDataException as e:
             await self.store_result(str(e), 'error')
