@@ -71,7 +71,7 @@ class Calculation(metaclass=abc.ABCMeta):
     created_at: datetime.datetime | None
     finished_at: datetime.datetime | None
     status: str
-    result: str or None = None
+    result: str | None = None
 
     def __init__(
             self,
