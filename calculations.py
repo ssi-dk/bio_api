@@ -369,8 +369,11 @@ class DistanceCalculation(Calculation):
         return profile_count, cursor
 
     async def _amx_df_from_mongodb_cursor(self, cursor):
-        "Generate an allele matrix as dataframe containing the allele profiles from the MongoDB cursor"
+        ("Generate an allele matrix as dataframe containing the allele profiles from the MongoDB cursor. ")
+        ("At the same time, generate a dict for tracing sequence IDs back to mongo IDs.")
+        ("The dict will be stored in the calculation document.")
         full_dict = dict()
+        mongo_ids = dict()
 
         try:
             while True:
@@ -382,13 +385,14 @@ class DistanceCalculation(Calculation):
                 try:
                     allele_profile = hoist(mongo_item, self.profile_field_path)
                     full_dict[sequence_id] = allele_profile
+                    mongo_ids[sequence_id] = mongo_item['_id']
                 except KeyError:
                     raise MissingDataException(f"Sequence document with id {str(mongo_item['_id'])} does not contain profile field path '{self.profile_field_path}'.")
         except StopIteration:
             pass
 
         df = DataFrame.from_dict(full_dict, 'index', dtype=str)
-        return df
+        return df, mongo_ids
 
     async def _save_amx_df_as_tsv(self, allele_mx_df):
         "Save allele matrix dataframe as TSV file"
@@ -420,15 +424,14 @@ class DistanceCalculation(Calculation):
 
     async def calculate(self, cursor):
         try:
-            allele_mx_df: DataFrame = await self._amx_df_from_mongodb_cursor(cursor)
+            allele_mx_df, mongo_ids_dict = await self._amx_df_from_mongodb_cursor(cursor)
             await self._save_amx_df_as_tsv(allele_mx_df)
             dist_mx_df: DataFrame = await self._dmx_df_from_amx_tsv()
             dist_mx_dict = dist_mx_df.to_dict(orient='index')
             await self._save_dmx_as_json(dist_mx_dict)
             # We do not store the distance matrix in MongoDB because it might grow to more than 16 MB.
-            # Instead we store the list of sequence ID's.
-            print(allele_mx_df.index)
-            await self.store_result("Distance matrix stored on filesystem")
+            # Instead we just store a dictionary of sequence IDs and their related mongo IDs.
+            await self.store_result({'mongo_ids': mongo_ids_dict})
             print("Distance matrix calculation is finished!")
         except MissingDataException as e:
             await self.store_result(str(e), 'error')
