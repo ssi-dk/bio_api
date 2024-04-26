@@ -99,7 +99,16 @@ A tree represents the distances between the elements in the distance matrix in a
 #### Trees POST request input fields
 
 - dmx_job: the job_id of the distance matrix calculation to use
-- method: a tree calculation method. Allowed methods are 'single', 'complete', and probably others (this has to be investigated).
+- method: a tree calculation method. Allowed methods:
+  - single
+  - complete
+  - average
+  - weighted
+  - centroid
+  - median
+  - ward
+
+The metods are described here: <https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html>
 
 ### Trees GET request output structure
 
