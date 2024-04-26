@@ -40,7 +40,8 @@ class HCTreeCalcRequest(BaseModel):
     Distances are taken directly from the request.
     """
     dmx_job: str
-    method: str
+    # See https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html
+    method: typing.Literal["single", "complete", "average", "weighted", "centroid", "median", "ward"]
 
 
 
@@ -57,7 +58,7 @@ class Status(str, Enum):
 
 
 class CommonPOSTResponse(BaseModel):
-    """Common response class for all clculation responses (both POST and GET)"""
+    """Common response base class for all calculation responses (both POST and GET)"""
     job_id: str
     created_at: str
     status: Status
