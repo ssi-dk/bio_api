@@ -26,9 +26,13 @@ if __name__ == '__main__':
     print(f"MongoDB field containing cgMLST profile: {args.profile_field_path}")
 
     # Find ids based on species and the desired sequence count
-    mongo_ids = db[args.seq_collection].aggregate(
-        [ { '$sample': { 'size': args.sequence_count } } ]
-    )
+
+    pipeline = [
+        { '$sample': { 'size': args.sequence_count } },
+        { '$project': { '_id': 1 } }
+    ]
+
+    mongo_ids = db[args.seq_collection].aggregate(pipeline)
     print(list(mongo_ids))
 
     mongo_ids = ['66226e8d4633f2bc243e03c3', '66226e8d4633f2bc243e03c4', '66226e8d4633f2bc243e03c5']
