@@ -6,19 +6,6 @@ import json
 
 import client_functions
 
-def dictify_path(dotted_path:str, value:any):
-    path_elements = dotted_path.split('.')
-    emp_dict = p_list = {}
-    i = 0
-    for item in path_elements:
-        i += 1
-        if i == len(path_elements):
-            p_list[item] = value
-        else:
-            p_list[item] = {}
-        p_list = p_list[item]
-    return emp_dict
-
 def profile2mongo(
             db,
             filename: str,
@@ -49,11 +36,11 @@ def profile2mongo(
                 pass
 
         # Add some (possibly nested) mongo fields that are important for testing.
-        dictified_seqid_path = dictify_path(seqid_field_path, document.pop('name'))
+        dictified_seqid_path = client_functions.dictify_path(seqid_field_path, document.pop('name'))
         document.update(dictified_seqid_path)
-        dictified_profile_path = dictify_path(profile_field_path, document.pop('profile'))
+        dictified_profile_path = client_functions.dictify_path(profile_field_path, document.pop('profile'))
         document.update(dictified_profile_path)
-        dictified_species_path = dictify_path(species_field_path, species)
+        dictified_species_path = client_functions.dictify_path(species_field_path, species)
         document.update(dictified_species_path)
 
         result = db[collection].insert_one(document)

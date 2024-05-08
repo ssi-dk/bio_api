@@ -2,6 +2,19 @@ import requests
 
 base_url = 'http://bio_api:8000'
 
+def dictify_path(dotted_path:str, value:any):
+    path_elements = dotted_path.split('.')
+    emp_dict = p_list = {}
+    i = 0
+    for item in path_elements:
+        i += 1
+        if i == len(path_elements):
+            p_list[item] = value
+        else:
+            p_list[item] = {}
+        p_list = p_list[item]
+    return emp_dict
+
 def call_hello_world():
     url = base_url + '/'
     rest_response = requests.get(url)
