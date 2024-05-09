@@ -77,8 +77,12 @@ class NearestNeighborsGETResponse(NearestNeighborsRequest, CommonGETResponse):
     result: typing.Optional[list[Neighbor]]
 
 
+class DistanceMatrixResult(BaseModel):
+    seq_to_mongo: dict
+    distances: typing.Optional[dict] = None
+
 class DistanceMatrixGETResponse(DistanceMatrixRequest, CommonGETResponse):
-    result: typing.Optional[dict]
+    result: DistanceMatrixResult
 
 
 class HCTreeCalcGETResponse(HCTreeCalcRequest, CommonGETResponse):
