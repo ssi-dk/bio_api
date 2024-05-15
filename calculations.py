@@ -262,16 +262,17 @@ class NearestNeighbors(Calculation):
         
         pipeline = list()
 
-        print("Filters to apply to sequences before running nearest neighbors:")
-        for k, v in self.filtering.items():
-            print(f"{k} must be {v}")
-            pipeline.append(
-            {'$match':
-                {
-                    k: {'$eq': v},
+        if self.filtering is not None:
+            print("Filters to apply to sequences before running nearest neighbors:")
+            for k, v in self.filtering.items():
+                print(f"{k} must be {v}")
+                pipeline.append(
+                {'$match':
+                    {
+                        k: {'$eq': v},
+                    }
                 }
-            }
-        )
+            )
 
         pipeline.append(
             {'$match':
