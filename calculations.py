@@ -263,15 +263,19 @@ class NearestNeighbors(Calculation):
         pipeline = list()
 
         print("Filters to apply to sequences before running nearest neighbors:")
-        for k, v in self.filtering.items():
-            print(f"{k} must be {v}")
-            pipeline.append(
-            {'$match':
-                {
-                    k: {'$eq': v},
+        # There must always be a filter on species as different species have different cgMLST schemas
+        try:
+            for k, v in self.filtering.items():
+                print(f"{k} must be {v}")
+                pipeline.append(
+                {'$match':
+                    {
+                        k: {'$eq': v},
+                    }
                 }
-            }
-        )
+            )
+        except KeyError as e:
+            await self.store_result(str(e), 'error')
 
         pipeline.append(
             {'$match':
