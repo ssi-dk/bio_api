@@ -71,7 +71,6 @@ if __name__ == '__main__':
                         help="path for species field - dots are translated into nested fields",
                         default='categories.species_detection.summary.species')
     parser.add_argument('--species', type=str, help="Species to insert in species_field_path", default='Salmonella enterica')
-    parser.add_argument('--max_items', type=int, help="limit the number of items to import")
     args = parser.parse_args()
     connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
     connection = pymongo.MongoClient(connection_string)
@@ -79,8 +78,6 @@ if __name__ == '__main__':
     print(f"Connection string: {connection_string}")
     print(f"Import to collection: {args.collection}")
     print(f"MongoDB field containing cgMLST profile: {args.profile_field_path}")
-    print(f"Max items to import: {args.max_items}")
-    max_items = int(args.max_items) if args.max_items else None
 
     # updated_ids = import_profiles(
     #     db,
