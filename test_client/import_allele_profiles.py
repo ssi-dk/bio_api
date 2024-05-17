@@ -11,12 +11,14 @@ import client_functions
 def import_profiles(
             db,
             filename: str,
-            collection: str='samples',
-            seqid_field_path: str='name',
-            profile_field_path: str='profile',
-            species_field_path: str='species',
-            species: str='Salmonella enterica'):
+            collection: str,
+            profile_field_path: str,
+            species_field_path: str,
+            species: str
+    ):
     
+    sequences_to_update = db[collection].count_documents({})
+    print(sequences_to_update)
 
     df = read_csv(filename, sep='\t')
     updated_ids = list()
@@ -60,7 +62,7 @@ if __name__ == '__main__':
                         default='categories.species_detection.summary.species')
     parser.add_argument('--species', type=str, help="Species to insert in species_field_path", default='Salmonella enterica')
     args = parser.parse_args()
-    connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
+    connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://localhost:27017/bio_api_test')
     connection = pymongo.MongoClient(connection_string)
     db = connection.get_database()
     print(f"Connection string: {connection_string}")
