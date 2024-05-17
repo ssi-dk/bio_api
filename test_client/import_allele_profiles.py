@@ -4,6 +4,8 @@ import argparse
 import pymongo
 import json
 
+import pymongo.cursor
+
 import client_functions
 
 def import_profiles(
@@ -13,40 +15,26 @@ def import_profiles(
             seqid_field_path: str='name',
             profile_field_path: str='profile',
             species_field_path: str='species',
-            species: str='Salmonella enterica',
-            max_items: int=None):
+            species: str='Salmonella enterica'):
+    
+
     df = read_csv(filename, sep='\t')
-    df = df[['name']].assign(
-                    profile=df.set_index(['name']).to_dict(orient='records')
-    )
-    inserted_ids = list()
-    for _index, row in df.iterrows():
-        if max_items and (_index >= max_items):
-            print(f"Reached maximum of {max_items} items.")
-            break
+    updated_ids = list()
+    # for _index, row in df.iterrows():
 
-        # Each rows' to_dict() will be a MongoDB document
-        document = row.to_dict()
+    #     document = row.to_dict()
 
-        # Make sure that all numberish values are ints
-        for key, value in document['profile'].items():
-            try:
-                document['profile'][key] = int(value)
-            except ValueError:
-                pass
+    #     # Make sure that all numberish values are ints
+    #     for key, value in document['profile'].items():
+    #         try:
+    #             document['profile'][key] = int(value)
+    #         except ValueError:
+    #             pass
 
-        # Add some (possibly nested) mongo fields that are important for testing.
-        dictified_seqid_path = client_functions.dictify_path(seqid_field_path, document.pop('name'))
-        document.update(dictified_seqid_path)
-        dictified_profile_path = client_functions.dictify_path(profile_field_path, document.pop('profile'))
-        document.update(dictified_profile_path)
-        dictified_species_path = client_functions.dictify_path(species_field_path, species)
-        document.update(dictified_species_path)
-
-        result = db[collection].insert_one(document)
-        assert result.acknowledged == True
-        inserted_ids.append(str(result.inserted_id))
-    return inserted_ids
+    #     result = db[collection].insert_one(document)
+    #     assert result.acknowledged == True
+    #     updated_ids.append(str(result.inserted_id))
+    return updated_ids
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -79,14 +67,13 @@ if __name__ == '__main__':
     print(f"Import to collection: {args.collection}")
     print(f"MongoDB field containing cgMLST profile: {args.profile_field_path}")
 
-    # updated_ids = import_profiles(
-    #     db,
-    #     args.filename,
-    #     collection=args.collection,
-    #     profile_field_path=args.profile_field_path,
-    #     species_field_path=args.species_field_path,
-    #     species=args.species,
-    #     max_items=max_items
-    #     )
-    # print("These are the _id strings of the MongoDB documents:")
-    # print(json.dumps(updated_ids))
+    updated_ids = import_profiles(
+        db,
+        args.filename,
+        collection=args.collection,
+        profile_field_path=args.profile_field_path,
+        species_field_path=args.species_field_path,
+        species=args.species
+        )
+    print("These are the _id strings of the MongoDB documents:")
+    print(json.dumps(updated_ids))
