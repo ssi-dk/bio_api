@@ -13,8 +13,6 @@ def import_profiles(
             filename: str,
             collection: str,
             profile_field_path: str,
-            species_field_path: str,
-            species: str
     ):
     
     stu_count = db[collection].count_documents({'categories.cgmlst.report.alleles': {'$exists': 0}})
@@ -59,12 +57,6 @@ if __name__ == '__main__':
                         type=str,
                         help="path for profile field - dots are translated into nested fields",
                         default='categories.cgmlst.report.alleleles')
-    # species_field_path will be used to filter sequences so we know that all samples where we add an allele profile has this species.
-    parser.add_argument('--species_field_path',
-                        type=str,
-                        help="path for species field - dots are translated into nested fields",
-                        default='categories.species_detection.summary.species')
-    parser.add_argument('--species', type=str, help="Species to insert in species_field_path", default='Salmonella enterica')
     args = parser.parse_args()
     connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://localhost:27017/bio_api_test')
     connection = pymongo.MongoClient(connection_string)
@@ -78,8 +70,6 @@ if __name__ == '__main__':
         args.filename,
         collection=args.collection,
         profile_field_path=args.profile_field_path,
-        species_field_path=args.species_field_path,
-        species=args.species
         )
     print("These are the _id strings of the MongoDB documents:")
     print(json.dumps(updated_ids))
