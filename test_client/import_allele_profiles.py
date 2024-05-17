@@ -51,8 +51,12 @@ def import_profiles(
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
                     prog='import_profiles',
-                    description="Import allele profiles from a .tsv file and add them to existing sequences i MongoDB. " + 
-                        "The first column in the file must contain the user-oriented sequence id, and this column MUST be named 'name'.",
+                    description=\
+                        "Import allele profiles from a .tsv file and add them to existing sequences i MongoDB. " +
+                        "The script will add allele profiles to existing samples that has the desired species and " +
+                        "does not already have an allele profile. " +
+                        "It will continue until either all the samples has got an allele profile or " +
+                        "there are no more allele profiles to add."
     )
 
     parser.add_argument('filename')
