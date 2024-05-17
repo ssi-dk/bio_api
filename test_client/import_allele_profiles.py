@@ -22,22 +22,23 @@ def import_profiles(
     sequences_to_update = db[collection].find({'categories.cgmlst.report.alleleles': {'$exists': 0}})
     print(sequences_to_update)
 
+    # for s in sequences_to_update:
+    #     print(s['_id'])
+
     df = read_csv(filename, sep='\t')
     updated_ids = list()
-    # for _index, row in df.iterrows():
+    for _index, row in df.iterrows():
 
-    #     document = row.to_dict()
+        document = row.to_dict()
+        print(document['name'])
 
-    #     # Make sure that all numberish values are ints
-    #     for key, value in document['profile'].items():
-    #         try:
-    #             document['profile'][key] = int(value)
-    #         except ValueError:
-    #             pass
+        # Make sure that all numberish values are ints
+        # for key, value in document.items():
+        #     print(key, value)
 
-    #     result = db[collection].insert_one(document)
-    #     assert result.acknowledged == True
-    #     updated_ids.append(str(result.inserted_id))
+        # result = db[collection].insert_one(document)
+        # assert result.acknowledged == True
+        # updated_ids.append(str(result.inserted_id))
     return updated_ids
 
 if __name__ == '__main__':
