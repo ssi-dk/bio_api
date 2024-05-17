@@ -17,8 +17,8 @@ def import_profiles(
             species: str
     ):
     
-    stu_count = db[collection].count_documents({'categories.cgmlst.report.alleleles': {'$exists': 0}})
-    print(stu_count)
+    stu_count = db[collection].count_documents({'categories.cgmlst.report.alleles': {'$exists': 0}})
+    print(f"{str(stu_count)} sequences are missing allele profile.")
 
     sequences_to_update: pymongo.cursor.Cursor
     sequences_to_update = db[collection].find({'categories.cgmlst.report.alleleles': {'$exists': 0}})
