@@ -17,7 +17,11 @@ def import_profiles(
             species: str
     ):
     
-    sequences_to_update = db[collection].count_documents({})
+    stu_count = db[collection].count_documents({'categories.cgmlst.report.alleleles': {'$exists': 0}})
+    print(stu_count)
+
+    sequences_to_update: pymongo.cursor.Cursor
+    sequences_to_update = db[collection].find({'categories.cgmlst.report.alleleles': {'$exists': 0}})
     print(sequences_to_update)
 
     df = read_csv(filename, sep='\t')
