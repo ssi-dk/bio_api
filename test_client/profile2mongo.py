@@ -6,6 +6,16 @@ import json
 
 import client_functions
 
+def recursive_merge(dict1, dict2):
+    for key, value in dict2.items():
+        if key in dict1 and isinstance(dict1[key], dict) and isinstance(value, dict):
+            # Recursively merge nested dictionaries
+            dict1[key] = recursive_merge(dict1[key], value)
+        else:
+            # Merge non-dictionary values
+            dict1[key] = value
+    return dict1
+
 def profile2mongo(
             db,
             filename: str,
@@ -37,11 +47,11 @@ def profile2mongo(
 
         # Add some (possibly nested) mongo fields that are important for testing.
         dictified_seqid_path = client_functions.dictify_path(seqid_field_path, document.pop('name'))
-        document.update(dictified_seqid_path)
+        document = recursive_merge(document, dictified_seqid_path)
         dictified_profile_path = client_functions.dictify_path(profile_field_path, document.pop('profile'))
-        document.update(dictified_profile_path)
+        document = recursive_merge(document, dictified_profile_path)
         dictified_species_path = client_functions.dictify_path(species_field_path, species)
-        document.update(dictified_species_path)
+        document = recursive_merge(document, dictified_species_path)
 
         result = db[collection].insert_one(document)
         assert result.acknowledged == True
