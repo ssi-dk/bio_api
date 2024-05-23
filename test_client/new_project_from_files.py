@@ -3,8 +3,8 @@ from datetime import datetime
 from pathlib import Path
 from json import dumps
 
-import common
-from functions import new_project
+from microreact_integration import common
+from microreact_integration.functions import new_project
 
 parser = argparse.ArgumentParser(description="Create a new minimal project in Microreact using a tree and a metadata table from files.")
 parser.add_argument("tree", help="Path to a Newick file containing the initial tree")
