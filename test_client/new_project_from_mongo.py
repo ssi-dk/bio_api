@@ -45,7 +45,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 connection_string = getenv('BIO_API_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
-connection:pymongo.MongoClient = pymongo.MongoClient()
+connection:pymongo.MongoClient = pymongo.MongoClient(connection_string)
 db = connection.get_database('bio_api_test')
 trees_str: str = args.trees
 tree_calcs = list()
