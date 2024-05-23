@@ -4,6 +4,7 @@ from os import getenv
 from json import dumps
 from string import ascii_letters,digits 
 from random import choice
+from pathlib import Path
 
 import pymongo
 from bson.objectid import ObjectId
@@ -91,8 +92,15 @@ print()
 print("Metadata values:")
 print(metadata_values)
 
-# Create a distance matrix Vega-Lite component
-# First, get the distance matrix from Bio API
+# If possible, create a distance matrix Vega-Lite component
+# To do this, we need the REST API functionality of Bio API which is only accessible when in Docker context.
+file_to_check = Path('/.dockerenv')
+if file_to_check.exists():
+    print("Script is running in Docker environment.")
+else:
+    print("Script is NOT running in Docker environment.")
+
+# Get the distance matrix from Bio API (because it's not in MongoDB)
 # dmx_from_bio_api = call_dmx_result(dmx_job_id)
 # print(dmx_from_bio_api)
 
