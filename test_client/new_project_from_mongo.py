@@ -23,7 +23,6 @@ help_desc = ("Create a test project in Microreact using one or more trees and so
              "The script depends on a MongoDB database defined by BIO_API_MONGO_CONNECTION, or in the case this environment "
              "variable is not set, a MongoDB database on mongodb://mongodb:27017/bio_api_test. "
              "A data table with fake metadata will be generated automatically. "
-             "The script is intended to be use directly from a command shell and has not been tested from inside a Docker container."
              )
 parser = argparse.ArgumentParser(description=help_desc)
 parser.add_argument(
