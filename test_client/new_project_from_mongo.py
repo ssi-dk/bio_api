@@ -96,9 +96,15 @@ if file_to_check.exists():
     dmx_from_bio_api = call_dmx_result(dmx_job_id)
     print("Response code from endpoint:")
     print(dmx_from_bio_api)
+    r: dict
     r = dmx_from_bio_api.json()
     if r['status'] == 'completed':
         print("DMX job seems to be OK")
+        print("Keys in DMX job document:")
+        print(r.keys())
+        print("Distances from DMX job result:")
+        distances: dict = r['result']['distances']
+        print(distances)
     else:
         print("DMX job is not completed")
         exit()
