@@ -111,15 +111,15 @@ if file_to_check.exists():
 else:
     print("Script is NOT running in Docker environment. We cannot a a distance matrix")
 
-# rest_response = functions.new_project(
-#     project_name=args.project_name,
-#     tree_calcs=tree_calcs,
-#     metadata_keys=metadata_keys,
-#     metadata_values=metadata_values,
-#     mr_access_token=common.MICROREACT_ACCESS_TOKEN,
-#     mr_base_url=common.MICROREACT_BASE_URL,
-#     verify = not args.noverify
-#     )
-# print(f"HTTP response code: {str(rest_response)}")
-# print("Response as actual JSON:")
-# print(dumps(rest_response.json()))
+rest_response = functions.new_project(
+    project_name=args.project_name,
+    tree_calcs=tree_calcs,
+    metadata_keys=metadata_keys,
+    metadata_values=metadata_values,
+    mr_access_token=common.MICROREACT_ACCESS_TOKEN,
+    mr_base_url=common.MICROREACT_BASE_URL,
+    verify = not args.noverify
+    )
+print(f"HTTP response code: {str(rest_response)}")
+print("Response as actual JSON:")
+print(dumps(rest_response.json()))
