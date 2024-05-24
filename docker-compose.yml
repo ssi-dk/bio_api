@@ -55,4 +55,8 @@ services:
       #   condition: service_started
       # rabbitmq:
       #   condition: service_healthy
+    environment:
+        - MICROREACT_BASE_URL=$MICROREACT_BASE_URL
+        - MICROREACT_ACCESS_TOKEN=$MICROREACT_ACCESS_TOKEN
+        - USER=$USER
 
