@@ -5,6 +5,7 @@ from json import dumps
 from string import ascii_letters,digits 
 from random import choice
 from pathlib import Path
+from sys import exit
 
 import pymongo
 from bson.objectid import ObjectId
@@ -95,6 +96,12 @@ if file_to_check.exists():
     dmx_from_bio_api = call_dmx_result(dmx_job_id)
     print("Response code from endpoint:")
     print(dmx_from_bio_api)
+    r = dmx_from_bio_api.json()
+    if r['status'] == 'completed':
+        print("DMX job seems to be OK")
+    else:
+        print("DMX job is not completed")
+        exit()
 else:
     print("Script is NOT running in Docker environment. We cannot a a distance matrix")
 
