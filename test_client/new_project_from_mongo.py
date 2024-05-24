@@ -109,13 +109,15 @@ if file_to_check.exists():
         print("DMX job is not completed")
         exit()
 else:
-    print("Script is NOT running in Docker environment. We cannot a a distance matrix")
+    print("Script is NOT running in Docker environment. We cannot get a distance matrix")
+    distances = None
 
 rest_response = functions.new_project(
     project_name=args.project_name,
     tree_calcs=tree_calcs,
     metadata_keys=metadata_keys,
     metadata_values=metadata_values,
+    distances=distances,
     mr_access_token=common.MICROREACT_ACCESS_TOKEN,
     mr_base_url=common.MICROREACT_BASE_URL,
     verify = not args.noverify
