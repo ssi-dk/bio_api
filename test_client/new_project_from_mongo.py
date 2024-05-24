@@ -86,33 +86,27 @@ for row in metadata_values:
     for n in range(6):
         row.append(random_string(10))
 
-print("Metadata keys:")
-print(metadata_keys)
-print()
-print("Metadata values:")
-print(metadata_values)
-
 # If possible, create a distance matrix Vega-Lite component
 # To do this, we need the REST API functionality of Bio API which is only accessible when in Docker context.
 file_to_check = Path('/.dockerenv')
 if file_to_check.exists():
-    print("Script is running in Docker environment.")
+    print("Script is running in Docker environment - use API endpoint to get distance matrix")
+    # Get the distance matrix from Bio API (because it's not in MongoDB)
+    dmx_from_bio_api = call_dmx_result(dmx_job_id)
+    print("Response code from endpoint:")
+    print(dmx_from_bio_api)
 else:
-    print("Script is NOT running in Docker environment.")
+    print("Script is NOT running in Docker environment. We cannot a a distance matrix")
 
-# Get the distance matrix from Bio API (because it's not in MongoDB)
-# dmx_from_bio_api = call_dmx_result(dmx_job_id)
-# print(dmx_from_bio_api)
-
-rest_response = functions.new_project(
-    project_name=args.project_name,
-    tree_calcs=tree_calcs,
-    metadata_keys=metadata_keys,
-    metadata_values=metadata_values,
-    mr_access_token=common.MICROREACT_ACCESS_TOKEN,
-    mr_base_url=common.MICROREACT_BASE_URL,
-    verify = not args.noverify
-    )
-print(f"HTTP response code: {str(rest_response)}")
-print("Response as actual JSON:")
-print(dumps(rest_response.json()))
+# rest_response = functions.new_project(
+#     project_name=args.project_name,
+#     tree_calcs=tree_calcs,
+#     metadata_keys=metadata_keys,
+#     metadata_values=metadata_values,
+#     mr_access_token=common.MICROREACT_ACCESS_TOKEN,
+#     mr_base_url=common.MICROREACT_BASE_URL,
+#     verify = not args.noverify
+#     )
+# print(f"HTTP response code: {str(rest_response)}")
+# print("Response as actual JSON:")
+# print(dumps(rest_response.json()))
