@@ -18,14 +18,14 @@ def recursive_merge(dict1, dict2):
 
 def bn2mongo(
             db,
-            filename: str,
+            tsv_filename: str,
             collection: str='samples',
             seqid_field_path: str='name',
             profile_field_path: str='profile',
             species_field_path: str='species',
             species: str='Salmonella enterica',
             max_items: int=None):
-    df = read_csv(filename, sep='\t')
+    df = read_csv(tsv_filename, sep='\t')
     df = df[['name']].assign(
                     profile=df.set_index(['name']).to_dict(orient='records')
     )
@@ -68,7 +68,7 @@ if __name__ == '__main__':
                         "The specific use case for the script is importing a data file exported from BioNumerics."
     )
 
-    parser.add_argument('filename')
+    parser.add_argument('tsv_filename')
     parser.add_argument('--collection', type=str, help="name of collection to import to", default='samples')
     parser.add_argument('--seqid_field_path', type=str, help="path for seqid field - dots are translated into nested fields", default='name')
     parser.add_argument('--profile_field_path', type=str, help="path for profile field - dots are translated into nested fields", default='profile')
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     max_items = int(args.max_items) if args.max_items else None
     inserted_ids = bn2mongo(
         db,
-        args.filename,
+        args.tsv_filename,
         collection=args.collection,
         seqid_field_path=args.seqid_field_path,
         profile_field_path=args.profile_field_path,
