@@ -70,8 +70,6 @@ if __name__ == '__main__':
 
     parser.add_argument('tsv_filename')
     parser.add_argument('--collection', type=str, help="name of collection to import to", default='samples')
-    parser.add_argument('--seqid_field_path', type=str, help="path for seqid field - dots are translated into nested fields", default='name')
-    parser.add_argument('--profile_field_path', type=str, help="path for profile field - dots are translated into nested fields", default='profile')
     parser.add_argument('--max_items', type=int, help="limit the number of items to import")
     args = parser.parse_args()
     connection_string = getenv('BIO_API_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
@@ -79,16 +77,12 @@ if __name__ == '__main__':
     db = connection.get_database()
     print(f"Connection string: {connection_string}")
     print(f"Import to collection: {args.collection}")
-    print(f"MongoDB field containing 'user' sequence id: {args.seqid_field_path}")
-    print(f"MongoDB field containing cgMLST profile: {args.profile_field_path}")
     print(f"Max items to import: {args.max_items}")
     max_items = int(args.max_items) if args.max_items else None
     inserted_ids = bn2mongo(
         db,
         args.tsv_filename,
         collection=args.collection,
-        seqid_field_path=args.seqid_field_path,
-        profile_field_path=args.profile_field_path,
         max_items=max_items
         )
     print("These are the _id strings of the MongoDB documents:")
