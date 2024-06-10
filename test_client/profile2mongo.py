@@ -74,7 +74,7 @@ if __name__ == '__main__':
     parser.add_argument('--max_items', type=int, help="limit the number of items to import")
     parser.add_argument('--dmx', help="calculate a distance matrix with the imported profiles", action="store_true")
     args = parser.parse_args()
-    connection_string = getenv('BIO_API MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
+    connection_string = getenv('BIO_API_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
     connection = pymongo.MongoClient(connection_string)
     db = connection.get_database()
     print(f"Connection string: {connection_string}")
