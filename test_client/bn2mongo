@@ -16,7 +16,7 @@ def recursive_merge(dict1, dict2):
             dict1[key] = value
     return dict1
 
-def profile2mongo(
+def bn2mongo(
             db,
             filename: str,
             collection: str='samples',
@@ -83,7 +83,7 @@ if __name__ == '__main__':
     print(f"MongoDB field containing cgMLST profile: {args.profile_field_path}")
     print(f"Max items to import: {args.max_items}")
     max_items = int(args.max_items) if args.max_items else None
-    inserted_ids = profile2mongo(
+    inserted_ids = bn2mongo(
         db,
         args.filename,
         collection=args.collection,
