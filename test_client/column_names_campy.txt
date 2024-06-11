@@ -9,7 +9,7 @@ WGS_run
 PatientName
 ENAAccessionnumber
 Source
-Formaal,projektnr
+Formaal_projektnr
 CountryOfTravel
 Date_to_WGS
 Initials_to_WGS
