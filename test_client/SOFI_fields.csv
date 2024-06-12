@@ -5,8 +5,8 @@ bifrost;Run_ID;categories.sample_info.summary.
 bifrost;Institution;categories.sample_info.summary.institution 
 bifrost;Project_no.;categories.sample_info.summary.project_no
 bifrost;Project_title;categories.sample_info.summary.project_title
-limstbr;Date_sample;-
-limstbr;Date_received;-
+lims/tbr;Date_sample;-
+lims/tbr;Date_received;-
 lims;CHR_no.;-
 lims;Aut_no.;-
 lims;Product_type;-

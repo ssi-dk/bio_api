@@ -15,7 +15,7 @@ SampleDate;Date_sample;limstbr
 Age;Age;tbr
 Rejse;Travel;tbr
 KMAdato;Date_received_KMA;tbr
-SSIdato;Date_received;limstbr
+SSIdato;Date_received;lims/tbr
 PatientSex;MF;tbr
 KmaNavn;KMA;tbr
 Owner;Institution;general
