@@ -18,5 +18,5 @@ KMAdato;Date_received_KMA;tbr
 SSIdato;Date_received;lims/tbr
 PatientSex;MF;tbr
 KmaNavn;KMA;tbr
-Owner;Institution;general
-Surveillance;Project_title;general
+Owner;Institution;bifrost
+Surveillance;Project_title;bifrost
