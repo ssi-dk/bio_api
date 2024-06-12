@@ -1,4 +1,5 @@
 BN kolonnenavn;Feltnavn i SOFI;ejersystem
+Key;Sequence_ID
 MLST ST;ST;bifrost
 FUDnr;FUD_no;sofi
 ClusterID;Cluster_ID;sofi
