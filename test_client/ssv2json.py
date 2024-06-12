@@ -14,6 +14,8 @@ print(f"Output filename: {output_filename}")
 mapping = dict()
 
 with open(input_file, encoding="ISO-8859-1") as i:
+    # Ignore header line
+    i.readline()
     while True:
         try:
             conversion_entry = i.readline().strip().split(";")
