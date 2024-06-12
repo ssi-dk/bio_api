@@ -1,5 +1,5 @@
 BN kolonnenavn;Feltnavn i SOFI;ejersystem
-Key;Sequence_ID;key
+Key;Sequence_ID;bifrost
 MLST ST;ST;bifrost
 FUDnr;FUD_no;sofi
 ClusterID;Cluster_ID;sofi
@@ -7,7 +7,7 @@ Species_from_WGS;QC_detected_species;bifrost
 EpiExportDate;Date_Epi;sofi
 CPRnr;CPR_no;tbr
 PrimaryIsolate;Primary_isolate;tbr
-WGS_run;Run_ID;key
+WGS_run;Run_ID;bifrost
 PatientName;Name;tbr
 CountryOfTravel;Travel_origin;tbr
 Regionsnavn;KMA_region;tbr
