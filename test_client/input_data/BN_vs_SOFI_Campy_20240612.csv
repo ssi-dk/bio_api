@@ -11,7 +11,7 @@ WGS_run;Run_ID;bifrost
 PatientName;Name;tbr
 CountryOfTravel;Travel_origin;tbr
 Regionsnavn;KMA_region;tbr
-SampleDate;Date_sample;limstbr
+SampleDate;Date_sample;lims/tbr
 Age;Age;tbr
 Rejse;Travel;tbr
 KMAdato;Date_received_KMA;tbr
