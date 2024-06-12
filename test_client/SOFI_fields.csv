@@ -1,10 +1,10 @@
 Felttype;Feltnavn i SOFI;PATH
-key;Isolate_ID;categories/sample_info/summary/sample_name
-key;Sequence_ID;categories/sample_info/summary/sofi_sequence_id
-key;Run_ID;categories/sample_info/summary/
-general;Institution;categories/sample_info/summary/institution 
-general;Project_no.;categories/sample_info/summary/project_no
-general;Project_title;categories/sample_info/summary/project_title
+key;Isolate_ID;categories.sample_info.summary.sample_name
+key;Sequence_ID;categories.sample_info.summary.sofi_sequence_id
+key;Run_ID;categories.sample_info.summary.
+general;Institution;categories.sample_info.summary.institution 
+general;Project_no.;categories.sample_info.summary.project_no
+general;Project_title;categories.sample_info.summary.project_title
 limstbr;Date_sample;-
 limstbr;Date_received;-
 lims;CHR_no.;-
@@ -15,7 +15,7 @@ lims;Origin;-
 lims;Animal;-
 lims;Info_sample;-
 tbr;CPR_no.;-
-tbr;M/F;-
+tbr;MF;-
 tbr;Name;-
 tbr;Age;-
 tbr;Primary_isolate;-
@@ -43,10 +43,10 @@ bifrost;AMR_Amp;categories.resistance.summary.phenotype
 bifrost;AMR_Azi;categories.resistance.summary.phenotype
 bifrost;AMR_Fep;categories.resistance.summary.phenotype
 bifrost;AMR_Fot;categories.resistance.summary.phenotype
-bifrost;AMR_F/C;categories.resistance.summary.phenotype
+bifrost;AMR_F.C;categories.resistance.summary.phenotype
 bifrost;AMR_Fox;categories.resistance.summary.phenotype
 bifrost;AMR_Taz;categories.resistance.summary.phenotype
-bifrost;AMR_T/C;categories.resistance.summary.phenotype
+bifrost;AMR_T.C;categories.resistance.summary.phenotype
 bifrost;AMR_Chl;categories.resistance.summary.phenotype
 bifrost;AMR_Cip;categories.resistance.summary.phenotype
 bifrost;AMR_Cli;categories.resistance.summary.phenotype
