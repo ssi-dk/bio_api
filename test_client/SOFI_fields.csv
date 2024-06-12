@@ -1,0 +1,124 @@
+Felttype;Feltnavn i SOFI;PATH
+;;
+;;
+;Isolate_ID;bifrost/samples/categories/sample_info/summary/sample_name
+;;
+;Sequence_ID;bifrost/samples/categories/sample_info/summary/sofi_sequence_id
+;Sequence_files;bifrost/samples/categories/sample_info/summary/filenames[0] bifrost/samples/categories/sample_info/summary/filenames[1]
+;;
+Metadata - kommer fra LIMS eller TBR;Institution;bifrost/samples/categories/sample_info/summary/institution 
+Metadata - kommer fra LIMS eller TBR;Project_no.;bifrost/samples/categories/sample_info/summary/project_no
+Metadata - kommer fra LIMS eller TBR;Project_title;bifrost/samples/categories/sample_info/summary/project_title
+Metadata - kommer fra LIMS eller TBR;Date_sample;LIMS andTBR
+Metadata - kommer fra LIMS eller TBR;Date_received;LIMS andTBR
+Metadata - kommer fra Illumina/mappenavn;Run_ID;bifrost/samples/categories/sample_info/summary/experiment_name
+manuelt ;Acc_no.;-
+Metadata - kommer fra Illumina eller LIMS?;QC_provided_species;bifrost/samples.categories.sample_info.summary.provided_speceies
+Metadata - kommer fra LIMS eller TBR;CHR_no.;LIMS
+Metadata - kommer fra LIMS eller TBR;Aut_no.;LIMS
+Metadata - kommer fra LIMS eller TBR;Product_type;LIMS
+Metadata - kommer fra LIMS eller TBR;Product;LIMS
+Metadata - kommer fra LIMS eller TBR;Origin;LIMS
+Metadata - kommer fra LIMS eller TBR;Animal;LIMS
+Metadata - kommer fra LIMS eller TBR;Info_sample;LIMS
+Metadata - kommer fra LIMS eller TBR;CPR_no.;TBR
+Metadata - kommer fra LIMS eller TBR;M/F;TBR
+Metadata - kommer fra LIMS eller TBR;Name;TBR
+Metadata - kommer fra LIMS eller TBR;Age;TBR
+Metadata - kommer fra LIMS eller TBR;Primary_isolate;TBR
+Metadata - kommer fra LIMS eller TBR;Travel;TBR
+Metadata - kommer fra LIMS eller TBR;Travel_origin;TBR
+Rundate i Illumina. Findes i  sekvensfilnavnet;Date_run;bifrost/samples.categories.summary.sample_info.sequence_run_date
+Metadata - kommer fra LIMS eller TBR;Date_received_KMA;TBR
+Metadata - kommer fra LIMS eller TBR;KMA;TBR
+Manuelt ;FUD_no.;SOFI owned
+Manuelt ;Cluster_ID;SOFI owned
+Manuelt ;Date_Epi;SOFI owned
+Metadata - kommer fra LIMS eller TBR;KMA_region;TBR
+Manuelt ;Outbreak_source;SOFI owned
+;;
+Analyseresultater - bliver på SOFI;Date_SOFI;biforst/samples.metadata.created_at
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;QC_detected_species;bifrost/samples/categories.specied_detection.summary.detected_species
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Species_final;Delegate kode 
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Subspecies;bifrost/samples/categories.serotype.summary.Subspecies
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Serotype_final;Delegate kode 
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Sero_enterobase;bifrost/samples/categories.serotype.report.enterobase_serotype1
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Sero_seqSero;bifrost/samples/categories.serotype.report.seqsero_serotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Sero_antigen_seqSero;bifrost/samples/categories.serotype.summary.antigenic_profile
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Sero_D-tartrate;bifrost/samples/categories.serotype.summary.D-tartrate_pos10
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Sero_serotype_finder;FASE2
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;ST;bifrost/samples/categories.mlst.summary.sequence_type.($schemaname)
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Pathotype_final;FASE2
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Virulence_genes;FASE2
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Adheasion_final;FASE2
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Toxin_final;FASE2
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Resistance_genes;bifrost/samples/categories.resistance.summary.genes and bifrost/samples/categories.resistance.summary.point_mutations
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_profile;DTU FASE2
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Ami;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Amp;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Azi;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Fep;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Fot;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_F/C;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Fox;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Taz;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_T/C;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Chl;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Cip;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Cli;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Col;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Dap;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Etp;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Ery;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Fus;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Gen;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Imi;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Kan;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Lzd;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Mero;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Mup;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Nal;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Pen;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Syn;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Rif;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Str;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Sul;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Tei;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Trm;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Tet;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Tia;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Tgc;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Tmp;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;AMR_Van;bifrost/samples/categories.resistance.summary.phenotype
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;ResFinder_version;FASE 2
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Date_analysis_SOFI;Delegate kode 
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Date_approved_serotype;Delegate kode
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Date_approved_QC;Delegate kode
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Date_approved_AMR;Delegate kode
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Date_approved_ST;Delegate kode
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Date_approved_toxin;Delegate kode
+Analyseresultater - Sendes fra SOFI til LIMS/TBR;Date_approved_cluster;Delegate kode
+Fritekst;Comments_supplementary;SOFI owned
+Fritekst;Comments_cluster;SOFI owned
+Fritekst;Comments_general;SOFI owned
+;QC_final;bifrost/samples/categories.stamper.summary.tests.name==qc_score bifrost/samples/categories.stamper.summary.tests.value
+;Comments_QC;SOFI owned
+;QC_action;bifrost/samples/categories.stamper.stamp.value
+;QC_provided_species;bifrost/samples/categories.stamper.report.data[2].test
+;QC_genome1x;bifrost/samples/categories.stamper.report.data[6].test
+;QC_genome10x;bifrost/samples/categories.stamper.report.data[7].test
+;QC_Gsize_diff1x10;bifrost/samples/categories.stamper.report.data[8].test
+;QC_avg_coverage;bifrost/samples/categories.stamper.report.data[9].test
+;QC_num_contigs;bifrost/samples/categories.denovo_assembly.summary.contigs
+;QC_ambiguous_sites;bifrost/samples/categories.mapping_qc.summary.snps.x10_10%.snps
+;QC_num_reads;bifrost/samples/categories.mapping_qc.summary.mapped.reads_mapped
+;QC_main_sp_plus_uncl;bifrost/samples/categories.stamper.summary.tests.name==main_species_level_ok bifrost/samples/categories.stamper.summary.tests.value
+;QC_unclassified_reads;bifrost/samples/categories.stamper.summary.tests.name==unclassified_level_ok bifrost/samples/categories.stamper.summary.tests.value
+;QC_DB_ID;bifrost/samples/categories.stamper.summary.tests.name==species_in_db bifrost/samples/categories.stamper.summary.tests.value
+;QC_failed_tests;bifrost/samples/categories.stamper.summary.reason 
+;QC_cgMLST%;FASE2
+;;FASE2
+;;FASE2
+;;FASE2
+;;FASE2
+;;FASE2
