@@ -1,21 +1,21 @@
-BN kolonnenavn;Feltnavn i SOFI
-MLST ST;ST
-FUDnr;FUD_no.
-ClusterID;Cluster_ID
-Species_from_WGS;QC_detected_species
-EpiExportDate;Date_Epi
-CPRnr;CPR_no.
-PrimaryIsolate;Primary_isolate
-WGS_run;Run_ID
-PatientName;Name
-CountryOfTravel;Travel_origin
-Regionsnavn;KMA_region
-SampleDate;Date_sample
-Age;Age
-Rejse;Travel
-KMAdato;Date_received_KMA
-SSIdato;Date_received
-PatientSex;M/F
-KmaNavn;KMA
-Owner;Institution
-Surveillance;Project_title
+BN kolonnenavn;Feltnavn i SOFI;felttype
+MLST ST;ST;bifrost
+FUDnr;FUD_no;sofi
+ClusterID;Cluster_ID;sofi
+Species_from_WGS;QC_detected_species;bifrost
+EpiExportDate;Date_Epi;sofi
+CPRnr;CPR_no;tbr
+PrimaryIsolate;Primary_isolate;tbr
+WGS_run;Run_ID;key
+PatientName;Name;tbr
+CountryOfTravel;Travel_origin;tbr
+Regionsnavn;KMA_region;tbr
+SampleDate;Date_sample;limstbr
+Age;Age;tbr
+Rejse;Travel;tbr
+KMAdato;Date_received_KMA;tbr
+SSIdato;Date_received;limstbr
+PatientSex;MF;tbr
+KmaNavn;KMA;tbr
+Owner;Institution;general
+Surveillance;Project_title;general
