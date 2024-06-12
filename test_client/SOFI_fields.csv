@@ -23,6 +23,11 @@ tbr;Travel_origin;-
 tbr;Date_received_KMA;-
 tbr;KMA;-
 tbr;KMA_region;-
+sofi;FUD_no;?
+sofi;Cluster_ID;?
+sofi;Date_epi;?
+sofi;KMA_region;?
+sofi;outbreak_source:?
 bifrost;Date_SOFI;metadata.created_at
 bifrost;QC_detected_species;categories.specied_detection.summary.detected_species
 bifrost;Subspecies;categories.serotype.summary.Subspecies
