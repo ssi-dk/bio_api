@@ -1,0 +1,21 @@
+BN kolonnenavn;Feltnavn i SOFI
+MLST ST;ST
+FUDnr;FUD_no.
+ClusterID;Cluster_ID
+Species_from_WGS;QC_detected_species
+EpiExportDate;Date_Epi
+CPRnr;CPR_no.
+PrimaryIsolate;Primary_isolate
+WGS_run;Run_ID
+PatientName;Name
+CountryOfTravel;Travel_origin
+Regionsnavn;KMA_region
+SampleDate;Date_sample
+Age;Age
+Rejse;Travel
+KMAdato;Date_received_KMA
+SSIdato;Date_received
+PatientSex;M/F
+KmaNavn;KMA
+Owner;Institution
+Surveillance;Project_title
