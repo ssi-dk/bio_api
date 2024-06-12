@@ -1,6 +1,7 @@
 Felttype;Feltnavn i SOFI;PATH
 key;Isolate_ID;categories/sample_info/summary/sample_name
 key;Sequence_ID;categories/sample_info/summary/sofi_sequence_id
+key;Run_ID;categories/sample_info/summary/
 general;Institution;categories/sample_info/summary/institution 
 general;Project_no.;categories/sample_info/summary/project_no
 general;Project_title;categories/sample_info/summary/project_title
