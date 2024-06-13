@@ -4,7 +4,7 @@ import argparse
 import pymongo
 import json
 
-import client_functions
+from client_functions import dictify_path
 
 def recursive_merge(dict1, dict2):
     for key, value in dict2.items():
@@ -69,24 +69,16 @@ def bn2mongo(
         print(document)
         print()
 
-    #     # Make sure that all numberish values are ints
-    #     for key, value in document['profile'].items():
-    #         try:
-    #             document['profile'][key] = int(value)
-    #         except ValueError:
-    #             pass
+        # dictified_seqid_path = dictify_path(seqid_field_path, document.pop('name'))
+        # document = recursive_merge(document, dictified_seqid_path)
+        # dictified_profile_path = dictify_path(profile_field_path, document.pop('profile'))
+        # document = recursive_merge(document, dictified_profile_path)
+        # dictified_species_path = dictify_path(species_field_path, species)
+        # document = recursive_merge(document, dictified_species_path)
 
-    #     # Add some (possibly nested) mongo fields that are important for testing.
-    #     dictified_seqid_path = client_functions.dictify_path(seqid_field_path, document.pop('name'))
-    #     document = recursive_merge(document, dictified_seqid_path)
-    #     dictified_profile_path = client_functions.dictify_path(profile_field_path, document.pop('profile'))
-    #     document = recursive_merge(document, dictified_profile_path)
-    #     dictified_species_path = client_functions.dictify_path(species_field_path, species)
-    #     document = recursive_merge(document, dictified_species_path)
-
-    #     result = db[collection].insert_one(document)
-    #     assert result.acknowledged == True
-    #     inserted_ids.append(str(result.inserted_id))
+        result = db[collection].insert_one(document)
+        assert result.acknowledged == True
+        inserted_ids.append(str(result.inserted_id))
     return inserted_ids
 
 if __name__ == '__main__':
