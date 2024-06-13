@@ -30,7 +30,7 @@ sofi;Date_epi;?
 sofi;KMA_region;?
 sofi;outbreak_source;?
 bifrost;Date_SOFI;metadata.created_at
-bifrost;QC_detected_species;categories.specied_detection.summary.detected_species
+bifrost;QC_detected_species;categories.species_detection.summary.detected_species
 bifrost;Subspecies;categories.serotype.summary.Subspecies
 bifrost;Sero_enterobase;categories.serotype.report.enterobase_serotype1
 bifrost;Sero_seqSero;categories.serotype.report.seqsero_serotype
