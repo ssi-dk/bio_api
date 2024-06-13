@@ -62,6 +62,12 @@ def bn2mongo(
         print("Unnested document:")
         print(unnested_document)
         print()
+        document = dict()
+        for k, v in unnested_document.items():
+            document[sofi_field_dict[k]] = v
+        print("Nested document:")    
+        print(document)
+        print()
 
     #     # Make sure that all numberish values are ints
     #     for key, value in document['profile'].items():
