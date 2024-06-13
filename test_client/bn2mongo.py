@@ -42,10 +42,6 @@ def bn2mongo(
         conversion_entry = i[1].to_dict()
         conversion_dict[conversion_entry['import_column']] = conversion_entry['sofi_fieldname']
 
-    print("Conversion dict:")
-    print(conversion_dict)
-    print()
-
     inserted_ids = list()
     document = dict()
     for _index, row in input_df.iterrows():
@@ -58,7 +54,6 @@ def bn2mongo(
         for k, v in data_dict.items():
             sofi_field_name = conversion_dict.get(k)
             if sofi_field_name:
-                print(sofi_field_name)
                 document[sofi_field_name] = v
         
         print("Document:")
