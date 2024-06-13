@@ -27,33 +27,37 @@ def bn2mongo(
             species: str='Salmonella enterica',
             max_items: int=None):
     df = read_csv(data_filename, sep=';', encoding='ISO-8859-1')
+
+    print("This what the data file looks like:")
+    print(df)
+
     inserted_ids = list()
-    for _index, row in df.iterrows():
-        if max_items and (_index >= max_items):
-            print(f"Reached maximum of {max_items} items.")
-            break
+    # for _index, row in df.iterrows():
+    #     if max_items and (_index >= max_items):
+    #         print(f"Reached maximum of {max_items} items.")
+    #         break
 
-        # Each rows' to_dict() will be a MongoDB document
-        document = row.to_dict()
+    #     # Each rows' to_dict() will be a MongoDB document
+    #     document = row.to_dict()
 
-        # Make sure that all numberish values are ints
-        for key, value in document['profile'].items():
-            try:
-                document['profile'][key] = int(value)
-            except ValueError:
-                pass
+    #     # Make sure that all numberish values are ints
+    #     for key, value in document['profile'].items():
+    #         try:
+    #             document['profile'][key] = int(value)
+    #         except ValueError:
+    #             pass
 
-        # Add some (possibly nested) mongo fields that are important for testing.
-        dictified_seqid_path = client_functions.dictify_path(seqid_field_path, document.pop('name'))
-        document = recursive_merge(document, dictified_seqid_path)
-        dictified_profile_path = client_functions.dictify_path(profile_field_path, document.pop('profile'))
-        document = recursive_merge(document, dictified_profile_path)
-        dictified_species_path = client_functions.dictify_path(species_field_path, species)
-        document = recursive_merge(document, dictified_species_path)
+    #     # Add some (possibly nested) mongo fields that are important for testing.
+    #     dictified_seqid_path = client_functions.dictify_path(seqid_field_path, document.pop('name'))
+    #     document = recursive_merge(document, dictified_seqid_path)
+    #     dictified_profile_path = client_functions.dictify_path(profile_field_path, document.pop('profile'))
+    #     document = recursive_merge(document, dictified_profile_path)
+    #     dictified_species_path = client_functions.dictify_path(species_field_path, species)
+    #     document = recursive_merge(document, dictified_species_path)
 
-        result = db[collection].insert_one(document)
-        assert result.acknowledged == True
-        inserted_ids.append(str(result.inserted_id))
+    #     result = db[collection].insert_one(document)
+    #     assert result.acknowledged == True
+    #     inserted_ids.append(str(result.inserted_id))
     return inserted_ids
 
 if __name__ == '__main__':
