@@ -1,22 +1,10 @@
-BN kolonnenavn;Feltnavn i SOFI;ejersystem
+import_column;SOFI_fieldname;owning_system
 Key;Sequence_ID;bifrost
 MLST ST;ST;bifrost
 FUDnr;FUD_no;sofi
 ClusterID;Cluster_ID;sofi
 Species_from_WGS;QC_detected_species;bifrost
 EpiExportDate;Date_Epi;sofi
-CPRnr;CPR_no;tbr
-PrimaryIsolate;Primary_isolate;tbr
 WGS_run;Run_ID;bifrost
-PatientName;Name;tbr
-CountryOfTravel;Travel_origin;tbr
-Regionsnavn;KMA_region;tbr
-SampleDate;Date_sample;lims/tbr
-Age;Age;tbr
-Rejse;Travel;tbr
-KMAdato;Date_received_KMA;tbr
-SSIdato;Date_received;lims/tbr
-PatientSex;MF;tbr
-KmaNavn;KMA;tbr
 Owner;Institution;bifrost
 Surveillance;Project_title;bifrost
