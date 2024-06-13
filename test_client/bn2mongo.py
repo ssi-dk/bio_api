@@ -37,6 +37,13 @@ def bn2mongo(
 
     sofi_field_df = read_csv('SOFI_fields.csv', sep=';', encoding='ISO-8859-1')
     print(sofi_field_df)
+    sofi_field_dict = dict()
+    for _index, row in sofi_field_df.iterrows():
+        if not row[2] in ['-', '?']:
+            sofi_field_dict[row[1]] = row[2]
+    print("SOFI field dict:")
+    print(sofi_field_dict)
+
 
     inserted_ids = list()
     document = dict()
