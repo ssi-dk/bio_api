@@ -1,6 +1,10 @@
 import_column;sofi_fieldname;owning_system
 Key;Sequence_ID;bifrost
+MLST ST;ST;bifrost
+FUDnr;FUD_no;sofi
+ClusterID;Cluster_ID;sofi
 Species_from_WGS;QC_detected_species;bifrost
+EpiExportDate;Date_Epi;sofi
 WGS_run;Run_ID;bifrost
 Owner;Institution;bifrost
 Surveillance;Project_title;bifrost
