@@ -61,10 +61,10 @@ def bn2mongo(
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
                     prog='bn2mongo',
-                    description="Import a TSV file with analysis data to MongoDB. " + 
-                        "The first column in the file must contain the user-oriented sequence id, and this column MUST be named 'name'. " +
-                        "Apart from the data file the script will also need a JSON file containing the mappings from the TSV file's column names " +
-                        "to field paths in MongoDB. " +
+                    description="Import a TSV file to SOFI MongoDB structure. " + 
+                        "The first column in the file must contain the key. " +
+                        "Apart from the data file, the script will also need a file containing the mappings from the data file's column names " +
+                        "to SOFI field names as specified in 'SOFI_fields.csv'. " +
                         "The specific use case for the script is importing a data file exported from BioNumerics."
     )
 
