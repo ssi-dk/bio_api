@@ -26,10 +26,16 @@ def bn2mongo(
             species_field_path: str='species',
             species: str='Salmonella enterica',
             max_items: int=None):
-    df = read_csv(data_filename, sep=';', encoding='ISO-8859-1')
-
+    
+    input_data = read_csv(data_filename, sep=';', encoding='ISO-8859-1')
     print("This what the data file looks like:")
-    print(df)
+    print(input_data)
+    print()
+
+    mapping = read_csv(mapping_filename, sep=';', encoding='ISO-8859-1')
+    print("This what the mapping file looks like:")
+    print(mapping)
+    print()
 
     inserted_ids = list()
     # for _index, row in df.iterrows():

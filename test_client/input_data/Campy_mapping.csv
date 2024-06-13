@@ -1,4 +1,4 @@
-import_column;SOFI_fieldname;owning_system
+import_column;sofi_fieldname;owning_system
 Key;Sequence_ID;bifrost
 MLST ST;ST;bifrost
 FUDnr;FUD_no;sofi
