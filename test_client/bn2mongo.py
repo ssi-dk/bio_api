@@ -4,17 +4,7 @@ import argparse
 import pymongo
 import json
 
-from client_functions import dictify_path
-
-def recursive_merge(dict1, dict2):
-    for key, value in dict2.items():
-        if key in dict1 and isinstance(dict1[key], dict) and isinstance(value, dict):
-            # Recursively merge nested dictionaries
-            dict1[key] = recursive_merge(dict1[key], value)
-        else:
-            # Merge non-dictionary values
-            dict1[key] = value
-    return dict1
+from client_functions import dictify_path, recursive_merge
 
 def bn2mongo(
             db,
@@ -64,10 +54,14 @@ def bn2mongo(
         print()
         document = dict()
         for k, v in unnested_document.items():
-            document[sofi_field_dict[k]] = v
-        print("Nested document:")    
-        print(document)
-        print()
+            dotted_path = sofi_field_dict[k]
+            print(f"Dotted path: {dotted_path}")
+            nested_dict = dictify_path(dotted_path, v)
+            print(f"Nested dict: {nested_dict}")
+        #     document[] = v
+        # print("Nested document:")    
+        # print(document)
+        # print()
 
         # dictified_seqid_path = dictify_path(seqid_field_path, document.pop('name'))
         # document = recursive_merge(document, dictified_seqid_path)
