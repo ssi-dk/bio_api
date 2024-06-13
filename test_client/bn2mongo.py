@@ -28,14 +28,7 @@ def bn2mongo(
             max_items: int=None):
     
     input_df = read_csv(data_filename, sep=';', encoding='ISO-8859-1')
-    print("This what the data file looks like:")
-    print(input_df)
-    print()
-
     mapping_df = read_csv(mapping_filename, sep=';', encoding='ISO-8859-1')
-    print("This what the mapping file looks like:")
-    print(mapping_df)
-    print()
 
     conversion_dict = dict()
     for i in mapping_df.iterrows():
