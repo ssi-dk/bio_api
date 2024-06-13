@@ -27,18 +27,18 @@ def bn2mongo(
             species: str='Salmonella enterica',
             max_items: int=None):
     
-    input_data = read_csv(data_filename, sep=';', encoding='ISO-8859-1')
+    input_df = read_csv(data_filename, sep=';', encoding='ISO-8859-1')
     print("This what the data file looks like:")
-    print(input_data)
+    print(input_df)
     print()
 
-    mapping = read_csv(mapping_filename, sep=';', encoding='ISO-8859-1')
+    mapping_df = read_csv(mapping_filename, sep=';', encoding='ISO-8859-1')
     print("This what the mapping file looks like:")
-    print(mapping)
+    print(mapping_df)
     print()
 
     inserted_ids = list()
-    for _index, row in input_data.iterrows():
+    for _index, row in input_df.iterrows():
         if max_items and (_index >= max_items):
             print(f"Reached maximum of {max_items} items.")
             break
