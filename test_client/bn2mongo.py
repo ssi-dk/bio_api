@@ -37,6 +37,11 @@ def bn2mongo(
     print(mapping_df)
     print()
 
+    print("Conversion entries:")
+    for i in mapping_df.iterrows():
+        print(i[1].to_dict())
+    print()
+
     inserted_ids = list()
     for _index, row in input_df.iterrows():
         if max_items and (_index >= max_items):
