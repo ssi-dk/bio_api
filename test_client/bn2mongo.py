@@ -69,6 +69,7 @@ if __name__ == '__main__':
     )
 
     parser.add_argument('data_filename')
+    parser.add_argument('mapping_filename')
     parser.add_argument('--collection', type=str, help="name of collection to import to", default='samples')
     parser.add_argument('--max_items', type=int, help="limit the number of items to import")
     args = parser.parse_args()
