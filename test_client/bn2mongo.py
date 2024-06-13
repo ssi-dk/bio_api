@@ -37,9 +37,13 @@ def bn2mongo(
     print(mapping_df)
     print()
 
-    print("Conversion entries:")
+    conversion_dict = dict()
     for i in mapping_df.iterrows():
-        print(i[1].to_dict())
+        conversion_entry = i[1].to_dict()
+        conversion_dict[conversion_entry['import_column']] = conversion_entry['sofi_fieldname']
+
+    print("Conversion dict:")
+    print(conversion_dict)
     print()
 
     inserted_ids = list()
