@@ -46,7 +46,7 @@ def bn2mongo(
 
 
     inserted_ids = list()
-    document = dict()
+    unnested_document = dict()
     for _index, row in input_df.iterrows():
         if max_items and (_index >= max_items):
             print(f"Reached maximum of {max_items} items.")
@@ -57,10 +57,10 @@ def bn2mongo(
         for k, v in data_dict.items():
             sofi_field_name = conversion_dict.get(k)
             if sofi_field_name:
-                document[sofi_field_name] = v
+                unnested_document[sofi_field_name] = v
         
-        print("Document:")
-        print(document)
+        print("Unnested document:")
+        print(unnested_document)
         print()
 
     #     # Make sure that all numberish values are ints
