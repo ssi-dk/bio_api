@@ -55,13 +55,12 @@ def bn2mongo(
         document = dict()
         for k, v in unnested_document.items():
             dotted_path = sofi_field_dict[k]
-            print(f"Dotted path: {dotted_path}")
             nested_dict = dictify_path(dotted_path, v)
-            print(f"Nested dict: {nested_dict}")
-        #     document[] = v
-        # print("Nested document:")    
-        # print(document)
-        # print()
+            document = recursive_merge(document, nested_dict)
+
+        print("Nested document:")    
+        print(document)
+        print()
 
         # dictified_seqid_path = dictify_path(seqid_field_path, document.pop('name'))
         # document = recursive_merge(document, dictified_seqid_path)
