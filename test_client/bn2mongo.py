@@ -47,13 +47,21 @@ def bn2mongo(
     print()
 
     inserted_ids = list()
+    document = dict()
     for _index, row in input_df.iterrows():
         if max_items and (_index >= max_items):
             print(f"Reached maximum of {max_items} items.")
             break
 
         # Each rows' to_dict() will be a MongoDB document
-        document = row.to_dict()
+        data_dict = row.to_dict()
+        for k, v in data_dict.items():
+            sofi_field_name = conversion_dict.get(k)
+            if sofi_field_name:
+                print(sofi_field_name)
+                document[sofi_field_name] = v
+        
+        print("Document:")
         print(document)
         print()
 
