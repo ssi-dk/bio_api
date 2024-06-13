@@ -1,7 +1,7 @@
 owning_system;sofi_field_name;path
 bifrost;Isolate_ID;categories.sample_info.summary.sample_name
 bifrost;Sequence_ID;categories.sample_info.summary.sofi_sequence_id
-bifrost;Run_ID;categories.sample_info.summary.run_id
+bifrost;Run_ID;categories.sample_info.summary.experiment_name
 bifrost;Institution;categories.sample_info.summary.institution 
 bifrost;Project_no.;categories.sample_info.summary.project_no
 bifrost;Project_title;categories.sample_info.summary.project_title
