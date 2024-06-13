@@ -38,13 +38,15 @@ def bn2mongo(
     print()
 
     inserted_ids = list()
-    # for _index, row in df.iterrows():
-    #     if max_items and (_index >= max_items):
-    #         print(f"Reached maximum of {max_items} items.")
-    #         break
+    for _index, row in input_data.iterrows():
+        if max_items and (_index >= max_items):
+            print(f"Reached maximum of {max_items} items.")
+            break
 
-    #     # Each rows' to_dict() will be a MongoDB document
-    #     document = row.to_dict()
+        # Each rows' to_dict() will be a MongoDB document
+        document = row.to_dict()
+        print(document)
+        print()
 
     #     # Make sure that all numberish values are ints
     #     for key, value in document['profile'].items():
