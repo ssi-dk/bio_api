@@ -28,12 +28,15 @@ def bn2mongo(
             max_items: int=None):
     
     input_df = read_csv(data_filename, sep=';', encoding='ISO-8859-1')
+    
     mapping_df = read_csv(mapping_filename, sep=';', encoding='ISO-8859-1')
-
     conversion_dict = dict()
     for i in mapping_df.iterrows():
         conversion_entry = i[1].to_dict()
         conversion_dict[conversion_entry['import_column']] = conversion_entry['sofi_fieldname']
+
+    sofi_field_df = read_csv('SOFI_fields.csv', sep=';', encoding='ISO-8859-1')
+    print(sofi_field_df)
 
     inserted_ids = list()
     document = dict()

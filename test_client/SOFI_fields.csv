@@ -1,4 +1,4 @@
-ejersystem;Feltnavn i SOFI;PATH
+owning_system;sofi_field_name;path
 bifrost;Isolate_ID;categories.sample_info.summary.sample_name
 bifrost;Sequence_ID;categories.sample_info.summary.sofi_sequence_id
 bifrost;Run_ID;categories.sample_info.summary.
