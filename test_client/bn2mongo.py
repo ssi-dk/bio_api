@@ -19,6 +19,7 @@ def recursive_merge(dict1, dict2):
 def bn2mongo(
             db,
             data_filename: str,
+            mapping_filename: str,
             collection: str='samples',
             seqid_field_path: str='name',
             profile_field_path: str='profile',
@@ -80,6 +81,7 @@ if __name__ == '__main__':
     inserted_ids = bn2mongo(
         db,
         args.data_filename,
+        args.mapping_filename,
         collection=args.collection,
         max_items=max_items
         )
