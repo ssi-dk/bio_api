@@ -52,6 +52,7 @@ def bn2mongo(
         print("Unnested document:")
         print(unnested_document)
         print()
+
         document = dict()
         for k, v in unnested_document.items():
             dotted_path = sofi_field_dict[k]
@@ -61,13 +62,6 @@ def bn2mongo(
         print("Nested document:")    
         print(document)
         print()
-
-        # dictified_seqid_path = dictify_path(seqid_field_path, document.pop('name'))
-        # document = recursive_merge(document, dictified_seqid_path)
-        # dictified_profile_path = dictify_path(profile_field_path, document.pop('profile'))
-        # document = recursive_merge(document, dictified_profile_path)
-        # dictified_species_path = dictify_path(species_field_path, species)
-        # document = recursive_merge(document, dictified_species_path)
 
         result = db[collection].insert_one(document)
         assert result.acknowledged == True
