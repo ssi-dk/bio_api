@@ -25,10 +25,7 @@ def bn2mongo(
             species_field_path: str='species',
             species: str='Salmonella enterica',
             max_items: int=None):
-    df = read_csv(data_filename, sep='\t')
-    df = df[['name']].assign(
-                    profile=df.set_index(['name']).to_dict(orient='records')
-    )
+    df = read_csv(data_filename, sep=';', encoding='ISO-8859-1')
     inserted_ids = list()
     for _index, row in df.iterrows():
         if max_items and (_index >= max_items):
