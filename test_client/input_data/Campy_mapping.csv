@@ -1,5 +1,6 @@
 import_column;sofi_fieldname;owning_system
 Key;Sequence_ID;bifrost
+MLST ST;ST;bifrost
 Species_from_WGS;QC_detected_species;bifrost
 WGS_run;Run_ID;bifrost
 Owner;Institution;bifrost

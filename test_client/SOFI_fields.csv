@@ -36,7 +36,7 @@ bifrost;Sero_enterobase;categories.serotype.report.enterobase_serotype1
 bifrost;Sero_seqSero;categories.serotype.report.seqsero_serotype
 bifrost;Sero_antigen_seqSero;categories.serotype.summary.antigenic_profile
 bifrost;Sero_D-tartrate;categories.serotype.summary.D-tartrate_pos10
-bifrost;ST;categories.mlst.summary.sequence_type.($schemaname)
+bifrost;ST;categories.mlst.summary.sequence_type
 bifrost;Resistance_genes;categories.resistance.summary.genes and categories.resistance.summary.point_mutations
 bifrost;AMR_Ami;categories.resistance.summary.phenotype
 bifrost;AMR_Amp;categories.resistance.summary.phenotype
