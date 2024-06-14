@@ -51,6 +51,13 @@ def bn2mongo(
                     # Need to add a schema name
                     unnested_document[sofi_field_name] = {'some_schema': int(value)}
                 else:
+                    try:
+                        value = float(value)
+                    except ValueError:
+                        try:
+                            value = int(value)
+                        except ValueError:
+                            pass
                     unnested_document[sofi_field_name] = value
         
         print("Unnested document:")
