@@ -44,19 +44,19 @@ def bn2mongo(
 
         # Each rows' to_dict() will be a MongoDB document
         data_dict = row.to_dict()
-        for k, v in data_dict.items():
-            sofi_field_name = conversion_dict.get(k)
+        for key, value in data_dict.items():
+            sofi_field_name = conversion_dict.get(key)
             if sofi_field_name:
-                unnested_document[sofi_field_name] = v
+                unnested_document[sofi_field_name] = value
         
         print("Unnested document:")
         print(unnested_document)
         print()
 
         document = dict()
-        for k, v in unnested_document.items():
-            dotted_path = sofi_field_dict[k]
-            nested_dict = dictify_path(dotted_path, v)
+        for key, value in unnested_document.items():
+            dotted_path = sofi_field_dict[key]
+            nested_dict = dictify_path(dotted_path, value)
             document = recursive_merge(document, nested_dict)
 
         print("Nested document:")    
