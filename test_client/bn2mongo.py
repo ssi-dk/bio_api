@@ -81,6 +81,11 @@ def bn2mongo(
                     profile=allele_df.set_index(['Key']).to_dict(orient='records')
         )
         print(allele_df)
+        allele_df_as_dict = allele_df.to_dict()
+        print(allele_df_as_dict.keys())
+        # We seem to have the right keys, I think that all we need is to loop over the samples and add the profile to each sample.
+
+
         # alleles_dict = dictify_path('categories.cgmlst.report.alleles', allele_df.to_dict())
         # print("Alleles dict:")
         # print(alleles_dict['categories']['cgmlst']['report']['alleles'])
