@@ -77,10 +77,16 @@ def bn2mongo(
 
         # Add allele profile
         allele_df = read_csv(allele_filename, sep='\t')
-        alleles_dict = dictify_path('categories.cgmlst.report.alleles', allele_df.to_dict())
-        document = recursive_merge(document, alleles_dict)
-        print("Document with allele profile")
-        print(document)
+        allele_df = allele_df[['Key']].assign(
+                    profile=allele_df.set_index(['Key']).to_dict(orient='records')
+        )
+        print(allele_df)
+        # alleles_dict = dictify_path('categories.cgmlst.report.alleles', allele_df.to_dict())
+        # print("Alleles dict:")
+        # print(alleles_dict['categories']['cgmlst']['report']['alleles'])
+        # document = recursive_merge(document, alleles_dict)
+        # print("Document with allele profile")
+        # print(document)
 
         # result = db[collection].insert_one(document)
         # assert result.acknowledged == True
