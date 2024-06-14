@@ -87,6 +87,14 @@ def bn2mongo(
         print(allele_df)
         allele_df_as_dict = allele_df.to_dict()
         alleles = allele_df_as_dict['alleles'][sequence_id]
+
+        # Convert values to int if possible
+        for locus, value in alleles.items():
+            try:
+                alleles[locus] = int(value)
+            except ValueError:
+                pass
+
         alleles_dict = dictify_path('categories.cgmlst.report.alleles', alleles)
         # print("Alleles dict:")
         # print(alleles_dict)
