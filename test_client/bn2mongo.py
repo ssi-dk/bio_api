@@ -12,10 +12,6 @@ def bn2mongo(
             mapping_filename: str,
             allele_filename: str,
             collection: str='samples',
-            seqid_field_path: str='name',
-            profile_field_path: str='profile',
-            species_field_path: str='species',
-            species: str='Salmonella enterica',
             max_items: int=None):
     
     input_df = read_csv(data_filename, sep=';', encoding='ISO-8859-1')
