@@ -88,15 +88,15 @@ def bn2mongo(
         allele_df_as_dict = allele_df.to_dict()
         alleles = allele_df_as_dict['alleles'][sequence_id]
         alleles_dict = dictify_path('categories.cgmlst.report.alleles', alleles)
-        print("Alleles dict:")
-        print(alleles_dict)
-        # document = recursive_merge(document, alleles_dict)
+        # print("Alleles dict:")
+        # print(alleles_dict)
+        document = recursive_merge(document, alleles_dict)
         # print("Document with allele profile")
         # print(document)
 
-        # result = db[collection].insert_one(document)
-        # assert result.acknowledged == True
-        # inserted_ids.append(str(result.inserted_id))
+        result = db[collection].insert_one(document)
+        assert result.acknowledged == True
+        inserted_ids.append(str(result.inserted_id))
     return inserted_ids
 
 if __name__ == '__main__':
