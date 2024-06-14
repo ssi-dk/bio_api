@@ -10,6 +10,7 @@ def bn2mongo(
             db,
             data_filename: str,
             mapping_filename: str,
+            allele_filename: str,
             collection: str='samples',
             seqid_field_path: str='name',
             profile_field_path: str='profile',
@@ -74,9 +75,16 @@ def bn2mongo(
         print(document)
         print()
 
-        result = db[collection].insert_one(document)
-        assert result.acknowledged == True
-        inserted_ids.append(str(result.inserted_id))
+        # Add allele profile
+        allele_df = read_csv(allele_filename, sep='\t')
+        alleles_dict = dictify_path('categories.cgmlst.report.alleles', allele_df.to_dict())
+        document = recursive_merge(document, alleles_dict)
+        print("Document with allele profile")
+        print(document)
+
+        # result = db[collection].insert_one(document)
+        # assert result.acknowledged == True
+        # inserted_ids.append(str(result.inserted_id))
     return inserted_ids
 
 if __name__ == '__main__':
@@ -91,6 +99,7 @@ if __name__ == '__main__':
 
     parser.add_argument('data_filename')
     parser.add_argument('mapping_filename')
+    parser.add_argument('allele_filename')
     parser.add_argument('--collection', type=str, help="name of collection to import to", default='samples')
     parser.add_argument('--max_items', type=int, help="limit the number of items to import")
     args = parser.parse_args()
@@ -105,6 +114,7 @@ if __name__ == '__main__':
         db,
         args.data_filename,
         args.mapping_filename,
+        args.allele_filename,
         collection=args.collection,
         max_items=max_items
         )
