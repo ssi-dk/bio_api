@@ -85,6 +85,8 @@ def bn2mongo(
         )
         allele_df = allele_df.set_index(['key'])
         print(allele_df)
+        allele_df_as_dict = allele_df.to_dict()
+        print(allele_df_as_dict['alleles'][sequence_id])
 
         # We seem to have the right keys, I think that all we need is to find the right Key in allele_df_as_dict
 
