@@ -86,13 +86,10 @@ def bn2mongo(
         allele_df = allele_df.set_index(['key'])
         print(allele_df)
         allele_df_as_dict = allele_df.to_dict()
-        print(allele_df_as_dict['alleles'][sequence_id])
-
-        # We seem to have the right keys, I think that all we need is to find the right Key in allele_df_as_dict
-
-
-        # alleles_dict = dictify_path('categories.cgmlst.report.alleles', allele_df_as_dict[key])
-        # print(alleles_dict['categories']['cgmlst']['report']['alleles'])
+        alleles = allele_df_as_dict['alleles'][sequence_id]
+        alleles_dict = dictify_path('categories.cgmlst.report.alleles', alleles)
+        print("Alleles dict:")
+        print(alleles_dict)
         # document = recursive_merge(document, alleles_dict)
         # print("Document with allele profile")
         # print(document)
