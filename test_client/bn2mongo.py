@@ -47,7 +47,11 @@ def bn2mongo(
         for key, value in data_dict.items():
             sofi_field_name = conversion_dict.get(key)
             if sofi_field_name:
-                unnested_document[sofi_field_name] = value
+                if sofi_field_name == 'ST':
+                    # Need to add a schema name
+                    unnested_document[sofi_field_name] = {'cjejuni': int(value)}
+                else:
+                    unnested_document[sofi_field_name] = value
         
         print("Unnested document:")
         print(unnested_document)
