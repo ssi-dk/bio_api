@@ -49,7 +49,10 @@ def bn2mongo(
             if sofi_field_name:
                 if sofi_field_name == 'ST':
                     # Need to add a schema name
-                    unnested_document[sofi_field_name] = {'some_schema': int(value)}
+                    try:
+                        unnested_document[sofi_field_name] = {'some_schema': int(value)}
+                    except ValueError:
+                        unnested_document[sofi_field_name] = value
                 else:
                     try:
                         value = float(value)
