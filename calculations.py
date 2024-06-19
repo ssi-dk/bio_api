@@ -24,7 +24,7 @@ def hoist(var, dotted_field_path:str):
 
     Example:
     var = {'my': {'nested': {'dictionary': 123}}}
-    dotted_field_path = 'my.nested.diectionary'
+    dotted_field_path = 'my.nested.dictionary'
     print(hoist(var, dotted_field_path))
 
     The above example should return 123.
