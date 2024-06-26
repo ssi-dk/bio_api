@@ -19,17 +19,14 @@ def random_string(n):
    my_str = ''.join(my_list) 
    return my_str
 
-help_desc = ("Create a test project in Microreact using one or more trees and some dummy data. "
-             "The script depends on a MongoDB database defined by BIO_API_MONGO_CONNECTION, or in the case this environment "
-             "variable is not set, a MongoDB database on mongodb://mongodb:27017/bio_api_test. "
+help_desc = ("Create a test project in Microreact using all samples from a MongoDB collection. "
              "A data table with fake metadata will be generated automatically. "
              )
 parser = argparse.ArgumentParser(description=help_desc)
 parser.add_argument(
-    "trees",
+    "collection",
         help=(
-            "Mongo ID(s) for document(s) in tree_calculations collection. "
-            "If more than one ID, separate with commas without spaces. "
+            "Name of MongoDB collection that contains the samples to use. "
             )
         )
 parser.add_argument(
@@ -47,64 +44,68 @@ args = parser.parse_args()
 connection_string = getenv('BIO_API_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
 connection:pymongo.MongoClient = pymongo.MongoClient(connection_string)
 db = connection.get_database('bio_api_test')
-trees_str: str = args.trees
-tree_calcs = list()
-tree_ids = [ ObjectId(id) for id in trees_str.split(',') ]
-print("Tree ids:")
-print(tree_ids)
-tree_cursor = db['tree_calculations'].find({'_id': {'$in': tree_ids}})
-tc = next(tree_cursor)
-tree_calcs.append(tc)
-dmx_job_id = tc['dmx_job']  #TODO unify
-print(f"DMX job id: {dmx_job_id}")
-dmx_job = db['dist_calculations'].find_one({'_id': ObjectId(dmx_job_id)})
-assert 'result' in dmx_job
-assert type(dmx_job['result']) is dict
-assert 'seq_to_mongo' in dmx_job['result']
-while True:
-    try:
-        tc = next(tree_cursor)
-        # Make sure that all trees are calculated from the same dmx job
-        assert tc['dmx_job'] == dmx_job_id
-        tree_calcs.append(tc)
-    except StopIteration:
-        break
+collection: str = args.collection
+samples = db[collection].find()
+sample_count = db[collection].count_documents({})
+print(f"Found {sample_count} samples in {collection}")
 
-# Create minimal metadata set
-seq_to_mongo:dict = dmx_job['result']['seq_to_mongo']
-metadata_keys = ['seq_id', 'db_id']
+# tree_calcs = list()
+# tree_ids = [ ObjectId(id) for id in trees_str.split(',') ]
+# print("Tree ids:")
+# print(tree_ids)
+# tree_cursor = db['tree_calculations'].find({'_id': {'$in': tree_ids}})
+# tc = next(tree_cursor)
+# tree_calcs.append(tc)
+# dmx_job_id = tc['dmx_job']  #TODO unify
+# print(f"DMX job id: {dmx_job_id}")
+# dmx_job = db['dist_calculations'].find_one({'_id': ObjectId(dmx_job_id)})
+# assert 'result' in dmx_job
+# assert type(dmx_job['result']) is dict
+# assert 'seq_to_mongo' in dmx_job['result']
+# while True:
+#     try:
+#         tc = next(tree_cursor)
+#         # Make sure that all trees are calculated from the same dmx job
+#         assert tc['dmx_job'] == dmx_job_id
+#         tree_calcs.append(tc)
+#     except StopIteration:
+#         break
 
-metadata_values = list()
-for k, v in seq_to_mongo.items():
-    metadata_values.append([k, str(v)])
+# # Create minimal metadata set
+# seq_to_mongo:dict = dmx_job['result']['seq_to_mongo']
+# metadata_keys = ['seq_id', 'db_id']
 
-# Add fake encrypted metadata
-metadata_keys.extend(['cpr', 'navn', 'mk', 'alder', 'landnavn', 'kmanavn'])
-row: list
-for row in metadata_values:
-    for n in range(6):
-        row.append(random_string(10))
+# metadata_values = list()
+# for k, v in seq_to_mongo.items():
+#     metadata_values.append([k, str(v)])
 
-print("Metadata keys:")
-print(metadata_keys)
-print()
-print("Metadata values:")
-print(metadata_values)
+# # Add fake encrypted metadata
+# metadata_keys.extend(['cpr', 'navn', 'mk', 'alder', 'landnavn', 'kmanavn'])
+# row: list
+# for row in metadata_values:
+#     for n in range(6):
+#         row.append(random_string(10))
 
-# Create a distance matrix Vega-Lite component
-# First, get the distance matrix from Bio API
-# dmx_from_bio_api = call_dmx_result(dmx_job_id)
-# print(dmx_from_bio_api)
+# print("Metadata keys:")
+# print(metadata_keys)
+# print()
+# print("Metadata values:")
+# print(metadata_values)
 
-rest_response = functions.new_project(
-    project_name=args.project_name,
-    tree_calcs=tree_calcs,
-    metadata_keys=metadata_keys,
-    metadata_values=metadata_values,
-    mr_access_token=common.MICROREACT_ACCESS_TOKEN,
-    mr_base_url=common.MICROREACT_BASE_URL,
-    verify = not args.noverify
-    )
-print(f"HTTP response code: {str(rest_response)}")
-print("Response as actual JSON:")
-print(dumps(rest_response.json()))
+# # Create a distance matrix Vega-Lite component
+# # First, get the distance matrix from Bio API
+# # dmx_from_bio_api = call_dmx_result(dmx_job_id)
+# # print(dmx_from_bio_api)
+
+# rest_response = functions.new_project(
+#     project_name=args.project_name,
+#     tree_calcs=tree_calcs,
+#     metadata_keys=metadata_keys,
+#     metadata_values=metadata_values,
+#     mr_access_token=common.MICROREACT_ACCESS_TOKEN,
+#     mr_base_url=common.MICROREACT_BASE_URL,
+#     verify = not args.noverify
+#     )
+# print(f"HTTP response code: {str(rest_response)}")
+# print("Response as actual JSON:")
+# print(dumps(rest_response.json()))
