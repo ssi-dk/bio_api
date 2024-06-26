@@ -4,13 +4,14 @@ from os import getenv
 from json import dumps
 from string import ascii_letters,digits 
 from random import choice
+from time import sleep
 
 import pymongo
 from bson.objectid import ObjectId
 
 from microreact_integration import common, functions
 
-from client_functions import call_dmx_from_mongodb, call_dmx_result
+import client_functions
  
 lettersdigits=ascii_letters+digits 
  
@@ -50,7 +51,7 @@ sample_count = db[collection].count_documents({})
 print(f"Found {sample_count} samples in {collection}")
 
 # Initiate distance calculation
-result = call_dmx_from_mongodb(
+result = client_functions.call_dmx_from_mongodb(
     seq_collection=collection,
     seqid_field_path='categories.sample_info.summary.sofi_sequence_id',
     profile_field_path='categories.cgmlst.report.alleles',
@@ -60,6 +61,18 @@ assert result.status_code == 201
 assert 'job_id' in result.json()
 dmx_job_id = result.json()['job_id']
 print(dmx_job_id)
+
+# Check status of distance calculation
+dmx_job_status = ''
+while not dmx_job_status == 'finished':
+    result = client_functions.call_dmx_status(dmx_job_id)
+    print(result)
+    assert result.status_code == 200
+    dmx_job = result.json()
+    assert 'status' in dmx_job
+    dmx_job_status = dmx_job['status']
+    print(f'DMX job status: {dmx_job_status}')
+    sleep(1)
 
 # tree_calcs = list()
 # tree_ids = [ ObjectId(id) for id in trees_str.split(',') ]

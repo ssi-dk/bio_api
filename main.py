@@ -168,11 +168,13 @@ async def dmx_result(dc_id: str, level:str='full'):
             )
 
     content = calc.to_dict()
-    # Replace ObjectId's with str
-    for k, v in content['result']['seq_to_mongo'].items():
-        content['result']['seq_to_mongo'][k] = str(v)
     
     if calc.status == 'completed':
+
+        # Replace ObjectId's with str
+        for k, v in content['result']['seq_to_mongo'].items():
+            content['result']['seq_to_mongo'][k] = str(v)
+
         content['finished_at'] = calc.finished_at.isoformat()
         content['result'] = calc.result
         if level == 'full':
