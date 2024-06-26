@@ -66,7 +66,9 @@ def call_dmx_from_mongodb(
     seq_collection:str,
     seqid_field_path: str,
     profile_field_path:str,
-    mongo_ids:list):
+    mongo_ids:list | None):
+    if not mongo_ids:
+        print("mongo_ids not provided - use all samples in collection")
     url = base_url + '/v1/distance_calculations'
     rest_response = requests.post(
         url,

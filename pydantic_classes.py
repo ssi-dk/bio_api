@@ -27,12 +27,12 @@ class DistanceMatrixRequest(BaseModel):
     seq_collection: collection to find sequences in
     seqid_field_path: field path in dotted notation which contains the 'sequence id' the user wants to see
     profile_field_path: field path in dotted notation which contains the cgMLST allele profiles
-    mongo_ids: the  _id strings for the desired sequence documents
+    seq_mongo_ids: the  _id strings for the desired sequence documents
     """
     seq_collection: str
     seqid_field_path: str
     profile_field_path: str
-    seq_mongo_ids: list
+    seq_mongo_ids: list | None
 
 
 class HCTreeCalcRequest(BaseModel):
