@@ -1,6 +1,7 @@
 import requests
+from os import getenv
 
-BIO_API_BASE_URL = 'http://bio_api:8000'
+BIO_API_BASE_URL = getenv('BIO_API_BASE_URL', 'http://bio_api:8000')
 
 def dictify_path(dotted_path:str, value:any):
     path_elements = dotted_path.split('.')
