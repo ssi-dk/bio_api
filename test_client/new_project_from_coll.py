@@ -10,7 +10,7 @@ from bson.objectid import ObjectId
 
 from microreact_integration import common, functions
 
-from client_functions import call_dmx_result
+from client_functions import call_dmx_from_mongodb, call_dmx_result
  
 lettersdigits=ascii_letters+digits 
  
@@ -48,6 +48,18 @@ collection: str = args.collection
 samples = db[collection].find()
 sample_count = db[collection].count_documents({})
 print(f"Found {sample_count} samples in {collection}")
+
+# Initiate distance calculation
+result = call_dmx_from_mongodb(
+    seq_collection=collection,
+    seqid_field_path='categories.sample_info.summary.sofi_sequence_id',
+    profile_field_path='categories.cgmlst.report.alleles',
+)
+print(result)
+assert result.status_code == 201
+assert 'job_id' in result.json()
+dmx_job_id = result.json()['job_id']
+print(dmx_job_id)
 
 # tree_calcs = list()
 # tree_ids = [ ObjectId(id) for id in trees_str.split(',') ]

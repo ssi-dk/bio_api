@@ -370,7 +370,7 @@ class DistanceCalculation(Calculation):
             field_paths=[self.seqid_field_path, self.profile_field_path],
             mongo_ids=self.seq_mongo_ids
             )
-        if len(self.seq_mongo_ids) != profile_count:
+        if self.seq_mongo_ids is not None and len(self.seq_mongo_ids) != profile_count:
             message = "Could not find the requested number of sequences. " + \
                 f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(profile_count)}"
             raise MissingDataException(message)
