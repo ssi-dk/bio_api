@@ -51,24 +51,24 @@ sample_count = db[collection].count_documents({})
 print(f"Found {sample_count} samples in {collection}")
 
 # Initiate distance calculation
-result = client_functions.call_dmx_from_mongodb(
+dmx_post_response = client_functions.call_dmx_from_mongodb(
     seq_collection=collection,
     seqid_field_path='categories.sample_info.summary.sofi_sequence_id',
     profile_field_path='categories.cgmlst.report.alleles',
 )
-print(result)
-assert result.status_code == 201
-assert 'job_id' in result.json()
-dmx_job_id = result.json()['job_id']
-print(dmx_job_id)
+print(dmx_post_response)
+assert dmx_post_response.status_code == 201
+assert 'job_id' in dmx_post_response.json()
+dmx_job_id = dmx_post_response.json()['job_id']
+print(f"DMX job id: {dmx_job_id}")
 
 # Check status of distance calculation
 dmx_job_status = ''
 while not dmx_job_status == 'completed':
-    result = client_functions.call_dmx_status(dmx_job_id)
-    print(result)
-    assert result.status_code == 200
-    dmx_job = result.json()
+    dmx_get_response = client_functions.call_dmx_status(dmx_job_id)
+    print(dmx_get_response)
+    assert dmx_get_response.status_code == 200
+    dmx_job = dmx_get_response.json()
     assert 'status' in dmx_job
     dmx_job_status = dmx_job['status']
     print(f'DMX job status: {dmx_job_status}')
