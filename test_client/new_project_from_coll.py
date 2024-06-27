@@ -64,7 +64,7 @@ print(dmx_job_id)
 
 # Check status of distance calculation
 dmx_job_status = ''
-while not dmx_job_status == 'finished':
+while not dmx_job_status == 'completed':
     result = client_functions.call_dmx_status(dmx_job_id)
     print(result)
     assert result.status_code == 200
