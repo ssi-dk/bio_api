@@ -78,7 +78,7 @@ tree_post_response = client_functions.call_hc_tree_from_dmx_job(dmx_job_id, 'sin
 assert tree_post_response.status_code == 201
 assert 'job_id' in tree_post_response.json()
 tree_job_id = tree_post_response.json()['job_id']
-print(f"Tree job id: {dmx_job_id}")
+print(f"Tree job id: {tree_job_id}")
 
 # Check status of tree calculation
 tree_job_status = ''
