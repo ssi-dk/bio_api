@@ -92,26 +92,26 @@ while not tree_job_status == 'completed':
     print(f'Tree job status: {tree_job_status}')
     sleep(1)
 
-# # Create minimal metadata set
-# seq_to_mongo:dict = dmx_job['result']['seq_to_mongo']
-# metadata_keys = ['seq_id', 'db_id']
+# Create minimal metadata set
+seq_to_mongo:dict = dmx_job['result']['seq_to_mongo']
+metadata_keys = ['seq_id', 'db_id']
 
-# metadata_values = list()
-# for k, v in seq_to_mongo.items():
-#     metadata_values.append([k, str(v)])
+metadata_values = list()
+for k, v in seq_to_mongo.items():
+    metadata_values.append([k, str(v)])
 
-# # Add fake encrypted metadata
-# metadata_keys.extend(['cpr', 'navn', 'mk', 'alder', 'landnavn', 'kmanavn'])
-# row: list
-# for row in metadata_values:
-#     for n in range(6):
-#         row.append(random_string(10))
+# Add fake encrypted metadata
+metadata_keys.extend(['cpr', 'navn', 'mk', 'alder', 'landnavn', 'kmanavn'])
+row: list
+for row in metadata_values:
+    for n in range(6):
+        row.append(random_string(10))
 
-# print("Metadata keys:")
-# print(metadata_keys)
-# print()
-# print("Metadata values:")
-# print(metadata_values)
+print("Metadata keys:")
+print(metadata_keys)
+print()
+print("Metadata values:")
+print(metadata_values)
 
 # # Create a distance matrix Vega-Lite component
 # # First, get the distance matrix from Bio API
