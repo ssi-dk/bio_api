@@ -86,9 +86,9 @@ while not tree_job_status == 'completed':
     tree_get_response = client_functions.call_hc_tree_status(tree_job_id)
     print(tree_get_response)
     assert tree_get_response.status_code == 200
-    tree_job = dmx_get_response.json()
+    tree_job = tree_get_response.json()
     assert 'status' in tree_job
-    tree_job_status = dmx_job['status']
+    tree_job_status = tree_job['status']
     print(f'Tree job status: {tree_job_status}')
     sleep(1)
 
@@ -107,26 +107,26 @@ for row in metadata_values:
     for n in range(6):
         row.append(random_string(10))
 
-print("Metadata keys:")
-print(metadata_keys)
-print()
-print("Metadata values:")
-print(metadata_values)
+# print("Metadata keys:")
+# print(metadata_keys)
+# print()
+# print("Metadata values:")
+# print(metadata_values)
 
-# # Create a distance matrix Vega-Lite component
-# # First, get the distance matrix from Bio API
-# # dmx_from_bio_api = call_dmx_result(dmx_job_id)
-# # print(dmx_from_bio_api)
+# Create a distance matrix Vega-Lite component
+# First, get the distance matrix from Bio API
+# dmx_from_bio_api = call_dmx_result(dmx_job_id)
+# print(dmx_from_bio_api)
 
-# rest_response = functions.new_project(
-#     project_name=args.project_name,
-#     tree_calcs=tree_calcs,
-#     metadata_keys=metadata_keys,
-#     metadata_values=metadata_values,
-#     mr_access_token=common.MICROREACT_ACCESS_TOKEN,
-#     mr_base_url=common.MICROREACT_BASE_URL,
-#     verify = not args.noverify
-#     )
-# print(f"HTTP response code: {str(rest_response)}")
-# print("Response as actual JSON:")
-# print(dumps(rest_response.json()))
+rest_response = functions.new_project(
+    project_name=args.project_name,
+    tree_calcs=[tree_job],
+    metadata_keys=metadata_keys,
+    metadata_values=metadata_values,
+    mr_access_token=common.MICROREACT_ACCESS_TOKEN,
+    mr_base_url=common.MICROREACT_BASE_URL,
+    verify = not args.noverify
+    )
+print(f"HTTP response code: {str(rest_response)}")
+print("Response as actual JSON:")
+print(dumps(rest_response.json()))
