@@ -56,7 +56,6 @@ dmx_post_response = client_functions.call_dmx_from_mongodb(
     seqid_field_path='categories.sample_info.summary.sofi_sequence_id',
     profile_field_path='categories.cgmlst.report.alleles',
 )
-print(dmx_post_response)
 assert dmx_post_response.status_code == 201
 assert 'job_id' in dmx_post_response.json()
 dmx_job_id = dmx_post_response.json()['job_id']
@@ -74,27 +73,24 @@ while not dmx_job_status == 'completed':
     print(f'DMX job status: {dmx_job_status}')
     sleep(1)
 
-# tree_calcs = list()
-# tree_ids = [ ObjectId(id) for id in trees_str.split(',') ]
-# print("Tree ids:")
-# print(tree_ids)
-# tree_cursor = db['tree_calculations'].find({'_id': {'$in': tree_ids}})
-# tc = next(tree_cursor)
-# tree_calcs.append(tc)
-# dmx_job_id = tc['dmx_job']  #TODO unify
-# print(f"DMX job id: {dmx_job_id}")
-# dmx_job = db['dist_calculations'].find_one({'_id': ObjectId(dmx_job_id)})
-# assert 'result' in dmx_job
-# assert type(dmx_job['result']) is dict
-# assert 'seq_to_mongo' in dmx_job['result']
-# while True:
-#     try:
-#         tc = next(tree_cursor)
-#         # Make sure that all trees are calculated from the same dmx job
-#         assert tc['dmx_job'] == dmx_job_id
-#         tree_calcs.append(tc)
-#     except StopIteration:
-#         break
+# Initiate tree calculation
+tree_post_response = client_functions.call_hc_tree_from_dmx_job(dmx_job_id, 'single')
+assert tree_post_response.status_code == 201
+assert 'job_id' in tree_post_response.json()
+tree_job_id = tree_post_response.json()['job_id']
+print(f"Tree job id: {dmx_job_id}")
+
+# Check status of tree calculation
+tree_job_status = ''
+while not tree_job_status == 'completed':
+    tree_get_response = client_functions.call_hc_tree_status(tree_job_id)
+    print(tree_get_response)
+    assert tree_get_response.status_code == 200
+    tree_job = dmx_get_response.json()
+    assert 'status' in tree_job
+    tree_job_status = dmx_job['status']
+    print(f'Tree job status: {tree_job_status}')
+    sleep(1)
 
 # # Create minimal metadata set
 # seq_to_mongo:dict = dmx_job['result']['seq_to_mongo']
