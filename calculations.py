@@ -53,12 +53,16 @@ class MongoAPI:
     async def get_field_data(
             self,
             collection:str,   # MongoDB collection
-            mongo_ids:list,   # List of MongoDB ObjectIds as str
+            mongo_ids:list | None,   # List of MongoDB ObjectIds as str
             field_paths:list, # List of field paths in dotted notation: ['some.example.field1', 'some.other.example.field2']
         ):
-        filter = {'_id': {'$in': strs2ObjectIds(mongo_ids)}}
-        document_count = self.db[collection].count_documents(filter)
-        cursor = self.db[collection].find(filter, {field_path: True for field_path in field_paths})
+        if mongo_ids:
+            filter = {'_id': {'$in': strs2ObjectIds(mongo_ids)}}
+            document_count = self.db[collection].count_documents(filter)
+            cursor = self.db[collection].find(filter, {field_path: True for field_path in field_paths})
+        else:
+            document_count = self.db[collection].count_documents({})
+            cursor = self.db[collection].find({}, {field_path: True for field_path in field_paths})
         return document_count, cursor
 
 connection_string = getenv('BIO_API_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
@@ -319,7 +323,7 @@ class DistanceCalculation(Calculation):
     seq_collection: str
     seqid_field_path: str
     profile_field_path: str
-    seq_mongo_ids: list
+    seq_mongo_ids: list | None
 
     def __init__(
             self,
@@ -366,7 +370,7 @@ class DistanceCalculation(Calculation):
             field_paths=[self.seqid_field_path, self.profile_field_path],
             mongo_ids=self.seq_mongo_ids
             )
-        if len(self.seq_mongo_ids) != profile_count:
+        if self.seq_mongo_ids is not None and len(self.seq_mongo_ids) != profile_count:
             message = "Could not find the requested number of sequences. " + \
                 f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(profile_count)}"
             raise MissingDataException(message)
