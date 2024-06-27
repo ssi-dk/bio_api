@@ -83,7 +83,7 @@ print(f"Tree job id: {tree_job_id}")
 # Check status of tree calculation
 tree_job_status = ''
 while not tree_job_status == 'completed':
-    tree_get_response = client_functions.call_hc_tree_status(tree_job_id)
+    tree_get_response = client_functions.call_hc_tree_result(tree_job_id)
     print(tree_get_response)
     assert tree_get_response.status_code == 200
     tree_job = tree_get_response.json()
