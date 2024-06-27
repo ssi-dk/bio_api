@@ -83,7 +83,7 @@ class DistanceMatrixResult(BaseModel):
     distances: typing.Optional[dict] = None
 
 class DistanceMatrixGETResponse(DistanceMatrixRequest, CommonGETResponse):
-    result: DistanceMatrixResult
+    result: typing.Optional[DistanceMatrixResult]
 
 
 class HCTreeCalcGETResponse(HCTreeCalcRequest, CommonGETResponse):
