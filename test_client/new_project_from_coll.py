@@ -118,6 +118,7 @@ for row in metadata_values:
 # dmx_from_bio_api = call_dmx_result(dmx_job_id)
 # print(dmx_from_bio_api)
 
+print(f"Sending request to {common.MICROREACT_BASE_URL}")
 rest_response = functions.new_project(
     project_name=args.project_name,
     tree_calcs=[tree_job],
