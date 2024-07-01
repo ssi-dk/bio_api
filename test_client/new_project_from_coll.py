@@ -26,18 +26,21 @@ help_desc = ("Create a test project in Microreact using all samples from a Mongo
 parser = argparse.ArgumentParser(description=help_desc)
 parser.add_argument(
     "collection",
-        help=(
-            "Name of MongoDB collection that contains the samples to use. "
-            )
-        )
+    help="Name of MongoDB collection that contains the samples to use."
+    )
 parser.add_argument(
     "--project_name",
     help="Project name (can be changed later in web interface)",
     default=common.USERNAME + '_' + str(datetime.now().isoformat(timespec='seconds'))
     )
-parser.add_argument(
+group = parser.add_mutually_exclusive_group()
+group.add_argument(
+    "--file",
+    help="Store the project as a file with this name instead of uploading it through the upload API",
+    )
+group.add_argument(
     "--noverify",
-    help="Do not verify SSL certificate of Microreact host ",
+    help="Do not verify SSL certificate of Microreact host",
     action="store_true"
     )
 args = parser.parse_args()
@@ -51,65 +54,61 @@ sample_count = db[collection].count_documents({})
 print(f"Found {sample_count} samples in {collection}")
 
 # Initiate distance calculation
-result = client_functions.call_dmx_from_mongodb(
+dmx_post_response = client_functions.call_dmx_from_mongodb(
     seq_collection=collection,
     seqid_field_path='categories.sample_info.summary.sofi_sequence_id',
     profile_field_path='categories.cgmlst.report.alleles',
 )
-print(result)
-assert result.status_code == 201
-assert 'job_id' in result.json()
-dmx_job_id = result.json()['job_id']
-print(dmx_job_id)
+assert dmx_post_response.status_code == 201
+assert 'job_id' in dmx_post_response.json()
+dmx_job_id = dmx_post_response.json()['job_id']
+print(f"DMX job id: {dmx_job_id}")
 
 # Check status of distance calculation
 dmx_job_status = ''
-while not dmx_job_status == 'finished':
-    result = client_functions.call_dmx_status(dmx_job_id)
-    print(result)
-    assert result.status_code == 200
-    dmx_job = result.json()
+while not dmx_job_status == 'completed':
+    dmx_get_response = client_functions.call_dmx_status(dmx_job_id)
+    print(dmx_get_response)
+    assert dmx_get_response.status_code == 200
+    dmx_job = dmx_get_response.json()
     assert 'status' in dmx_job
     dmx_job_status = dmx_job['status']
     print(f'DMX job status: {dmx_job_status}')
     sleep(1)
 
-# tree_calcs = list()
-# tree_ids = [ ObjectId(id) for id in trees_str.split(',') ]
-# print("Tree ids:")
-# print(tree_ids)
-# tree_cursor = db['tree_calculations'].find({'_id': {'$in': tree_ids}})
-# tc = next(tree_cursor)
-# tree_calcs.append(tc)
-# dmx_job_id = tc['dmx_job']  #TODO unify
-# print(f"DMX job id: {dmx_job_id}")
-# dmx_job = db['dist_calculations'].find_one({'_id': ObjectId(dmx_job_id)})
-# assert 'result' in dmx_job
-# assert type(dmx_job['result']) is dict
-# assert 'seq_to_mongo' in dmx_job['result']
-# while True:
-#     try:
-#         tc = next(tree_cursor)
-#         # Make sure that all trees are calculated from the same dmx job
-#         assert tc['dmx_job'] == dmx_job_id
-#         tree_calcs.append(tc)
-#     except StopIteration:
-#         break
+# Initiate tree calculation
+tree_post_response = client_functions.call_hc_tree_from_dmx_job(dmx_job_id, 'single')
+assert tree_post_response.status_code == 201
+assert 'job_id' in tree_post_response.json()
+tree_job_id = tree_post_response.json()['job_id']
+print(f"Tree job id: {tree_job_id}")
 
-# # Create minimal metadata set
-# seq_to_mongo:dict = dmx_job['result']['seq_to_mongo']
-# metadata_keys = ['seq_id', 'db_id']
+# Check status of tree calculation
+tree_job_status = ''
+while not tree_job_status == 'completed':
+    tree_get_response = client_functions.call_hc_tree_result(tree_job_id)
+    print(tree_get_response)
+    assert tree_get_response.status_code == 200
+    tree_job = tree_get_response.json()
+    assert 'status' in tree_job
+    tree_job_status = tree_job['status']
+    print(f'Tree job status: {tree_job_status}')
+    sleep(1)
 
-# metadata_values = list()
-# for k, v in seq_to_mongo.items():
-#     metadata_values.append([k, str(v)])
+# Create minimal metadata set
+seq_to_mongo:dict = dmx_job['result']['seq_to_mongo']
+metadata_keys = ['seq_id', 'db_id']
 
-# # Add fake encrypted metadata
-# metadata_keys.extend(['cpr', 'navn', 'mk', 'alder', 'landnavn', 'kmanavn'])
-# row: list
-# for row in metadata_values:
-#     for n in range(6):
-#         row.append(random_string(10))
+metadata_values = list()
+for k, v in seq_to_mongo.items():
+    metadata_values.append([k, str(v)])
+
+# Add fake encrypted metadata
+metadata_keys.extend(['cpr', 'navn', 'mk', 'alder', 'landnavn', 'kmanavn'])
+row: list
+for row in metadata_values:
+    for n in range(6):
+        row.append(random_string(10))
 
 # print("Metadata keys:")
 # print(metadata_keys)
@@ -117,20 +116,30 @@ while not dmx_job_status == 'finished':
 # print("Metadata values:")
 # print(metadata_values)
 
-# # Create a distance matrix Vega-Lite component
-# # First, get the distance matrix from Bio API
-# # dmx_from_bio_api = call_dmx_result(dmx_job_id)
-# # print(dmx_from_bio_api)
+# Create a distance matrix Vega-Lite component
+# First, get the distance matrix from Bio API
+# dmx_from_bio_api = call_dmx_result(dmx_job_id)
+# print(dmx_from_bio_api)
 
-# rest_response = functions.new_project(
-#     project_name=args.project_name,
-#     tree_calcs=tree_calcs,
-#     metadata_keys=metadata_keys,
-#     metadata_values=metadata_values,
-#     mr_access_token=common.MICROREACT_ACCESS_TOKEN,
-#     mr_base_url=common.MICROREACT_BASE_URL,
-#     verify = not args.noverify
-#     )
-# print(f"HTTP response code: {str(rest_response)}")
-# print("Response as actual JSON:")
-# print(dumps(rest_response.json()))
+if args.file:
+    functions.new_project_file(
+        project_name=args.project_name,
+        tree_calcs=[tree_job],
+        metadata_keys=metadata_keys,
+        metadata_values=metadata_values,
+        file_name = args.file
+    )
+else:
+    print(f"Sending request to {common.MICROREACT_BASE_URL}")
+    rest_response = functions.new_project(
+        project_name=args.project_name,
+        tree_calcs=[tree_job],
+        metadata_keys=metadata_keys,
+        metadata_values=metadata_values,
+        mr_access_token=common.MICROREACT_ACCESS_TOKEN,
+        mr_base_url=common.MICROREACT_BASE_URL,
+        verify = not args.noverify
+        )
+    print(f"HTTP response code: {str(rest_response)}")
+    print("Response as actual JSON:")
+    print(dumps(rest_response.json()))
