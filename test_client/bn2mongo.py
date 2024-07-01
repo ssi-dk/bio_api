@@ -52,7 +52,7 @@ def bn2mongo(
                     try:
                         unnested_document[sofi_field_name] = {'some_schema': int(value)}
                     except ValueError:
-                        unnested_document[sofi_field_name] = value
+                        unnested_document[sofi_field_name] = dict()
                 else:
                     try:
                         value = float(value)
