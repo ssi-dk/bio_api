@@ -26,18 +26,21 @@ help_desc = ("Create a test project in Microreact using all samples from a Mongo
 parser = argparse.ArgumentParser(description=help_desc)
 parser.add_argument(
     "collection",
-        help=(
-            "Name of MongoDB collection that contains the samples to use. "
-            )
-        )
+    help="Name of MongoDB collection that contains the samples to use."
+    )
 parser.add_argument(
     "--project_name",
     help="Project name (can be changed later in web interface)",
     default=common.USERNAME + '_' + str(datetime.now().isoformat(timespec='seconds'))
     )
-parser.add_argument(
+group = parser.add_mutually_exclusive_group()
+group.add_argument(
+    "--file",
+    help="Store the project as a file with this name instead of uploading it through the upload API",
+    )
+group.add_argument(
     "--noverify",
-    help="Do not verify SSL certificate of Microreact host ",
+    help="Do not verify SSL certificate of Microreact host",
     action="store_true"
     )
 args = parser.parse_args()
@@ -118,16 +121,25 @@ for row in metadata_values:
 # dmx_from_bio_api = call_dmx_result(dmx_job_id)
 # print(dmx_from_bio_api)
 
-print(f"Sending request to {common.MICROREACT_BASE_URL}")
-rest_response = functions.new_project(
-    project_name=args.project_name,
-    tree_calcs=[tree_job],
-    metadata_keys=metadata_keys,
-    metadata_values=metadata_values,
-    mr_access_token=common.MICROREACT_ACCESS_TOKEN,
-    mr_base_url=common.MICROREACT_BASE_URL,
-    verify = not args.noverify
+if args.file:
+    functions.new_project_file(
+        project_name=args.project_name,
+        tree_calcs=[tree_job],
+        metadata_keys=metadata_keys,
+        metadata_values=metadata_values,
+        file_name = args.file
     )
-print(f"HTTP response code: {str(rest_response)}")
-print("Response as actual JSON:")
-print(dumps(rest_response.json()))
+else:
+    print(f"Sending request to {common.MICROREACT_BASE_URL}")
+    rest_response = functions.new_project(
+        project_name=args.project_name,
+        tree_calcs=[tree_job],
+        metadata_keys=metadata_keys,
+        metadata_values=metadata_values,
+        mr_access_token=common.MICROREACT_ACCESS_TOKEN,
+        mr_base_url=common.MICROREACT_BASE_URL,
+        verify = not args.noverify
+        )
+    print(f"HTTP response code: {str(rest_response)}")
+    print("Response as actual JSON:")
+    print(dumps(rest_response.json()))
