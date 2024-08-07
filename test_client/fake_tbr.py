@@ -108,34 +108,12 @@ def fake_fn(
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-                    prog='bn2mongo',
-                    description="Import a TSV file to SOFI MongoDB structure. " + 
-                        "The first column in the file must contain the key. " +
-                        "Apart from the data file, the script will also need a file containing the mappings from the data file's column names " +
-                        "to SOFI field names as specified in 'SOFI_fields.csv'. " +
-                        "The specific use case for the script is importing a data file exported from BioNumerics."
+                    prog='fake_tbr',
+                    description="Create fake TBR data for keys taken from first column in a semicolon separated data file. "
     )
 
-    parser.add_argument('data_filename')
-    parser.add_argument('mapping_filename')
-    parser.add_argument('allele_filename')
-    parser.add_argument('--collection', type=str, help="name of collection to import to", default='samples')
-    parser.add_argument('--max_items', type=int, help="limit the number of items to import")
+    parser.add_argument('input_filename')
+    parser.add_argument('output_filename')
     args = parser.parse_args()
-    connection_string = getenv('BIO_API_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
-    connection = pymongo.MongoClient(connection_string)
-    db = connection.get_database()
-    print(f"Connection string: {connection_string}")
-    print(f"Import to collection: {args.collection}")
-    print(f"Max items to import: {args.max_items}")
-    max_items = int(args.max_items) if args.max_items else None
-    inserted_ids = fake_fn(
-        db,
-        args.data_filename,
-        args.mapping_filename,
-        args.allele_filename,
-        collection=args.collection,
-        max_items=max_items
-        )
-    print("These are the _id strings of the MongoDB documents:")
-    print(json.dumps(inserted_ids))
+    
+    # output = fake_fn(keys)
