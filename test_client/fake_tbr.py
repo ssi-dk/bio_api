@@ -123,11 +123,11 @@ if __name__ == '__main__':
         'provdato',
         'RunID',
         'cprnr',
-        'kon'
+        'kon',
         'navn',
-        'alder'
+        'alder',
         'PrimaryIsolate',
-        'Rejse'
+        'Rejse',
         'landnavn',
         'KMAdato',
         'kmanavn',
@@ -143,7 +143,26 @@ if __name__ == '__main__':
     output_data = DataFrame(columns=tbr_fields)
 
     for i_index, i_row in input_data.iterrows():
-        sequence_id = i_row[0]
-        print(f"Sequence ID: {sequence_id}")
+        output_data.loc[i_index] = (
+            i_row[0],
+            'provdato',
+            'RunID',
+            'cprnr',
+            'kon',
+            'navn',
+            'alder',
+            'PrimaryIsolate',
+            'Rejse',
+            'landnavn',
+            'KMAdato',
+            'kmanavn',
+            'FUDNR',
+            'ClusterID',
+            'Dato_Epi',
+            'Regionsnavn',
+            'Species',
+            'ST'
+        )
+        print(output_data)
     
     # output = fake_fn(keys)
