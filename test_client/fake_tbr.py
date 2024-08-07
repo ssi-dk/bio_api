@@ -118,29 +118,29 @@ if __name__ == '__main__':
 
     input_data = read_csv(args.input_filename, sep=';', encoding='ISO-8859-1')
 
-    columns = [
-        'tbl_Isolater.Isolatnr',
-        'tbl_Isolater.Provdato',
-        'tbl_Isolater.RunID',
-        'tbl_Isolater.cprnr',
-        'tbl_Basis.Kon'
-        'tbl_Isolater.navn',
-        'tbl_Basis.Alder'
-        'tbl_Isolater.PrimaryIsolate',
-        'tbl_Basis.Rejse'
-        'tbl_Lande.landnavn',
-        'tbl_Isolater.KMAdato',
-        'tbl_KMA.kmanavn',
-        'tbl_Isolater.FUDNR',
-        'tbl_Isolater.ClusterID',
-        'tbl_Isolater.Dato_Epi',
-        'tbl_Region.Regionsnavn',
-        'tbl_Isolater.Species',
-        'tbl_Isolater.ST'
+    tbr_fields = [
+        'Isolatnr',
+        'provdato',
+        'RunID',
+        'cprnr',
+        'kon'
+        'navn',
+        'alder'
+        'PrimaryIsolate',
+        'Rejse'
+        'landnavn',
+        'KMAdato',
+        'kmanavn',
+        'FUDNR',
+        'ClusterID',
+        'Dato_Epi',
+        'Regionsnavn',
+        'Species',
+        'ST'
     ]
 
 
-    output_data = DataFrame(columns=columns)
+    output_data = DataFrame(columns=tbr_fields)
 
     for _index, row in input_data.iterrows():
         sequence_id = row[0]
