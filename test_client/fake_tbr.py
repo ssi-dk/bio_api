@@ -1,6 +1,7 @@
 from pandas import read_csv, DataFrame
 import argparse
 from faker import Faker
+from sys import exit
 
 fake = Faker('da_DK')
 
@@ -11,6 +12,7 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('input_filename')
 parser.add_argument('output_filename')
+parser.add_argument('--limit', type=int, default=None)
 args = parser.parse_args()
 
 input_data = read_csv(args.input_filename, sep=';', encoding='ISO-8859-1')
@@ -40,6 +42,8 @@ tbr_fields = (
 output_data = DataFrame(columns=tbr_fields)
 
 for i_index, i_row in input_data.iterrows():
+    # if args.limit is not None and i_index > args.limit:
+    #     exit()
     output_data.loc[i_index] = (
         i_row.get('Isolatnr'),
         # provdato example: '2015-01-14 00:00:00'
@@ -77,6 +81,5 @@ for i_index, i_row in input_data.iterrows():
         # ST example: 583
         583
     )
-    print(output_data)
 
-# output = fake_fn(keys)
+print(output_data)
