@@ -50,7 +50,7 @@ for i_index, i_row in input_data.iterrows():
         # RunID example: 'N_WGS_999'
         'N_WGS_999',
         # cprnr example: '2512489996'
-        fake.date_of_birth().strftime('%d%m%-y') + '-' + str(fake.random_number(4, fix_len=True)),
+        fake.date_of_birth().strftime('%d%m%y') + '-' + str(fake.random_number(4, fix_len=True)),
         # kon example: 'K'
         'K',
         # navn example: 'BERGGREN, NANCY ANN'
