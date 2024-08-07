@@ -1,5 +1,5 @@
 from os import getenv
-from pandas import read_csv
+from pandas import read_csv, DataFrame
 import argparse
 import pymongo
 import json
@@ -115,7 +115,33 @@ if __name__ == '__main__':
     parser.add_argument('input_filename')
     parser.add_argument('output_filename')
     args = parser.parse_args()
+
     input_data = read_csv(args.input_filename, sep=';', encoding='ISO-8859-1')
+
+    columns = [
+        'tbl_Isolater.Isolatnr',
+        'tbl_Isolater.Provdato',
+        'tbl_Isolater.RunID',
+        'tbl_Isolater.cprnr',
+        'tbl_Basis.Kon'
+        'tbl_Isolater.navn',
+        'tbl_Basis.Alder'
+        'tbl_Isolater.PrimaryIsolate',
+        'tbl_Basis.Rejse'
+        'tbl_Lande.landnavn',
+        'tbl_Isolater.KMAdato',
+        'tbl_KMA.kmanavn',
+        'tbl_Isolater.FUDNR',
+        'tbl_Isolater.ClusterID',
+        'tbl_Isolater.Dato_Epi',
+        'tbl_Region.Regionsnavn',
+        'tbl_Isolater.Species',
+        'tbl_Isolater.ST'
+    ]
+
+
+    output_data = DataFrame(columns=columns)
+
     for _index, row in input_data.iterrows():
         sequence_id = row[0]
         print(f"Sequence ID: {sequence_id}")
