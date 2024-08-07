@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     for i_index, i_row in input_data.iterrows():
         output_data.loc[i_index] = (
-            i_row[0],
+            i_row.get('Isolatnr'),
             'provdato',
             'RunID',
             'cprnr',
