@@ -115,5 +115,9 @@ if __name__ == '__main__':
     parser.add_argument('input_filename')
     parser.add_argument('output_filename')
     args = parser.parse_args()
+    input_data = read_csv(args.input_filename, sep=';', encoding='ISO-8859-1')
+    for _index, row in input_data.iterrows():
+        sequence_id = row[0]
+        print(f"Sequence ID: {sequence_id}")
     
     # output = fake_fn(keys)
