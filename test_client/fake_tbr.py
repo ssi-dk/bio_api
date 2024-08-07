@@ -118,7 +118,7 @@ if __name__ == '__main__':
 
     input_data = read_csv(args.input_filename, sep=';', encoding='ISO-8859-1')
 
-    tbr_fields = [
+    tbr_fields = (
         'Isolatnr',
         'provdato',
         'RunID',
@@ -137,13 +137,13 @@ if __name__ == '__main__':
         'Regionsnavn',
         'Species',
         'ST'
-    ]
+    )
 
 
     output_data = DataFrame(columns=tbr_fields)
 
-    for _index, row in input_data.iterrows():
-        sequence_id = row[0]
+    for i_index, i_row in input_data.iterrows():
+        sequence_id = i_row[0]
         print(f"Sequence ID: {sequence_id}")
     
     # output = fake_fn(keys)
