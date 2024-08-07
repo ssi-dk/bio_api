@@ -2,7 +2,7 @@ from pandas import read_csv, DataFrame
 import argparse
 from faker import Faker
 
-fake = Faker()
+fake = Faker('da_DK')
 
 parser = argparse.ArgumentParser(
                 prog='fake_tbr',
@@ -51,7 +51,7 @@ for i_index, i_row in input_data.iterrows():
         # kon example: 'K'
         'K',
         # navn example: 'BERGGREN, NANCY ANN'
-        f'{fake.first_name()}, {fake.first_name()}'.upper(),
+        f'{fake.last_name()}, {fake.first_name()}'.upper(),
         # alder example: 72
         72,
         # PrimaryIsolate example: 1
