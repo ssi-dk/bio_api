@@ -6,7 +6,7 @@ import json
 
 from client_functions import dictify_path, recursive_merge
 
-def bn2mongo(
+def fake_fn(
             db,
             data_filename: str,
             mapping_filename: str,
@@ -129,7 +129,7 @@ if __name__ == '__main__':
     print(f"Import to collection: {args.collection}")
     print(f"Max items to import: {args.max_items}")
     max_items = int(args.max_items) if args.max_items else None
-    inserted_ids = bn2mongo(
+    inserted_ids = fake_fn(
         db,
         args.data_filename,
         args.mapping_filename,
