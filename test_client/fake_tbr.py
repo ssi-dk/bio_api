@@ -1,7 +1,6 @@
 from pandas import read_csv, DataFrame
 import argparse
 from faker import Faker
-from sys import exit
 
 fake = Faker('da_DK')
 
@@ -42,8 +41,8 @@ tbr_fields = (
 output_data = DataFrame(columns=tbr_fields)
 
 for i_index, i_row in input_data.iterrows():
-    # if args.limit is not None and i_index > args.limit:
-    #     exit()
+    if args.limit is not None and i_index > args.limit:
+        break
     output_data.loc[i_index] = (
         i_row.get('Isolatnr'),
         # provdato example: '2015-01-14 00:00:00'
