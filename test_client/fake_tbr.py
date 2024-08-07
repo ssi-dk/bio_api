@@ -46,7 +46,7 @@ for i_index, i_row in input_data.iterrows():
     output_data.loc[i_index] = (
         i_row.get('Isolatnr'),
         # provdato example: '2015-01-14 00:00:00'
-        '2015-01-14 00:00:00',
+        fake.date_this_century(),
         # RunID example: 'N_WGS_999'
         'N_WGS_999',
         # cprnr example: '2512489996'
