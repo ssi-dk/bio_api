@@ -1,4 +1,4 @@
-from pandas import read_csv, DataFrame
+import pandas
 import argparse
 from faker import Faker
 import random
@@ -16,7 +16,7 @@ parser.add_argument('output_filename')
 parser.add_argument('--limit', type=int, default=None)
 args = parser.parse_args()
 
-input_data = read_csv(args.input_filename, sep=';', encoding='ISO-8859-1')
+input_data = pandas.read_csv(args.input_filename, sep=';', encoding='ISO-8859-1')
 
 tbr_fields = (
     'Isolatnr',
@@ -38,9 +38,9 @@ tbr_fields = (
     'Species',
     'ST'
 )
+pandas.set_option('display.max_columns', len(tbr_fields))
 
-
-output_data = DataFrame(columns=tbr_fields)
+output_data = pandas.DataFrame(columns=tbr_fields)
 
 for i_index, i_row in input_data.iterrows():
     if args.limit is not None and i_index > args.limit:
