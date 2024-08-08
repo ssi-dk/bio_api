@@ -48,6 +48,7 @@ for i_index, i_row in input_data.iterrows():
     first_name = fake.first_name_male() if male else fake.first_name_female()
     age_timedelta = date.today() - fake.date_of_birth(maximum_age=90)
     age = age_timedelta.days // 365
+    run_id = 'N_WGS_' + str(random.randint(0,100)).zfill(3)
     if args.limit is not None and i_index > args.limit:
         break
     output_data.loc[i_index] = (
@@ -55,7 +56,7 @@ for i_index, i_row in input_data.iterrows():
         # provdato example: '2015-01-14 00:00:00'
         fake.date_this_century(),
         # RunID example: 'N_WGS_999'
-        'N_WGS_999',
+        run_id,
         # cprnr example: '2512489996'
         fake.date_of_birth().strftime('%d%m%y') + '-' + str(fake.random_number(4, fix_len=True)),
         # kon example: 'K'
