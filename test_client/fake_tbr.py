@@ -89,7 +89,7 @@ for i_index, i_row in input_data.iterrows():
         # Dato_Epi example: '2024-03-22 18:59:01.917'
         dato_epi,
         # Regionsnavn example: 'SJÆLLAND'
-        'SJÆLLAND',
+        fake.state().upper(),
         # Species example: 'Escherichia coli'
         'Escherichia coli',
         # ST example: 583
