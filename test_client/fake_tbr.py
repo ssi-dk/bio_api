@@ -98,4 +98,4 @@ for i_index, i_row in input_data.iterrows():
         random.randint(1, 999)
     )
 
-print(output_data)
+output_data.to_csv(args.output_filename, sep=';', index=False)
