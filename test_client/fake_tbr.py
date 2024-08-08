@@ -91,9 +91,9 @@ for i_index, i_row in input_data.iterrows():
         # Regionsnavn example: 'SJÆLLAND'
         fake.state().upper(),
         # Species example: 'Escherichia coli'
-        'Escherichia coli',
+        'Campylobacter jejuni',
         # ST example: 583
-        583
+        random.randint(1, 999)
     )
 
 print(output_data)
