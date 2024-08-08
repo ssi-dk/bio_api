@@ -86,7 +86,7 @@ for i_index, i_row in input_data.iterrows():
         # FUDNR example: '2211'
         '2211',
         # ClusterID example: 'ST99#99'
-        'ST99#99',
+        '',
         # Dato_Epi example: '2024-03-22 18:59:01.917'
         dato_epi,
         # Regionsnavn example: 'SJÆLLAND'
