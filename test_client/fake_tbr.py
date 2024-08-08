@@ -43,14 +43,16 @@ tbr_fields = (
 output_data = DataFrame(columns=tbr_fields)
 
 for i_index, i_row in input_data.iterrows():
+    if args.limit is not None and i_index > args.limit:
+        break
+
     last_name = fake.last_name()
     male = bool(random.getrandbits(1))
     first_name = fake.first_name_male() if male else fake.first_name_female()
     age_timedelta = date.today() - fake.date_of_birth(maximum_age=90)
     age = age_timedelta.days // 365
     run_id = 'N_WGS_' + str(random.randint(0,100)).zfill(3)
-    if args.limit is not None and i_index > args.limit:
-        break
+
     output_data.loc[i_index] = (
         i_row['Key'],
         # provdato example: '2015-01-14 00:00:00'
