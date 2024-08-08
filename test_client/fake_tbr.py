@@ -2,7 +2,7 @@ import pandas
 import argparse
 from faker import Faker
 import random
-from datetime import date
+from datetime import date, timedelta
 
 fake = Faker('da_DK')
 
@@ -55,6 +55,8 @@ for i_index, i_row in input_data.iterrows():
     travel = bool(random.getrandbits(1))
     rejse = 'Ja' if travel else 'Nej'
     landnavn = fake.country().upper() if travel else ""
+    dato_kma = fake.date_this_century()
+    dato_epi = dato_kma + timedelta(days=random.randint(1, 25))
 
     output_data.loc[i_index] = (
         i_row['Key'],
@@ -77,7 +79,7 @@ for i_index, i_row in input_data.iterrows():
         # landnavn example: 'IBIZA, MALLORCA'
         landnavn,
         # KMAdato example: '2015-01-20 00:00:00'
-        '2015-01-20 00:00:00',
+        dato_kma,
         # kmanavn example: 'KMA RegionSjælland'
         'KMA RegionSjælland',
         # FUDNR example: '2211'
@@ -85,7 +87,7 @@ for i_index, i_row in input_data.iterrows():
         # ClusterID example: 'ST99#99'
         'ST99#99',
         # Dato_Epi example: '2024-03-22 18:59:01.917'
-        '2024-03-22 18:59:01.917',
+        dato_epi,
         # Regionsnavn example: 'SJÆLLAND'
         'SJÆLLAND',
         # Species example: 'Escherichia coli'
