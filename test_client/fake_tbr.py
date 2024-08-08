@@ -58,6 +58,7 @@ for i_index, i_row in input_data.iterrows():
     provdato = fake.date_this_century()
     dato_kma = provdato + timedelta(days=random.randint(1, 5))
     dato_epi = dato_kma + timedelta(days=random.randint(1, 15))
+    regionsnavn = fake.state()
 
     output_data.loc[i_index] = (
         i_row['Key'],
@@ -82,15 +83,15 @@ for i_index, i_row in input_data.iterrows():
         # KMAdato example: '2015-01-20 00:00:00'
         dato_kma,
         # kmanavn example: 'KMA RegionSjælland'
-        'KMA RegionSjælland',
+        'KMA Region ' + regionsnavn,
         # FUDNR example: '2211'
-        '2211',
+        '',
         # ClusterID example: 'ST99#99'
         '',
         # Dato_Epi example: '2024-03-22 18:59:01.917'
         dato_epi,
         # Regionsnavn example: 'SJÆLLAND'
-        fake.state().upper(),
+        regionsnavn.upper(),
         # Species example: 'Escherichia coli'
         'Campylobacter jejuni',
         # ST example: 583
