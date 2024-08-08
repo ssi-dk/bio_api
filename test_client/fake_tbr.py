@@ -59,11 +59,12 @@ for i_index, i_row in input_data.iterrows():
     dato_kma = provdato + timedelta(days=random.randint(1, 5))
     dato_epi = dato_kma + timedelta(days=random.randint(1, 15))
     regionsnavn = fake.state()
+    time_postfix =  ' 00:00:00'
 
     output_data.loc[i_index] = (
         i_row['Key'],
         # provdato example: '2015-01-14 00:00:00'
-        provdato,
+        str(provdato) + time_postfix,
         # RunID example: 'N_WGS_999'
         run_id,
         # cprnr example: '2512489996'
@@ -81,7 +82,7 @@ for i_index, i_row in input_data.iterrows():
         # landnavn example: 'IBIZA, MALLORCA'
         landnavn,
         # KMAdato example: '2015-01-20 00:00:00'
-        dato_kma,
+        str(dato_kma) + time_postfix,
         # kmanavn example: 'KMA RegionSjælland'
         'KMA Region ' + regionsnavn,
         # FUDNR example: '2211'
@@ -89,7 +90,7 @@ for i_index, i_row in input_data.iterrows():
         # ClusterID example: 'ST99#99'
         '',
         # Dato_Epi example: '2024-03-22 18:59:01.917'
-        dato_epi,
+        str(dato_epi) + time_postfix,
         # Regionsnavn example: 'SJÆLLAND'
         regionsnavn.upper(),
         # Species example: 'Escherichia coli'
