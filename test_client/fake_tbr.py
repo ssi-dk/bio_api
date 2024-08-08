@@ -54,6 +54,7 @@ for i_index, i_row in input_data.iterrows():
     run_id = 'N_WGS_' + str(random.randint(0,100)).zfill(3)
     travel = bool(random.getrandbits(1))
     rejse = 'Ja' if travel else 'Nej'
+    landnavn = fake.country().upper() if travel else ""
 
     output_data.loc[i_index] = (
         i_row['Key'],
@@ -74,7 +75,7 @@ for i_index, i_row in input_data.iterrows():
         # Rejse example: 'Ja'
         rejse,
         # landnavn example: 'IBIZA, MALLORCA'
-        'IBIZA, MALLORCA',
+        landnavn,
         # KMAdato example: '2015-01-20 00:00:00'
         '2015-01-20 00:00:00',
         # kmanavn example: 'KMA RegionSjælland'
