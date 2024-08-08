@@ -55,13 +55,14 @@ for i_index, i_row in input_data.iterrows():
     travel = bool(random.getrandbits(1))
     rejse = 'Ja' if travel else 'Nej'
     landnavn = fake.country().upper() if travel else ""
-    dato_kma = fake.date_this_century()
-    dato_epi = dato_kma + timedelta(days=random.randint(1, 25))
+    provdato = fake.date_this_century()
+    dato_kma = provdato + timedelta(days=random.randint(1, 5))
+    dato_epi = dato_kma + timedelta(days=random.randint(1, 15))
 
     output_data.loc[i_index] = (
         i_row['Key'],
         # provdato example: '2015-01-14 00:00:00'
-        fake.date_this_century(),
+        provdato,
         # RunID example: 'N_WGS_999'
         run_id,
         # cprnr example: '2512489996'
