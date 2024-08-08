@@ -1,6 +1,7 @@
 from pandas import read_csv, DataFrame
 import argparse
 from faker import Faker
+import random
 
 fake = Faker('da_DK')
 
@@ -41,6 +42,9 @@ tbr_fields = (
 output_data = DataFrame(columns=tbr_fields)
 
 for i_index, i_row in input_data.iterrows():
+    last_name = fake.last_name()
+    male = bool(random.getrandbits(1))
+    first_name = fake.first_name_male() if male else fake.first_name_female()
     if args.limit is not None and i_index > args.limit:
         break
     output_data.loc[i_index] = (
@@ -52,9 +56,9 @@ for i_index, i_row in input_data.iterrows():
         # cprnr example: '2512489996'
         fake.date_of_birth().strftime('%d%m%y') + '-' + str(fake.random_number(4, fix_len=True)),
         # kon example: 'K'
-        'K',
+        'M' if male else 'K',
         # navn example: 'BERGGREN, NANCY ANN'
-        f'{fake.last_name()}, {fake.first_name()}'.upper(),
+        f'{last_name}, {first_name}'.upper(),
         # alder example: 72
         72,
         # PrimaryIsolate example: 1
