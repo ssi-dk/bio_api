@@ -52,6 +52,8 @@ for i_index, i_row in input_data.iterrows():
     age_timedelta = date.today() - fake.date_of_birth(maximum_age=90)
     age = age_timedelta.days // 365
     run_id = 'N_WGS_' + str(random.randint(0,100)).zfill(3)
+    travel = bool(random.getrandbits(1))
+    rejse = 'Ja' if travel else 'Nej'
 
     output_data.loc[i_index] = (
         i_row['Key'],
@@ -70,7 +72,7 @@ for i_index, i_row in input_data.iterrows():
         # PrimaryIsolate example: 1
         1,
         # Rejse example: 'Ja'
-        'Ja',
+        rejse,
         # landnavn example: 'IBIZA, MALLORCA'
         'IBIZA, MALLORCA',
         # KMAdato example: '2015-01-20 00:00:00'
