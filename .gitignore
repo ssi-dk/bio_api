@@ -165,3 +165,4 @@ tmp/
 data/
 dumps/
 dmx_data/
+test_client/test.csv
