@@ -7,8 +7,8 @@ from microreact_integration import common
 from microreact_integration.functions import new_project
 
 parser = argparse.ArgumentParser(description="Create a new minimal project in Microreact using a tree and a metadata table from files.")
-parser.add_argument("tree", help="Path to a Newick file containing the initial tree")
 parser.add_argument("metadata", help="Path to a metadata file")
+parser.add_argument("--tree", help="Path to a Newick file containing the initial tree")
 parser.add_argument(
     "--project_name",
     help="Project name (can be changed later in web interface)",
@@ -20,9 +20,6 @@ parser.add_argument(
     action="store_true"
     )
 args = parser.parse_args()
-
-with open(Path(args.tree), 'r') as tree_file:
-    newick = tree_file.read()
 
 with open(Path(args.metadata), 'r') as metadata_file:
     header_line=True
@@ -36,13 +33,20 @@ with open(Path(args.metadata), 'r') as metadata_file:
         else:
             metadata_values.append(line.strip().split('\t'))
 
+if args.tree:
+    with open(Path(args.tree), 'r') as tree_file:
+        newick = tree_file.read()
+        tree_calcs=[{'method': 'single', 'result': newick}]
+else:
+        tree_calcs = None
+
 print(f"Name of created project will be {args.project_name}")
 
 rest_response = new_project(
     project_name=args.project_name,
-    tree_calcs=[{'method': 'single', 'result': newick}],
     metadata_keys=metadata_keys,
     metadata_values=metadata_values,
+    tree_calcs=tree_calcs,
     mr_access_token=common.MICROREACT_ACCESS_TOKEN,
     mr_base_url=common.MICROREACT_BASE_URL,
     verify = not args.noverify
