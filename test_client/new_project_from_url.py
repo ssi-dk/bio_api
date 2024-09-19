@@ -39,5 +39,5 @@ rest_response = new_project_2(
     verify = not args.noverify
     )
 print(f"HTTP response code: {str(rest_response)}")
-# print("Response as actual JSON:")
-# print(dumps(rest_response.json()))
+print("Response as actual JSON:")
+print(dumps(rest_response.json()))
