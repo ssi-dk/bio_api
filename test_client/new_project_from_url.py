@@ -44,13 +44,12 @@ print(f"Name of created project will be {args.project_name}")
 
 rest_response = new_project_2(
     project_name=args.project_name,
-    metadata_keys=metadata_keys,
-    metadata_values=metadata_values,
+    metadata_url='hsj',
     tree_calcs=tree_calcs,
     mr_access_token=common.MICROREACT_ACCESS_TOKEN,
     mr_base_url=common.MICROREACT_BASE_URL,
     verify = not args.noverify
     )
 print(f"HTTP response code: {str(rest_response)}")
-print("Response as actual JSON:")
-print(dumps(rest_response.json()))
+# print("Response as actual JSON:")
+# print(dumps(rest_response.json()))
