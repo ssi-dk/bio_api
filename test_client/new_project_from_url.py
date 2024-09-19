@@ -4,7 +4,7 @@ from pathlib import Path
 from json import dumps
 
 from microreact_integration import common
-from microreact_integration.functions import new_project
+from microreact_integration.functions import new_project_2
 
 parser = argparse.ArgumentParser(description="Create a new minimal project in Microreact using a tree and a metadata table from files.")
 parser.add_argument("metadata", help="Path to a metadata file")
@@ -42,7 +42,7 @@ else:
 
 print(f"Name of created project will be {args.project_name}")
 
-rest_response = new_project(
+rest_response = new_project_2(
     project_name=args.project_name,
     metadata_keys=metadata_keys,
     metadata_values=metadata_values,
