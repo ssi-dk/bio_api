@@ -38,7 +38,7 @@ if args.tree:
         newick = tree_file.read()
         tree_calcs=[{'method': 'single', 'result': newick}]
 else:
-        tree_calcs = None
+        tree_calcs = list()
 
 print(f"Name of created project will be {args.project_name}")
 
