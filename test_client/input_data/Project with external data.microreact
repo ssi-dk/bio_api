@@ -1,0 +1,151 @@
+{
+  "charts": {},
+  "datasets": {
+    "dataset-1": {
+      "id": "dataset-1",
+      "file": "s0hn",
+      "idFieldName": "Dataset 1"
+    }
+  },
+  "files": {
+    "s0hn": {
+      "id": "s0hn",
+      "name": "",
+      "format": "text/csv",
+      "type": "data",
+      "url": "https://gist.githubusercontent.com/dsternlicht/74020ebfdd91a686d71e785a79b318d4/raw/d3104389ba98a8605f8e641871b9ce71eff73f7e/chartsninja-data-1.csv"
+    }
+  },
+  "filters": {
+    "dataFilters": [],
+    "chartFilters": [],
+    "searchOperator": "includes",
+    "searchValue": "",
+    "selection": [],
+    "selectionBreakdownField": null
+  },
+  "maps": {},
+  "meta": {
+    "name": "Project with external data",
+    "image": "data:image/png;base64,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",
+    "timestamp": "2024-09-23T11:22:00.996Z",
+    "description": "",
+    "createdAt": "2024-07-09T11:37:46.247Z",
+    "updatedAt": "2024-07-09T11:37:46.247Z"
+  },
+  "networks": {},
+  "notes": {},
+  "panes": {
+    "model": {
+      "global": {
+        "splitterSize": 2,
+        "tabEnableClose": false,
+        "tabSetHeaderHeight": 1,
+        "tabSetTabStripHeight": 1,
+        "tabSetMinWidth": 160,
+        "tabSetMinHeight": 160,
+        "borderMinSize": 160,
+        "borderBarSize": 20,
+        "borderEnableDrop": false
+      },
+      "borders": [
+        {
+          "type": "border",
+          "size": 240,
+          "location": "right",
+          "children": [
+            {
+              "type": "tab",
+              "id": "--mr-legend-pane",
+              "name": "Legend",
+              "component": "Legend",
+              "enableClose": false,
+              "enableDrag": false
+            },
+            {
+              "type": "tab",
+              "id": "--mr-selection-pane",
+              "name": "Selection",
+              "component": "Selection",
+              "enableClose": false,
+              "enableDrag": false
+            },
+            {
+              "type": "tab",
+              "id": "--mr-history-pane",
+              "name": "History",
+              "component": "History",
+              "enableClose": false,
+              "enableDrag": false
+            },
+            {
+              "type": "tab",
+              "id": "--mr-views-pane",
+              "name": "Views",
+              "component": "Views",
+              "enableClose": false,
+              "enableDrag": false
+            }
+          ]
+        }
+      ],
+      "layout": {
+        "type": "row",
+        "id": "#bb85329a-2fad-431e-887b-7666778baa67",
+        "children": [
+          {
+            "type": "tabset",
+            "id": "#f1588ff2-3b5c-4182-b6b3-176253f393c0",
+            "children": [
+              {
+                "type": "tab",
+                "id": "table-1",
+                "name": "Metadata",
+                "component": "Table"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "slicers": {},
+  "styles": {
+    "coloursField": null,
+    "colourPalettes": [],
+    "defaultColour": "transparent",
+    "defaultShape": "circle",
+    "colourSettings": {},
+    "labelsField": null,
+    "legendDirection": "row",
+    "shapesField": null,
+    "shapePalettes": []
+  },
+  "tables": {
+    "table-1": {
+      "displayMode": "cosy",
+      "hideUnselected": false,
+      "title": "Metadata",
+      "paneId": "table-1",
+      "columns": [
+        {
+          "field": "Dataset 1",
+          "fixed": false
+        },
+        {
+          "field": " Dataset 2",
+          "fixed": false
+        },
+        {
+          "field": " Dataset 3",
+          "fixed": false
+        }
+      ],
+      "file": "s0hn"
+    }
+  },
+  "timelines": {},
+  "trees": {},
+  "views": [],
+  "schema": "https://microreact.org/schema/v1.json"
+}
