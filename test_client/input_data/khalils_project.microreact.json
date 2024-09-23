@@ -1,0 +1,63 @@
+{
+    "charts": {},
+    "datasets": {
+        "dataset-1": {
+            "file": "data-file-1",
+            "idFieldName": "id"
+        }
+    },
+    "files": {
+        "data-file-1": {
+            "id": "data-file-1",
+            "format": "text/csv",
+            "name": "data.csv",
+            "url": "https://raw.githubusercontent.com/microreact/data/main/data.csv"
+        }
+    },
+    "filters": {},
+    "maps": {
+        "map-1": {
+            "title": "Map",
+            "dataType": "geographic-coordinates",
+            "coordinate-unit": "decimal-degrees",
+            "latitudeField": "__latitude",
+            "longitudeField": "__longitude",
+            "viewport": null
+        }
+    },
+    "meta": {
+        "name": "hayu110x2c0smcm"
+    },
+    "networks": {},
+    "notes": {},
+    "panes": {},
+    "styles": {},
+    "tables": {
+        "table-1": {
+            "dataset": "dataset-1",
+            "file": "data-file-1",
+            "title": "Metadata",
+            "columns": [
+                {
+                    "field": "id"
+                },
+                {
+                    "field": "__latitude"
+                },
+                {
+                    "field": "__longitude"
+                },
+                {
+                    "field": "Country"
+                },
+                {
+                    "field": "Pedalism"
+                }
+            ]
+        }
+    },
+    "timelines": {},
+    "trees": {},
+    "version": 1,
+    "schema": "https://microreact.org/schema/v1.json"
+}
