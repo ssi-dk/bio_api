@@ -1,27 +1,27 @@
 {
     "schema": "https://microreact.org/schema/v1.json",
     "meta": {
-        "name": "finn_2024-09-24T10:12:09"
+        "name": "finn_2024-09-24T10:33:40"
     },
     "datasets": {
-        "ac7abfa8-9935-41cf-96a1-9c1e1616f72c": {
-            "file": "cf1cce63-c018-4a49-8019-6a34599c7f15",
-            "idFieldName": "key"
+        "63b00631-3715-432c-8065-23147a4e20f0": {
+            "file": "52d846ca-bc0e-4405-bedf-22196eb7f819",
+            "idFieldName": "id"
         }
     },
     "files": {
-        "cf1cce63-c018-4a49-8019-6a34599c7f15": {
-            "id": "cf1cce63-c018-4a49-8019-6a34599c7f15",
+        "52d846ca-bc0e-4405-bedf-22196eb7f819": {
+            "id": "52d846ca-bc0e-4405-bedf-22196eb7f819",
             "type": "data",
             "name": "metadata.csv",
             "format": "text/csv",
-            "blob": "https://gist.githubusercontent.com/dsternlicht/74020ebfdd91a686d71e785a79b318d4/raw/d3104389ba98a8605f8e641871b9ce71eff73f7e/chartsninja-data-1.csv"
+            "blob": "https://raw.githubusercontent.com/microreact/data/main/data.csv"
         }
     },
     "tables": {
-        "8f850519-a127-41f5-8060-278d3668e7a6": {
+        "6c49ff10-e1c9-46ca-8488-4489261a42c2": {
             "title": "Metadata",
-            "id": "8f850519-a127-41f5-8060-278d3668e7a6",
+            "id": "6c49ff10-e1c9-46ca-8488-4489261a42c2",
             "columns": [
                 {
                     "field": "Dataset 1",
@@ -36,7 +36,7 @@
                     "fixed": false
                 }
             ],
-            "file": "cf1cce63-c018-4a49-8019-6a34599c7f15"
+            "file": "52d846ca-bc0e-4405-bedf-22196eb7f819"
         }
     },
     "trees": {},
