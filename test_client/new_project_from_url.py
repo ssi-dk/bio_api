@@ -8,6 +8,7 @@ from microreact_integration.functions import new_project_2
 
 parser = argparse.ArgumentParser(description="Create a new minimal project in Microreact using a tree and a metadata table from files.")
 parser.add_argument("metadata_url", help="URL with metadata")
+parser.add_argument("metadata_columns", help="Comma-separated list with column names to import")
 parser.add_argument("--tree", help="Path to a Newick file containing the initial tree")
 parser.add_argument(
     "--project_name",
@@ -29,7 +30,7 @@ else:
         tree_calcs = list()
 
 print(f"Name of created project will be {args.project_name}")
-columns = ["id", "__latitude", "__longitude", "Country", "Pedalism"]  #TODO maybe read from a file?
+columns = args.metadata_columns.split(',')
 
 rest_response = new_project_2(
     project_name=args.project_name,
