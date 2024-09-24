@@ -16,13 +16,6 @@
     },
     "filters": {},
     "maps": {
-        "map-1": {
-            "title": "Map",
-            "dataType": "geographic-coordinates",
-            "coordinate-unit": "decimal-degrees",
-            "latitudeField": "__latitude",
-            "longitudeField": "__longitude"
-        }
     },
     "meta": {
         "name": "hayu110x2c0smcm"
