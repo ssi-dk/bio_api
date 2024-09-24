@@ -1,17 +1,17 @@
 {
     "schema": "https://microreact.org/schema/v1.json",
     "meta": {
-        "name": "finn_2024-09-24T09:41:02"
+        "name": "finn_2024-09-24T10:12:09"
     },
     "datasets": {
-        "0cec667d-f925-4a3d-922d-6e949ad9d230": {
-            "file": "1d49ebb4-6be1-4b9b-b71e-8ea4348d19c6",
+        "ac7abfa8-9935-41cf-96a1-9c1e1616f72c": {
+            "file": "cf1cce63-c018-4a49-8019-6a34599c7f15",
             "idFieldName": "key"
         }
     },
     "files": {
-        "1d49ebb4-6be1-4b9b-b71e-8ea4348d19c6": {
-            "id": "1d49ebb4-6be1-4b9b-b71e-8ea4348d19c6",
+        "cf1cce63-c018-4a49-8019-6a34599c7f15": {
+            "id": "cf1cce63-c018-4a49-8019-6a34599c7f15",
             "type": "data",
             "name": "metadata.csv",
             "format": "text/csv",
@@ -19,9 +19,9 @@
         }
     },
     "tables": {
-        "c5c73ffb-ab60-4283-b1d9-d15c4089624e": {
+        "8f850519-a127-41f5-8060-278d3668e7a6": {
             "title": "Metadata",
-            "id": "c5c73ffb-ab60-4283-b1d9-d15c4089624e",
+            "id": "8f850519-a127-41f5-8060-278d3668e7a6",
             "columns": [
                 {
                     "field": "Dataset 1",
@@ -36,8 +36,7 @@
                     "fixed": false
                 }
             ],
-            "file": "1d49ebb4-6be1-4b9b-b71e-8ea4348d19c6",
-            "dataset": "0cec667d-f925-4a3d-922d-6e949ad9d230"
+            "file": "cf1cce63-c018-4a49-8019-6a34599c7f15"
         }
     },
     "trees": {},
