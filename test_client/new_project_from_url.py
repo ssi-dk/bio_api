@@ -29,10 +29,12 @@ else:
         tree_calcs = list()
 
 print(f"Name of created project will be {args.project_name}")
+columns = ["id", "__latitude", "__longitude", "Country", "Pedalism"]  #TODO maybe read from a file?
 
 rest_response = new_project_2(
     project_name=args.project_name,
     metadata_url=args.metadata_url,
+    columns=columns,
     tree_calcs=tree_calcs,
     mr_access_token=common.MICROREACT_ACCESS_TOKEN,
     mr_base_url=common.MICROREACT_BASE_URL,
