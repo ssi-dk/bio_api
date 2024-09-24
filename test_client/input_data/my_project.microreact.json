@@ -1,0 +1,53 @@
+{
+    "schema": "https://microreact.org/schema/v1.json",
+    "meta": {
+        "name": "finn_2024-09-24T09:41:02"
+    },
+    "datasets": {
+        "0cec667d-f925-4a3d-922d-6e949ad9d230": {
+            "file": "1d49ebb4-6be1-4b9b-b71e-8ea4348d19c6",
+            "idFieldName": "key"
+        }
+    },
+    "files": {
+        "1d49ebb4-6be1-4b9b-b71e-8ea4348d19c6": {
+            "id": "1d49ebb4-6be1-4b9b-b71e-8ea4348d19c6",
+            "type": "data",
+            "name": "metadata.csv",
+            "format": "text/csv",
+            "blob": "https://gist.githubusercontent.com/dsternlicht/74020ebfdd91a686d71e785a79b318d4/raw/d3104389ba98a8605f8e641871b9ce71eff73f7e/chartsninja-data-1.csv"
+        }
+    },
+    "tables": {
+        "c5c73ffb-ab60-4283-b1d9-d15c4089624e": {
+            "title": "Metadata",
+            "id": "c5c73ffb-ab60-4283-b1d9-d15c4089624e",
+            "columns": [
+                {
+                    "field": "Dataset 1",
+                    "fixed": false
+                },
+                {
+                    "field": "Dataset 2",
+                    "fixed": false
+                },
+                {
+                    "field": "Dataset 3",
+                    "fixed": false
+                }
+            ],
+            "file": "1d49ebb4-6be1-4b9b-b71e-8ea4348d19c6"
+        }
+    },
+    "trees": {},
+    "timelines": {},
+    "charts": {},
+    "filters": {},
+    "maps": {},
+    "networks": {},
+    "notes": {},
+    "panes": {},
+    "slicers": {},
+    "styles": {},
+    "views": {}
+}
