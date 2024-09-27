@@ -37,7 +37,7 @@ def get_newick(node, parent_dist, leaf_names, newick='') -> str:
 def make_tree(df: pd.DataFrame, method: str):
 
     m = df.values
-    M = np.array(m)
+    M = ssd.squareform(np.array(m))
 
     # Perform single linkage
     Z = linkage(M, method)
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     # Read distance matrix file
     input_matrix_file = args.source_folder.joinpath('dist.tsv')
     df = pd.read_csv(input_matrix_file, index_col=0, sep="\t")
-    nwk_tree = make_tree(df)
+    nwk_tree = make_tree(df, "single")
 
     # Save tree to output newick file
     with open(output_newick_file,"w") as outfile:
