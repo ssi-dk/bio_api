@@ -9,6 +9,7 @@ from microreact_integration.functions import new_project_2
 parser = argparse.ArgumentParser(description="Create a new minimal project in Microreact using a tree and a metadata table from files.")
 parser.add_argument("metadata_url", help="URL with metadata")
 parser.add_argument("metadata_columns", help="Comma-separated list with column names to import")
+parser.add_argument("--hidden", help="Comma-separated list of columns to be hidden")
 parser.add_argument("--tree", help="Path to a Newick file containing the initial tree")
 parser.add_argument(
     "--project_name",
@@ -37,6 +38,7 @@ rest_response = new_project_2(
     metadata_url=args.metadata_url,
     columns=columns,
     tree_calcs=tree_calcs,
+    hidden=args.hidden,
     mr_access_token=common.MICROREACT_ACCESS_TOKEN,
     mr_base_url=common.MICROREACT_BASE_URL,
     verify = not args.noverify
