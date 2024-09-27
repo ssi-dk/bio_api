@@ -1,7 +1,7 @@
 import argparse
 from datetime import datetime
 from pathlib import Path
-from json import dumps
+from json import dumps, JSONDecodeError
 
 from microreact_integration import common
 from microreact_integration.functions import new_project_2
@@ -42,5 +42,10 @@ rest_response = new_project_2(
     verify = not args.noverify
     )
 print(f"HTTP response code: {str(rest_response)}")
-print("Response as actual JSON:")
-print(dumps(rest_response.json()))
+print("response.content:")
+print(str(rest_response.content))
+try:
+    print("Try to parse response as JSON")
+    print(dumps(rest_response.json()))
+except JSONDecodeError:
+     print("Could not parse response as JSON")
