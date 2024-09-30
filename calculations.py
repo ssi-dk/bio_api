@@ -433,10 +433,16 @@ class DistanceCalculation(Calculation):
     async def calculate(self, cursor):
         try:
             allele_mx_df, mongo_ids_dict = await self._amx_df_from_mongodb_cursor(cursor)
-            await self._save_amx_df_as_tsv(allele_mx_df)
+            await self._save_amx_df_as_tsv(allele_mx_df)  # The allele mx is only saved as documentation
             dist_mx_df: DataFrame = await self._dmx_df_from_amx_tsv()
             dist_mx_dict = dist_mx_df.to_dict(orient='index')
             await self._save_dmx_as_json(dist_mx_dict)
+
+            print("Distance matrix looks like this:")
+            print(dist_mx_df)
+            #dist_mx_csv = dist_mx_df.to_csv(path_or_buf=..., sep=...)
+            #print("Distance matrix saved as ...")
+
             # We do not store the distance matrix in MongoDB because it might grow to more than 16 MB.
             # Instead we just store a dictionary of sequence IDs and their related mongo IDs.
             await self.store_result({'seq_to_mongo': mongo_ids_dict})
