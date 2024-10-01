@@ -80,7 +80,7 @@ class NearestNeighborsGETResponse(NearestNeighborsRequest, CommonGETResponse):
 
 class DistanceMatrixResult(BaseModel):
     seq_to_mongo: dict
-    distances: typing.Optional[dict] = None
+    distances: typing.Optional[str] = None
 
 class DistanceMatrixGETResponse(DistanceMatrixRequest, CommonGETResponse):
     result: typing.Optional[DistanceMatrixResult]
