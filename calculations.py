@@ -8,7 +8,7 @@ import abc
 
 import pymongo
 from bson.objectid import ObjectId
-from pandas import DataFrame, read_table
+from pandas import DataFrame, read_table, read_csv
 from tree_maker import make_tree
 
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
@@ -466,10 +466,8 @@ class TreeCalculation(Calculation):
 
     async def calculate(self):
         dc = DistanceCalculation.find(self.dmx_job)
-        with open(Path(dc.folder, DistanceCalculation.get_dist_mx_filename())) as f:
-            distances = load(f)
         try:
-            dist_df: DataFrame = DataFrame.from_dict(distances, orient='index')
+            dist_df: DataFrame = read_csv(Path(dc.folder, DistanceCalculation.get_dist_mx_filename()))
             tree = make_tree(dist_df, self.method)
             await self.store_result(tree)
         except ValueError as e:
