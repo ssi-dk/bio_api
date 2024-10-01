@@ -179,8 +179,11 @@ async def dmx_result(dc_id: str, level:str='full'):
         content['result'] = calc.result
         if level == 'full':
             # Add result from file
-            with open(Path(calc.folder, 'distance_matrix.json')) as f:
-                content['result']['distances'] = load(f)
+            with open(Path(calc.folder, calculations.DistanceCalculation.get_dist_mx_filename())) as f:
+                distances = f.read()
+            print("This is what the distance matrix looks like:")
+            print(distances)
+            content['result']['distances'] = distances
 
     return pc.DistanceMatrixGETResponse(**content)
 
