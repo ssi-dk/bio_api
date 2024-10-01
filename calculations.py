@@ -358,10 +358,14 @@ class DistanceCalculation(Calculation):
         "Return the filepath for the allele matrix file corresponding with the class instance"
         return str(Path(self.folder, 'allele_matrix.tsv'))
     
+    @classmethod
+    def get_dist_mx_filename():
+        return 'distance_matrix.csv'
+
     @property
     def dist_mx_filepath(self):
         "Return the filepath for the distance matrix file corresponding with the class instance"
-        return str(Path(self.folder, 'distance_matrix.csv'))
+        return str(Path(self.folder, self.get_dist_mx_filename()))
 
     async def query_mongodb_for_allele_profiles(self):
         "Get a MongoDB cursor that represents the allele profiles for the calculation"
@@ -462,7 +466,7 @@ class TreeCalculation(Calculation):
 
     async def calculate(self):
         dc = DistanceCalculation.find(self.dmx_job)
-        with open(Path(dc.folder, 'distance_matrix.json')) as f:
+        with open(Path(dc.folder, DistanceCalculation.get_dist_mx_filename())) as f:
             distances = load(f)
         try:
             dist_df: DataFrame = DataFrame.from_dict(distances, orient='index')
