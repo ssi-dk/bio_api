@@ -359,7 +359,7 @@ class DistanceCalculation(Calculation):
         return str(Path(self.folder, 'allele_matrix.tsv'))
     
     @classmethod
-    def get_dist_mx_filename():
+    def get_dist_mx_filename(cls):
         return 'distance_matrix.csv'
 
     @property
