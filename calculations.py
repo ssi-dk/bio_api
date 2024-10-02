@@ -467,7 +467,8 @@ class TreeCalculation(Calculation):
     async def calculate(self):
         dc = DistanceCalculation.find(self.dmx_job)
         try:
-            dist_df: DataFrame = read_csv(Path(dc.folder, DistanceCalculation.get_dist_mx_filename()))
+            dist_df: DataFrame = read_csv(Path(dc.folder, DistanceCalculation.get_dist_mx_filename()), index_col=0)
+            print(dist_df.values)
             tree = make_tree(dist_df, self.method)
             await self.store_result(tree)
         except ValueError as e:
