@@ -37,6 +37,9 @@ def get_newick(node, parent_dist, leaf_names, newick='') -> str:
 def make_tree(df: pd.DataFrame, method: str):
 
     m = df.values
+    print("Hello from tree_maker")
+    print("Values:")
+    print(m)
     M = ssd.squareform(np.array(m))
 
     # Perform single linkage
