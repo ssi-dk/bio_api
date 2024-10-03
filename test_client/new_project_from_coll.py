@@ -67,14 +67,23 @@ print(f"DMX job id: {dmx_job_id}")
 # Check status of distance calculation
 dmx_job_status = ''
 while not dmx_job_status == 'completed':
-    dmx_get_response = client_functions.call_dmx_status(dmx_job_id)
-    print(dmx_get_response)
-    assert dmx_get_response.status_code == 200
-    dmx_job = dmx_get_response.json()
+    dmx_status_response = client_functions.call_dmx_status(dmx_job_id)
+    print(dmx_status_response)
+    assert dmx_status_response.status_code == 200
+    dmx_job = dmx_status_response.json()
     assert 'status' in dmx_job
     dmx_job_status = dmx_job['status']
     print(f'DMX job status: {dmx_job_status}')
     sleep(1)
+
+# Get the actual distance matrix
+dmx_result_response = client_functions.call_dmx_result(dmx_job_id)
+print(dmx_result_response)
+assert dmx_result_response.status_code == 200
+dmx_job = dmx_result_response.json()
+matrix = dmx_job['result']['distances']
+print("Distance matrix:")
+print(matrix)
 
 # Initiate tree calculation
 tree_post_response = client_functions.call_hc_tree_from_dmx_job(dmx_job_id, 'single')
