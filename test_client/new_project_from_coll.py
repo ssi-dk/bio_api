@@ -134,7 +134,7 @@ else:
         tree_calcs=[tree_job],
         metadata_keys=metadata_keys,
         metadata_values=metadata_values,
-        distances=distances,
+        raw_matrices=[distances],
         mr_access_token=common.MICROREACT_ACCESS_TOKEN,
         mr_base_url=common.MICROREACT_BASE_URL,
         verify = not args.noverify
