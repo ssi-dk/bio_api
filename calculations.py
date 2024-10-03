@@ -434,9 +434,6 @@ class DistanceCalculation(Calculation):
             allele_mx_df, mongo_ids_dict = await self._amx_df_from_mongodb_cursor(cursor)
             await self._save_amx_df_as_tsv(allele_mx_df)  # The allele mx is only saved as documentation
             dist_mx_df: DataFrame = await self._dmx_df_from_amx_tsv()
-
-            print("Distance matrix looks like this:")
-            print(dist_mx_df)
             dist_mx_df.to_csv(path_or_buf=self.dist_mx_filepath)
 
             # We do not store the distance matrix in MongoDB because it might grow to more than 16 MB.
@@ -468,7 +465,6 @@ class TreeCalculation(Calculation):
         dc = DistanceCalculation.find(self.dmx_job)
         try:
             dist_df: DataFrame = read_csv(Path(dc.folder, DistanceCalculation.get_dist_mx_filename()), index_col=0)
-            print(dist_df.values)
             tree = make_tree(dist_df, self.method)
             print("Newick:")
             print(tree)
