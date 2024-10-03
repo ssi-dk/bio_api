@@ -112,23 +112,12 @@ metadata_values = list()
 for k, v in seq_to_mongo.items():
     metadata_values.append([k, str(v)])
 
-# Add fake encrypted metadata
+# Add fake metadata
 metadata_keys.extend(['cpr', 'navn', 'mk', 'alder', 'landnavn', 'kmanavn'])
 row: list
 for row in metadata_values:
     for n in range(6):
         row.append(random_string(10))
-
-# print("Metadata keys:")
-# print(metadata_keys)
-# print()
-# print("Metadata values:")
-# print(metadata_values)
-
-# Create a distance matrix Vega-Lite component
-# First, get the distance matrix from Bio API
-# dmx_from_bio_api = call_dmx_result(dmx_job_id)
-# print(dmx_from_bio_api)
 
 if args.file:
     functions.new_project_file(
@@ -145,6 +134,7 @@ else:
         tree_calcs=[tree_job],
         metadata_keys=metadata_keys,
         metadata_values=metadata_values,
+        matrix=matrix,
         mr_access_token=common.MICROREACT_ACCESS_TOKEN,
         mr_base_url=common.MICROREACT_BASE_URL,
         verify = not args.noverify
