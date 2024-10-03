@@ -81,9 +81,9 @@ dmx_result_response = client_functions.call_dmx_result(dmx_job_id)
 print(dmx_result_response)
 assert dmx_result_response.status_code == 200
 dmx_job = dmx_result_response.json()
-matrix = dmx_job['result']['distances']
+distances = dmx_job['result']['distances']
 print("Distance matrix:")
-print(matrix)
+print(distances)
 
 # Initiate tree calculation
 tree_post_response = client_functions.call_hc_tree_from_dmx_job(dmx_job_id, 'single')
@@ -134,7 +134,7 @@ else:
         tree_calcs=[tree_job],
         metadata_keys=metadata_keys,
         metadata_values=metadata_values,
-        matrix=matrix,
+        distances=distances,
         mr_access_token=common.MICROREACT_ACCESS_TOKEN,
         mr_base_url=common.MICROREACT_BASE_URL,
         verify = not args.noverify
