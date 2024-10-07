@@ -11,7 +11,7 @@ db = connection.get_database()
 print(f"Connection string: {connection_string}")
 mongo_ids = profile2mongo(
     db,
-    'input_data/BN_alleles_export_50.tsv',
+    'input_data/BN_alleles_export_5.tsv',
     collection='test_samples',
     seqid_field_path='sequence.id',
     profile_field_path='cgmlst.profile'
