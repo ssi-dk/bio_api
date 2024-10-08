@@ -6,13 +6,14 @@ services:
       - ./dumps/mongodb:/dumps
     ports:
       - "27017:27017"
-#    rabbitmq:
-#      image: rabbitmq
-#      healthcheck:
-#        test: [ "CMD", "rabbitmqctl", "status"]
-#        interval: 5s
-#        timeout: 20s
-#        retries: 5
+
+  rabbitmq:
+    image: rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status"]
+      interval: 5s
+      timeout: 20s
+      retries: 5
   
 #    hpc_dispatcher:
 #      volumes:
