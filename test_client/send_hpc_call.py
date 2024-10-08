@@ -16,12 +16,12 @@ async def main() -> None:
     messenger = sofi_messenger.SOFIMessenger(host)
  
     hpc_resources = {
-        "args": ["-h"],
+        #"args": ["-h"],
         "cpus": 1,  # Max is 40
         "memGB": 4,  # Max is 185 (GB)
         "group": "fvst_ssi",
         "nodes": "1",
-        "walltime": "24:00:00",
+        # "walltime": "24:00:00",
     }
  
     snp_args = {
