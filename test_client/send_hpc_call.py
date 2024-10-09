@@ -8,11 +8,12 @@ import os
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
+print(sys.path)
 from sofi_messenger.src import sofi_messenger
  
  
 async def main() -> None:
-    host = "amqp://guest:guest@localhost/"
+    host = "amqp://guest:guest@rabbitmq/"
     messenger = sofi_messenger.SOFIMessenger(host)
  
     hpc_resources = {
