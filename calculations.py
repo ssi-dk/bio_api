@@ -496,11 +496,32 @@ class HPCCalculation(Calculation):
 
 class SNPCalculation(HPCCalculation):
     collection = 'snp'
+
     input_files: list[str]  #TODO consider pathlib.Path instead of str - maybe safer
     output_dir: str  #TODO consider pathlib.Path instead of str - maybe safer
     reference: str  #TODO consider pathlib.Path instead of str - maybe safer
     depth: int = 15
-    ignore_heterozygous: str = "TRUE"  # TODO maybe Bool in class but converts to str ind the end somehow
+    ignore_hz: bool  # TODO Convert to str in the end somehow
+
+    def __init__(
+            self,
+            input_files: str,
+            output_dir: str,
+            reference: str,
+            depth: int = 15,
+            ignore_hz: bool=True,
+            hpc_resources: HPCResources | None = None
+            ):
+        self.input_files = input_files
+        self.output_dir = output_dir
+        self.reference = reference
+        self.depth = depth
+        self.ignore_hz = ignore_hz
+        if hpc_resources:
+            self.hpc_resources = hpc_resources
+        else:
+            self.hpc_resources = HPCResources()
+
 
     async def calculate(self):
         pass
