@@ -1,10 +1,10 @@
 import datetime
 from os import getenv
 from pathlib import Path
-from json import dump, load
 import asyncio
 from io import StringIO
 import abc
+from dataclasses import dataclass
 
 import pymongo
 from bson.objectid import ObjectId
@@ -473,3 +473,34 @@ class TreeCalculation(Calculation):
             await self.store_result(str(e), 'error')
 
 
+@dataclass
+class HPCResources:
+    hpc_args: list = ["-h"]
+    cpus: int = 1
+    memGB: int = 4
+    group: str = "fvst_ssi"
+    nodes: str = "1"
+    walltime: str = "24:00:00"
+
+
+class HPCCalculation(Calculation):
+    hpc_resources: HPCResources
+
+    def __init__(self, hpc_resources: HPCResources |  None = None, **kwargs):
+        if hpc_resources:
+            self.hpc_resources = hpc_resources
+        else:
+            self.hpc_resources = HPCResources()
+        super().__init__(**kwargs)
+
+
+class SNPCalculation(HPCCalculation):
+    collection = 'snp'
+    input_files: list[str]  #TODO consider pathlib.Path instead of str - maybe safer
+    output_dir: str  #TODO consider pathlib.Path instead of str - maybe safer
+    reference: str  #TODO consider pathlib.Path instead of str - maybe safer
+    depth: int = 15
+    ignore_heterozygous: str = "TRUE"  # TODO maybe Bool in class but converts to str ind the end somehow
+
+    async def calculate(self):
+        pass
