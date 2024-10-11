@@ -14,9 +14,10 @@ AMQP_HOST = os.getenv('AMQP_HOST', "amqp://guest:guest@rabbitmq/")
 
 snp_calc = SNPCalculation(
     input_files=['file1', 'file2', 'file3'],
-    output_dir=['output_dir'],
+    output_dir='output_dir',
     reference='file4'
 )
+print(snp_calc.__dict__)
 
 async def main() -> None:
     messenger = sofi_messenger.SOFIMessenger(AMQP_HOST)
