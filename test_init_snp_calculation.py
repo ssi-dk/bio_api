@@ -1,16 +1,19 @@
 import asyncio
 import uuid
 import sys
-
-import sys
 import os
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
+
+from calculations import HPCResources, SNPCalculation
 from sofi_messenger.src import sofi_messenger
  
 AMQP_HOST = os.getenv('AMQP_HOST', "amqp://guest:guest@rabbitmq/")
+
+hpc_res = HPCResources()
+snp_calc = SNPCalculation()
 
 async def main() -> None:
     messenger = sofi_messenger.SOFIMessenger(AMQP_HOST)

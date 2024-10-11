@@ -4,7 +4,7 @@ from pathlib import Path
 import asyncio
 from io import StringIO
 import abc
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import pymongo
 from bson.objectid import ObjectId
@@ -472,10 +472,12 @@ class TreeCalculation(Calculation):
         except ValueError as e:
             await self.store_result(str(e), 'error')
 
+def get_default_hpc_args():
+    return ["-h"]
 
 @dataclass
 class HPCResources:
-    hpc_args: list = ["-h"]
+    hpc_args: list = field(default_factory=get_default_hpc_args)
     cpus: int = 1
     memGB: int = 4
     group: str = "fvst_ssi"
