@@ -14,7 +14,6 @@ import pydantic_classes as pc
 
 app = FastAPI(title="Bio API", description="REST API for controlling bioinformatic calculations", version="0.2.0")
 
-MANUAL_MX_DIR = getenv('BIO_API_TEST_INPUT_DIR', '/test_input')
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 
 additional_responses = {

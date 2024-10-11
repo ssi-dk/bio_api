@@ -10,10 +10,10 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 from sofi_messenger.src import sofi_messenger
  
- 
+AMQP_HOST = os.getenv('AMQP_HOST', "amqp://guest:guest@rabbitmq/")
+
 async def main() -> None:
-    host = "amqp://guest:guest@rabbitmq/"
-    messenger = sofi_messenger.SOFIMessenger(host)
+    messenger = sofi_messenger.SOFIMessenger(AMQP_HOST)
  
     hpc_resources = {
         #"args": ["-h"],
