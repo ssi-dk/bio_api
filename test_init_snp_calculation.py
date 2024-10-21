@@ -17,11 +17,16 @@ snp_calc = SNPCalculation(
     output_dir='output_dir',
     reference='file4'
 )
+
+print("My __dict__ method returns:")
 print(snp_calc.__dict__)
+print("My to_dict method returns:")
+print(snp_calc.to_dict())
 
 async def main() -> None:
     messenger = sofi_messenger.SOFIMessenger(AMQP_HOST)
  
+    #TODO Ud
     hpc_resources = {
         #"args": ["-h"],
         "cpus": 1,  # Max is 40
@@ -31,6 +36,7 @@ async def main() -> None:
         # "walltime": "24:00:00",
     }
 
+    #TODO ud
     snp_args = {
         "--input_files": "/path/to/some/file, /path/to/some/other/file",
         "--output_dir": "/path/to_output_dir",
@@ -44,7 +50,7 @@ async def main() -> None:
     await messenger.send_hpc_call(
         uuid=job_uuid,
         job_type="snp",
-        args=snp_args,
+        args=snp_calc.to_dict(),
         **hpc_resources,
     )
 
