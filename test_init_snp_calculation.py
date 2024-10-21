@@ -41,10 +41,9 @@ async def main() -> None:
         uuid.uuid4().hex, #snp_calc._id,
         snp_calc.get_job_type(),
         hpc_r.group,
-        hpc_r.cpus,
-        hpc_r.memGB,
-        hpc_r.nodes,
-        hpc_r.walltime,
+        cpus=hpc_r.cpus,
+        memGB=hpc_r.memGB,
+        nodes=hpc_r.nodes,
         #args=snp_calc.to_dict(),
     )
 
