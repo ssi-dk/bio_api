@@ -5,6 +5,7 @@ import asyncio
 from io import StringIO
 import abc
 from dataclasses import dataclass, field, asdict
+from abc import abstractmethod
 
 import pymongo
 from bson.objectid import ObjectId
@@ -477,7 +478,7 @@ def get_default_hpc_args():
 
 @dataclass
 class HPCResources:
-    hpc_args: list = field(default_factory=get_default_hpc_args)
+    args: list = field(default_factory=get_default_hpc_args)
     cpus: int = 1
     memGB: int = 4
     group: str = "fvst_ssi"
@@ -487,6 +488,10 @@ class HPCResources:
 
 class HPCCalculation(Calculation):
     hpc_resources: HPCResources
+
+    @abstractmethod
+    def get_job_type(self):
+        return 'general_hpc'
 
     def __init__(self, hpc_resources: HPCResources |  None = None, **kwargs):
         if hpc_resources:
@@ -519,7 +524,9 @@ class SNPCalculation(HPCCalculation):
         self.depth = depth
         self.ignore_hz = ignore_hz
 
-
+    def get_job_type(self):
+        return 'snp'
+    
     async def calculate(self):
         pass
 

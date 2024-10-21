@@ -2,12 +2,13 @@ import asyncio
 import uuid
 import sys
 import os
+from dataclasses import asdict
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 
-from calculations import SNPCalculation
+from calculations import SNPCalculation, HPCResources
 from sofi_messenger.src import sofi_messenger
  
 AMQP_HOST = os.getenv('AMQP_HOST', "amqp://guest:guest@rabbitmq/")
@@ -17,11 +18,6 @@ snp_calc = SNPCalculation(
     output_dir='output_dir',
     reference='file4'
 )
-
-print("My __dict__ method returns:")
-print(snp_calc.__dict__)
-print("My to_dict method returns:")
-print(snp_calc.to_dict())
 
 async def main() -> None:
     messenger = sofi_messenger.SOFIMessenger(AMQP_HOST)
@@ -35,23 +31,21 @@ async def main() -> None:
         "nodes": "1",
         # "walltime": "24:00:00",
     }
-
-    #TODO ud
-    snp_args = {
-        "--input_files": "/path/to/some/file, /path/to/some/other/file",
-        "--output_dir": "/path/to_output_dir",
-        "--reference": "/path/to/reference",
-        "--depth": "15",
-        "--ignore_heterozygous": "TRUE"
-    }
+    print("hpc_resources:")
+    print(hpc_resources)
+    hpc_r: HPCResources = HPCResources()
 
     job_uuid = uuid.uuid4().hex
 
     await messenger.send_hpc_call(
-        uuid=job_uuid,
-        job_type="snp",
-        args=snp_calc.to_dict(),
-        **hpc_resources,
+        uuid.uuid4().hex, #snp_calc._id,
+        snp_calc.get_job_type(),
+        hpc_r.group,
+        hpc_r.cpus,
+        hpc_r.memGB,
+        hpc_r.nodes,
+        hpc_r.walltime,
+        #args=snp_calc.to_dict(),
     )
 
 
