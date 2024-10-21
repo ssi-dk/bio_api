@@ -527,3 +527,14 @@ class SNPCalculation(HPCCalculation):
 
     async def calculate(self):
         pass
+
+    def to_dict(self):
+        content = super().to_dict()
+
+        # Convert Booelan value to text
+        content['ignore_hz'] = 'TRUE' if content['ignore_hz'] else 'FALSE'
+
+        # Convert HPCResources to dict
+        
+
+        return content
