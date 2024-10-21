@@ -30,7 +30,7 @@ async def main() -> None:
         "nodes": "1",
         # "walltime": "24:00:00",
     }
- 
+
     snp_args = {
         "--input_files": "/path/to/some/file, /path/to/some/other/file",
         "—output_dir": "/path/to_output_dir",
@@ -38,16 +38,16 @@ async def main() -> None:
         "--depth": "15",
         "--ignore_heterozygous": "TRUE"
     }
- 
+
     job_uuid = uuid.uuid4().hex
- 
+
     await messenger.send_hpc_call(
         uuid=job_uuid,
         job_type="snp",
         args=snp_args,
         **hpc_resources,
     )
- 
- 
+
+
 if __name__ == "__main__":
     asyncio.run(main())
