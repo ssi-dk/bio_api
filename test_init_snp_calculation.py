@@ -44,7 +44,7 @@ async def main() -> None:
         cpus=hpc_r.cpus,
         memGB=hpc_r.memGB,
         nodes=hpc_r.nodes,
-        #args=snp_calc.to_dict(),
+        args=snp_calc.to_dict(),
     )
 
 
