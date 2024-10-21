@@ -4,7 +4,7 @@ from pathlib import Path
 import asyncio
 from io import StringIO
 import abc
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 
 import pymongo
 from bson.objectid import ObjectId
@@ -532,9 +532,10 @@ class SNPCalculation(HPCCalculation):
         content = super().to_dict()
 
         # Convert Booelan value to text
-        content['ignore_hz'] = 'TRUE' if content['ignore_hz'] else 'FALSE'
+        content['ignore_heterozygous'] = 'TRUE' if content['ignore_hz'] else 'FALSE'
+        del content['ignore_hz']
 
         # Convert HPCResources to dict
-        
+        content['hpc_resources'] = asdict(content['hpc_resources'])
 
         return content
