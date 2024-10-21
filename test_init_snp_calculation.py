@@ -35,8 +35,6 @@ async def main() -> None:
     print(hpc_resources)
     hpc_r: HPCResources = HPCResources()
 
-    job_uuid = uuid.uuid4().hex
-
     await messenger.send_hpc_call(
         uuid.uuid4().hex, #snp_calc._id,
         snp_calc.get_job_type(),
