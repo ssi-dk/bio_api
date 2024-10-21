@@ -511,18 +511,13 @@ class SNPCalculation(HPCCalculation):
             output_dir: str,
             reference: str,
             depth: int = 15,
-            ignore_hz: bool=True,
-            hpc_resources: HPCResources | None = None
+            ignore_hz: bool=True
             ):
         self.input_files = input_files
         self.output_dir = output_dir
         self.reference = reference
         self.depth = depth
         self.ignore_hz = ignore_hz
-        if hpc_resources:
-            self.hpc_resources = hpc_resources
-        else:
-            self.hpc_resources = HPCResources()
 
 
     async def calculate(self):
@@ -534,8 +529,5 @@ class SNPCalculation(HPCCalculation):
         # Convert Booelan value to text
         content['ignore_heterozygous'] = 'TRUE' if content['ignore_hz'] else 'FALSE'
         del content['ignore_hz']
-
-        # Convert HPCResources to dict
-        content['hpc_resources'] = asdict(content['hpc_resources'])
 
         return content
