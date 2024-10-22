@@ -11,9 +11,9 @@ async def main() -> None:
     hpc_r: HPCResources = HPCResources()
     snp_calc = SNPCalculation(
         # hpc_resources = hpc_r
-        input_files=['file1', 'file2', 'file3'],
-        output_dir='output_dir',
-        reference='file4'
+        input_files=['my_new_file_1', 'my_new_file_2', 'my_new_file_3'],
+        output_dir='my_new_output_dir',
+        reference='my_new_file 4'
     )
     snp_calc._id = await snp_calc.insert_document()
     await snp_calc.calculate()
