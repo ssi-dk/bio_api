@@ -13,16 +13,15 @@ from sofi_messenger.src import sofi_messenger
  
 AMQP_HOST = os.getenv('AMQP_HOST', "amqp://guest:guest@rabbitmq/")
 
-snp_calc = SNPCalculation(
-    input_files=['file1', 'file2', 'file3'],
-    output_dir='output_dir',
-    reference='file4'
-)
-
 async def main() -> None:
     messenger = sofi_messenger.SOFIMessenger(AMQP_HOST)
     hpc_r: HPCResources = HPCResources()
-
+    snp_calc = SNPCalculation(
+        input_files=['file1', 'file2', 'file3'],
+        output_dir='output_dir',
+        reference='file4'
+    )
+    
     await messenger.send_hpc_call(
         uuid.uuid4().hex, #snp_calc._id,
         snp_calc.job_type,
