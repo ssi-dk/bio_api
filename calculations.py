@@ -509,7 +509,7 @@ class SNPCalculation(HPCCalculation):
     output_dir: str  #TODO consider pathlib.Path instead of str - maybe safer
     reference: str  #TODO consider pathlib.Path instead of str - maybe safer
     depth: int = 15
-    ignore_hz: bool  # TODO Convert to str in the end somehow
+    ignore_hz: bool
 
     def __init__(
             self,
