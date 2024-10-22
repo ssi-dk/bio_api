@@ -488,7 +488,7 @@ class HPCResources:
     memGB: int = 4
     group: str = "fvst_ssi"
     nodes: str = "1"
-    walltime: str = "24:00:00"
+    walltime: str = "24:00:00"  #TODO sofi_messenger does not accept this parameter currently
 
 
 class HPCCalculation(Calculation):
@@ -555,6 +555,23 @@ class SNPCalculation(HPCCalculation):
     async def calculate(self):
         # TODO Can I use the same messenger for all calls (put code in top of file or as part of class)?
         messenger = sofi_messenger.SOFIMessenger(AMQP_HOST)
+
+        # TODO noget skal lægges op i superklassen
+        calc_input_params =             {
+                'input_files': self.input_files,
+                'output_dir': self.output_dir,
+                'reference': self.reference,
+                'depth': self.depth,
+                'ignore_heterozygous': 'TRUE' if self.ignore_hz else 'FALSE'
+            }
+        print("Calculation input params:")
+        print(calc_input_params)
+        print()
+
+        print("hpc_resources:")
+        print(asdict(self.hpc_resources))
+        print()
+
         await messenger.send_hpc_call(
             str(self._id),
             self.job_type,
@@ -562,7 +579,7 @@ class SNPCalculation(HPCCalculation):
             cpus=self.hpc_resources.cpus,
             memGB=self.hpc_resources.memGB,
             nodes=self.hpc_resources.nodes,
-            args=self.to_dict(),
+            args=calc_input_params,
         )
 
     def to_dict(self):

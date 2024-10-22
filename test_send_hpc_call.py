@@ -25,11 +25,11 @@ async def main() -> None:
     }
  
     snp_args = {
-        "--input_files": "/path/to/some/file, /path/to/some/other/file",
-        "—output_dir": "/path/to_output_dir"
-        "--reference: /path/to/reference",
-        "--depth": "15",
-        "--ignore_heterozygous": "TRUE"
+        "input_files": "/path/to/some/file, /path/to/some/other/file",
+        "output_dir": "/path/to_output_dir"
+        "reference: /path/to/reference",
+        "depth": "15",
+        "ignore_heterozygous": "TRUE"
     }
  
     job_uuid = uuid.uuid4().hex
