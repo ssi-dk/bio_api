@@ -21,16 +21,17 @@ async def main() -> None:
         output_dir='output_dir',
         reference='file4'
     )
+    snp_calc._id = await snp_calc.insert_document()
     
-    await messenger.send_hpc_call(
-        uuid.uuid4().hex, #snp_calc._id,
-        snp_calc.job_type,
-        hpc_r.group,
-        cpus=hpc_r.cpus,
-        memGB=hpc_r.memGB,
-        nodes=hpc_r.nodes,
-        args=snp_calc.to_dict(),
-    )
+    # await messenger.send_hpc_call(
+    #     uuid.uuid4().hex, #snp_calc._id,
+    #     snp_calc.job_type,
+    #     hpc_r.group,
+    #     cpus=hpc_r.cpus,
+    #     memGB=hpc_r.memGB,
+    #     nodes=hpc_r.nodes,
+    #     args=snp_calc.to_dict(),
+    # )
 
 
 if __name__ == "__main__":

@@ -517,8 +517,10 @@ class SNPCalculation(HPCCalculation):
             output_dir: str,
             reference: str,
             depth: int = 15,
-            ignore_hz: bool=True
+            ignore_hz: bool=True,
+            **kwargs
             ):
+        super().__init__(**kwargs)
         self.input_files = input_files
         self.output_dir = output_dir
         self.reference = reference
