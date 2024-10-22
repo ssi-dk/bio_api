@@ -535,7 +535,7 @@ class SNPCalculation(HPCCalculation):
     def to_dict(self):
         content = super().to_dict()
 
-        # Convert Booelan value to text
+        # Convert Boolean value to text
         content['ignore_heterozygous'] = 'TRUE' if content['ignore_hz'] else 'FALSE'
         del content['ignore_hz']
 
