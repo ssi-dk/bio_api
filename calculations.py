@@ -554,6 +554,9 @@ class SNPCalculation(HPCCalculation):
         content['ignore_heterozygous'] = 'TRUE' if content['ignore_hz'] else 'FALSE'
         del content['ignore_hz']
 
+        hpc_r: HPCResources = content['hpc_resources']
+        for k, v in asdict(hpc_r).items():
+            content[k] = v
         del content['hpc_resources']
 
         return content
