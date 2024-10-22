@@ -8,9 +8,9 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 
 async def main() -> None:
-    hpc_r: HPCResources = HPCResources()
+    hpc_r: HPCResources = HPCResources(cpus=2, memGB=8, nodes='1, 2')
     snp_calc = SNPCalculation(
-        # hpc_resources = hpc_r
+        hpc_resources = hpc_r,
         input_files=['my_new_file_1', 'my_new_file_2', 'my_new_file_3'],
         output_dir='my_new_output_dir',
         reference='my_new_file 4'
