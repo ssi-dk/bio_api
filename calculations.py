@@ -504,6 +504,11 @@ class HPCCalculation(Calculation):
             self.hpc_resources = HPCResources()
         super().__init__(**kwargs)
 
+    async def insert_document(self):
+        await super().insert_document(
+            hpc_resource=asdict(self.hpc_resources)
+        )
+        return self._id
 
 class SNPCalculation(HPCCalculation):
     collection = 'snp'
