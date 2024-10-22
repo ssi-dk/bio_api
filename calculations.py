@@ -544,7 +544,7 @@ class SNPCalculation(HPCCalculation):
             output_dir=self.output_dir,
             reference=self.reference,
             depth=self.depth,
-            ignore_heterozygous = 'TRUE' if self.ignore_hz else 'FALSE'
+            ignore_hz=self.ignore_hz
         )
         return self._id
 
@@ -584,10 +584,6 @@ class SNPCalculation(HPCCalculation):
 
     def to_dict(self):
         content = super().to_dict()
-
-        # Convert Boolean value to text
-        content['ignore_heterozygous'] = 'TRUE' if content['ignore_hz'] else 'FALSE'
-        del content['ignore_hz']
 
         hpc_r: HPCResources = content['hpc_resources']
         for k, v in asdict(hpc_r).items():
