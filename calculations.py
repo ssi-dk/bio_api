@@ -581,13 +581,3 @@ class SNPCalculation(HPCCalculation):
             nodes=self.hpc_resources.nodes,
             args=calc_input_params,
         )
-
-    def to_dict(self):
-        content = super().to_dict()
-
-        hpc_r: HPCResources = content['hpc_resources']
-        for k, v in asdict(hpc_r).items():
-            content[k] = v
-        del content['hpc_resources']
-
-        return content
