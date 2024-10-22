@@ -488,10 +488,11 @@ class HPCResources:
 
 class HPCCalculation(Calculation):
     hpc_resources: HPCResources
-
+    
+    @property
     @abstractmethod
-    def get_job_type(self):
-        return 'general_hpc'
+    def job_type(self):
+        pass
 
     def __init__(self, hpc_resources: HPCResources |  None = None, **kwargs):
         if hpc_resources:
@@ -503,7 +504,7 @@ class HPCCalculation(Calculation):
 
 class SNPCalculation(HPCCalculation):
     collection = 'snp'
-
+    job_type = 'snp'
     input_files: list[str]  #TODO consider pathlib.Path instead of str - maybe safer
     output_dir: str  #TODO consider pathlib.Path instead of str - maybe safer
     reference: str  #TODO consider pathlib.Path instead of str - maybe safer
@@ -524,7 +525,8 @@ class SNPCalculation(HPCCalculation):
         self.depth = depth
         self.ignore_hz = ignore_hz
 
-    def get_job_type(self):
+    @property
+    def job_type(self):
         return 'snp'
     
     async def calculate(self):

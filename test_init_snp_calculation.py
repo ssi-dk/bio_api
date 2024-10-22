@@ -25,7 +25,7 @@ async def main() -> None:
 
     await messenger.send_hpc_call(
         uuid.uuid4().hex, #snp_calc._id,
-        snp_calc.get_job_type(),
+        snp_calc.job_type,
         hpc_r.group,
         cpus=hpc_r.cpus,
         memGB=hpc_r.memGB,
