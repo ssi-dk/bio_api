@@ -12,7 +12,10 @@ from bson.objectid import ObjectId
 from pandas import DataFrame, read_table, read_csv
 from tree_maker import make_tree
 
+from sofi_messenger.src import sofi_messenger
+
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
+AMQP_HOST = getenv('AMQP_HOST', "amqp://guest:guest@rabbitmq/")
 
 
 class MissingDataException(Exception):
@@ -532,7 +535,17 @@ class SNPCalculation(HPCCalculation):
         return 'snp'
     
     async def calculate(self):
-        pass
+        # TODO Can I use the same messenger for all calls (put code in top of file or as part of class)?
+        messenger = sofi_messenger.SOFIMessenger(AMQP_HOST)
+        await messenger.send_hpc_call(
+            str(self._id),
+            self.job_type,
+            self.hpc_resources.group,
+            cpus=self.hpc_resources.cpus,
+            memGB=self.hpc_resources.memGB,
+            nodes=self.hpc_resources.nodes,
+            args=self.to_dict(),
+        )
 
     def to_dict(self):
         content = super().to_dict()
@@ -540,5 +553,7 @@ class SNPCalculation(HPCCalculation):
         # Convert Boolean value to text
         content['ignore_heterozygous'] = 'TRUE' if content['ignore_hz'] else 'FALSE'
         del content['ignore_hz']
+
+        del content['hpc_resources']
 
         return content

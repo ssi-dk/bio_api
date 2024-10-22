@@ -7,29 +7,16 @@ current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 
-from sofi_messenger.src import sofi_messenger
- 
-AMQP_HOST = os.getenv('AMQP_HOST', "amqp://guest:guest@rabbitmq/")
-
 async def main() -> None:
-    messenger = sofi_messenger.SOFIMessenger(AMQP_HOST)
     hpc_r: HPCResources = HPCResources()
     snp_calc = SNPCalculation(
+        # hpc_resources = hpc_r
         input_files=['file1', 'file2', 'file3'],
         output_dir='output_dir',
         reference='file4'
     )
     snp_calc._id = await snp_calc.insert_document()
-    
-    # await messenger.send_hpc_call(
-    #     uuid.uuid4().hex, #snp_calc._id,
-    #     snp_calc.job_type,
-    #     hpc_r.group,
-    #     cpus=hpc_r.cpus,
-    #     memGB=hpc_r.memGB,
-    #     nodes=hpc_r.nodes,
-    #     args=snp_calc.to_dict(),
-    # )
+    await snp_calc.calculate()
 
 
 if __name__ == "__main__":
