@@ -120,9 +120,11 @@ class Calculation(metaclass=abc.ABCMeta):
             'result': self.result
             }
         doc_to_save = dict(global_attrs, **attrs)
+        print(f"Doc to save: {doc_to_save}")
         mongo_save = mongo_api.db[self.collection].insert_one(doc_to_save)
         assert mongo_save.acknowledged == True
         self._id = mongo_save.inserted_id
+        print(f"_id: {self._id}")
         return self._id
     
     @classmethod
@@ -504,9 +506,10 @@ class HPCCalculation(Calculation):
             self.hpc_resources = HPCResources()
         super().__init__(**kwargs)
 
-    async def insert_document(self):
+    async def insert_document(self, **attrs):
         await super().insert_document(
-            hpc_resource=asdict(self.hpc_resources)
+            hpc_resources=asdict(self.hpc_resources),
+            **attrs
         )
         return self._id
 
@@ -534,6 +537,16 @@ class SNPCalculation(HPCCalculation):
         self.reference = reference
         self.depth = depth
         self.ignore_hz = ignore_hz
+
+    async def insert_document(self):
+        await super().insert_document(
+            input_files=self.input_files,
+            output_dir=self.output_dir,
+            reference=self.reference,
+            depth=self.depth,
+            ignore_heterozygous = 'TRUE' if self.ignore_hz else 'FALSE'
+        )
+        return self._id
 
     @property
     def job_type(self):
