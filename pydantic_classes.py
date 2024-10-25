@@ -45,7 +45,7 @@ class HCTreeCalcRequest(BaseModel):
     method: typing.Literal["single", "complete", "average", "weighted", "centroid", "median", "ward"]
 
 
-class DistanceMatrixRequest(BaseModel):
+class SNPRequest(BaseModel):
     """
     Parameters for a REST request for a SNP calculation.
 
