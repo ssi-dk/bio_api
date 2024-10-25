@@ -106,3 +106,7 @@ class DistanceMatrixGETResponse(DistanceMatrixRequest, CommonGETResponse):
 
 class HCTreeCalcGETResponse(HCTreeCalcRequest, CommonGETResponse):
     result: typing.Optional[str]
+
+
+class SNPGETResponse(DistanceMatrixRequest, CommonGETResponse):
+    result: typing.Optional[DistanceMatrixResult]
