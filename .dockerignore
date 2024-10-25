@@ -1,0 +1,7 @@
+__pycache__/
+.pytest_cache/
+.venv/
+data/
+dmx_data/
+dumps/
+test_client/
