@@ -479,12 +479,8 @@ class TreeCalculation(Calculation):
         except ValueError as e:
             await self.store_result(str(e), 'error')
 
-def get_default_hpc_args():
-    return ["-h"]
-
 @dataclass
 class HPCResources:
-    args: list = field(default_factory=get_default_hpc_args)
     cpus: int = 1
     memGB: int = 4
     group: str = "fvst_ssi"
