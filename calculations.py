@@ -17,6 +17,8 @@ from sofi_messenger.src import sofi_messenger
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 AMQP_HOST = getenv('AMQP_HOST', "amqp://guest:guest@rabbitmq/")
 
+messenger = sofi_messenger.SOFIMessenger(AMQP_HOST)
+
 
 class MissingDataException(Exception):
     pass
@@ -553,9 +555,6 @@ class SNPCalculation(HPCCalculation):
         return 'snp'
     
     async def calculate(self):
-        # TODO Can I use the same messenger for all calls (put code in top of file or as part of class)?
-        messenger = sofi_messenger.SOFIMessenger(AMQP_HOST)
-
         # TODO noget skal lægges op i superklassen
         calc_input_params =             {
                 'input_files': self.input_files,
