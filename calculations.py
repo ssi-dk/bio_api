@@ -149,7 +149,6 @@ class Calculation(metaclass=abc.ABCMeta):
         """Update the MongoDB document that corresponds with the class instance with a result.
         Also insert a timestamp for when the calculation was completed and mark the calculation as completed.
         """
-        # TODO maybe merge with update?
         print("Store result.")
         print(f"My collection: {self.collection}")
         print("My _id:")
@@ -555,7 +554,6 @@ class SNPCalculation(HPCCalculation):
         return 'snp'
     
     async def calculate(self):
-        # TODO noget skal lægges op i superklassen
         calc_input_params =             {
                 'input_files': self.input_files,
                 'output_dir': self.output_dir,
