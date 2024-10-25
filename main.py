@@ -233,3 +233,25 @@ async def hc_tree_result(tc_id:str, level:str='full'):
         content['result'] = None
 
     return pc.HCTreeCalcGETResponse(**content)
+
+@app.post("/v1/snp_calculations",
+    response_model=pc.CommonPOSTResponse,
+    tags=["SNP"],
+    status_code=201,
+    responses=additional_responses
+    )
+async def snp(rq: pc.SNPRequest):
+    """
+    Initialize a new SNP calculation
+    """
+    
+    # Initialize SNPCalculation object
+
+    # First we need to get the files from a MongoDB lookup
+    calc = calculations.SNPCalculation(
+            # input_files,
+            # output_dir,
+            # reference,
+            rq.depth,
+            rq.ignore_hz
+    )
