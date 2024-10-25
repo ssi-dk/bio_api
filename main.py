@@ -244,10 +244,22 @@ async def snp(rq: pc.SNPRequest):
     """
     Initialize a new SNP calculation
     """
-    
-    # Initialize SNPCalculation object
 
-    # First we need to get the files from a MongoDB lookup
+    # # First we need to get the files from a MongoDB lookup    
+    # try:
+    #     _profile_count, cursor = await calc.query_mongodb_for_file_names()
+    # except InvalidId as e:
+    #     return HTTPException(
+    #         status_code=400, # Bad Request
+    #        detail=str(e)
+    #     )
+    # except calculations.MissingDataException as e:
+    #     raise HTTPException(
+    #         status_code=404,
+    #         detail=str(e)
+    #         )
+
+    # Initialize SNPCalculation object
     calc = calculations.SNPCalculation(
             # input_files,
             # output_dir,
