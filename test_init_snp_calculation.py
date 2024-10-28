@@ -18,9 +18,10 @@ async def main() -> None:
         ignore_hz=False,
         hpc_resources = hpc_r,
     )
+    print("Object created.")
 
-    print("Done!")
-    #snp_calc._id = await snp_calc.insert_document()
+    snp_calc._id = await snp_calc.insert_document()
+    print("Object saved.")
 
     # await snp_calc.query_mongodb_for_file_names()
 
