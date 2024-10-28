@@ -1,3 +1,4 @@
+numpy==1.26.4  # Should no be upgraded to 2.x
 requests==2.31.0
 pytest==8.0.0
 pandas==2.0.3
