@@ -10,10 +10,10 @@ sys.path.append(parent)
 async def main() -> None:
     hpc_r: HPCResources = HPCResources(cpus=2, memGB=8, nodes='1, 2')
     snp_calc = SNPCalculation(
-        seq_collection='samples',
-        seqid_field_path='what.ever',
-        seq_mongo_ids=['putn4viwerunv', 'øwejmrvwtkjo', '98nviuetnvmn'],
-        reference_mongo_id='dfgdæfgdfgm',
+        seq_collection='campy_2019',
+        seqid_field_path='categories.sample_info.summary.sofi_sequence_id',
+        seq_mongo_ids=['666febab9871ba945a1a11f0', '666febac9871ba945a1a11f1', '666febad9871ba945a1a11f2'],
+        reference_mongo_id='666febad9871ba945a1a11f3',
         depth='7',
         ignore_hz=False,
         hpc_resources = hpc_r,
