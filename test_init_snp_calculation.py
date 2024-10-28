@@ -1,7 +1,11 @@
 import asyncio
 import sys
 import os
-from calculations import SNPCalculation, HPCResources
+
+from fastapi.exceptions import HTTPException
+from bson.errors import InvalidId
+
+from calculations import SNPCalculation, HPCResources, MissingDataException
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -12,6 +16,7 @@ async def main() -> None:
     snp_calc = SNPCalculation(
         seq_collection='campy_2019',
         seqid_field_path='categories.sample_info.summary.sofi_sequence_id',
+        filename_field_path=''
         seq_mongo_ids=['666febab9871ba945a1a11f0', '666febac9871ba945a1a11f1', '666febad9871ba945a1a11f2'],
         reference_mongo_id='666febad9871ba945a1a11f3',
         depth='7',
@@ -23,7 +28,18 @@ async def main() -> None:
     snp_calc._id = await snp_calc.insert_document()
     print("Object saved.")
 
-    # await snp_calc.query_mongodb_for_file_names()
+    try:
+        _profile_count, cursor = await snp_calc.query_mongodb_for_filenames()
+    except InvalidId as e:
+        return HTTPException(
+            status_code=400, # Bad Request
+        detail=str(e)
+        )
+    except MissingDataException as e:
+        raise HTTPException(
+            status_code=404,
+            detail=str(e)
+            )
 
     # await snp_calc.calculate()
 

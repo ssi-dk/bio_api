@@ -526,6 +526,7 @@ class SNPCalculation(HPCCalculation):
             self,
             seq_collection: str,
             seqid_field_path: str,
+            filename_field_path: str,
             seq_mongo_ids: list,
             reference_mongo_id: str,
             depth: int = 15,
@@ -535,6 +536,7 @@ class SNPCalculation(HPCCalculation):
         super().__init__(**kwargs)
         self.seq_collection = seq_collection
         self.seqid_field_path = seqid_field_path
+        self.filename_field_path = filename_field_path
         self.seq_mongo_ids = seq_mongo_ids
         self.reference_mongo_id = reference_mongo_id
         self.depth = depth
@@ -557,19 +559,38 @@ class SNPCalculation(HPCCalculation):
         )
         return self._id
     
-    # def query_mongodb_for_file_names(self, seq_mongo_ids, reference_id):
-    #     try:
-    #         _profile_count, cursor = await calc.query_mongodb_for_file_names()
-    #     except InvalidId as e:
-    #         return HTTPException(
-    #             status_code=400, # Bad Request
-    #         detail=str(e)
-    #         )
-    #     except calculations.MissingDataException as e:
-    #         raise HTTPException(
-    #             status_code=404,
-    #             detail=str(e)
-    #             )
+    async def query_mongodb_for_filenames(self):
+        # Get the filenames for the calculation
+        sequence_count, cursor = await mongo_api.get_field_data(
+            collection=self.seq_collection,
+            mongo_ids=self.seq_mongo_ids,
+            field_paths=[ self.filename_field_path ],
+            )
+
+        if self.seq_mongo_ids is not None and len(self.seq_mongo_ids) != sequence_count:
+            message = "Could not find the requested number of sequences. " + \
+                f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(sequence_count)}"
+            raise MissingDataException(message)
+
+        self.input_filenames =  [ filename for filename in cursor ]
+    
+        # Get the reference filename
+        sequence_count, cursor = await mongo_api.get_field_data(
+            collection=self.seq_collection,
+            mongo_ids=self.reference_mongo_id,
+            field_paths=[ self.filename_field_path ],
+            )
+
+        if self.seq_mongo_ids is not None and len(self.seq_mongo_ids) != sequence_count:
+            message = "Could not find the requested number of sequences. " + \
+                f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(sequence_count)}"
+            raise MissingDataException(message)
+        
+        assert sequence_count == 1
+        self.reference_filename = next(cursor)
+    
+        # Update myself in MongoDB
+        self.update()
     
     async def calculate(self):
         calc_input_params =             {
