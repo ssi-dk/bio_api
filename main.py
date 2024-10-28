@@ -245,6 +245,19 @@ async def snp(rq: pc.SNPRequest):
     Initialize a new SNP calculation
     """
 
+    # Initialize SNPCalculation object
+    calc = calculations.SNPCalculation(
+            rq.seq_collection,
+            rq.seqid_field_path,
+            rq.seq_mongo_ids,
+            rq.reference_mongo_id,
+            rq.depth,
+            rq.ignore_hz
+    )
+
+    # Save object in MongoDB, so at least we have something even if filename lookup fails
+    await calc.insert_document()
+
     # # First we need to get the files from a MongoDB lookup    
     # try:
     #     _profile_count, cursor = await calc.query_mongodb_for_file_names()
@@ -259,11 +272,4 @@ async def snp(rq: pc.SNPRequest):
     #         detail=str(e)
     #         )
 
-    # Initialize SNPCalculation object
-    calc = calculations.SNPCalculation(
-            # input_files,
-            # output_dir,
-            # reference,
-            rq.depth,
-            rq.ignore_hz
-    )
+    # Now we are ready to send the calculation to RabbitMQ

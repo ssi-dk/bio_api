@@ -58,10 +58,11 @@ class SNPRequest(BaseModel):
     """
     seq_collection: str
     seqid_field_path: str
-    seq_mongo_ids: list | None
-    reference_id: str
+    seq_mongo_ids: list
+    reference_mongo_id: str
     depth: int = 15
     ignore_hz: bool = True
+    # TODO: hpc_resources: we probably need to be able to specify these in the request.
 
 
 # Response classes

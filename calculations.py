@@ -513,35 +513,46 @@ class HPCCalculation(Calculation):
 class SNPCalculation(HPCCalculation):
     collection = 'snp'
     job_type = 'snp'
-    input_files: list[str]  #TODO consider pathlib.Path instead of str - maybe safer
-    output_dir: str  #TODO consider pathlib.Path instead of str - maybe safer
-    reference: str  #TODO consider pathlib.Path instead of str - maybe safer
+    seq_collection: str
+    seqid_field_path: str
+    seq_mongo_ids: list
+    reference_mongo_id: str
     depth: int = 15
     ignore_hz: bool
+    input_filenames: list = list()
+    reference_filename: str | None = None
 
     def __init__(
             self,
-            input_files: str,
-            output_dir: str,
-            reference: str,
+            seq_collection: str,
+            seqid_field_path: str,
+            seq_mongo_ids: list,
+            reference_mongo_id: str,
             depth: int = 15,
             ignore_hz: bool=True,
             **kwargs
             ):
         super().__init__(**kwargs)
-        self.input_files = input_files
-        self.output_dir = output_dir
-        self.reference = reference
+        self.seq_collection = seq_collection
+        self.seqid_field_path = seqid_field_path
+        self.seq_mongo_ids = seq_mongo_ids
+        self.reference_mongo_id = reference_mongo_id
         self.depth = depth
         self.ignore_hz = ignore_hz
+    
+    def query_mongodb_for_file_names(self, seq_mongo_ids, reference_id):
+        pass
 
     async def insert_document(self):
         await super().insert_document(
-            input_files=self.input_files,
-            output_dir=self.output_dir,
-            reference=self.reference,
+            seq_collection=self.seq_collection,
+            seqid_field_path=self.seqid_field_path,
+            seq_mongo_ids=self.seq_mongo_ids,
+            reference_mongo_id=self.reference_mongo_id,
             depth=self.depth,
-            ignore_hz=self.ignore_hz
+            ignore_hz=self.ignore_hz,
+            input_filenames=self.input_filenames,
+            reference_filename=self.reference_filename,
         )
         return self._id
 
