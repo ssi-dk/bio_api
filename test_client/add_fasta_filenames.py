@@ -13,9 +13,9 @@ def bn2mongo(
             allele_filename: str,
             collection: str='samples',
             max_items: int=None):
-    
+
     input_df = read_csv(data_filename, sep=';', encoding='ISO-8859-1')
-    
+
     mapping_df = read_csv(mapping_filename, sep=';', encoding='ISO-8859-1')
     conversion_dict = dict()
     for i in mapping_df.iterrows():
