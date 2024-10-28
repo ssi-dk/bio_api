@@ -539,9 +539,10 @@ class SNPCalculation(HPCCalculation):
         self.reference_mongo_id = reference_mongo_id
         self.depth = depth
         self.ignore_hz = ignore_hz
-    
-    def query_mongodb_for_file_names(self, seq_mongo_ids, reference_id):
-        pass
+
+    @property
+    def job_type(self):
+        return 'snp'
 
     async def insert_document(self):
         await super().insert_document(
@@ -555,10 +556,20 @@ class SNPCalculation(HPCCalculation):
             reference_filename=self.reference_filename,
         )
         return self._id
-
-    @property
-    def job_type(self):
-        return 'snp'
+    
+    # def query_mongodb_for_file_names(self, seq_mongo_ids, reference_id):
+    #     try:
+    #         _profile_count, cursor = await calc.query_mongodb_for_file_names()
+    #     except InvalidId as e:
+    #         return HTTPException(
+    #             status_code=400, # Bad Request
+    #         detail=str(e)
+    #         )
+    #     except calculations.MissingDataException as e:
+    #         raise HTTPException(
+    #             status_code=404,
+    #             detail=str(e)
+    #             )
     
     async def calculate(self):
         calc_input_params =             {

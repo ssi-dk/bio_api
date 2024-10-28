@@ -258,18 +258,7 @@ async def snp(rq: pc.SNPRequest):
     # Save object in MongoDB, so at least we have something even if filename lookup fails
     await calc.insert_document()
 
-    # # First we need to get the files from a MongoDB lookup    
-    # try:
-    #     _profile_count, cursor = await calc.query_mongodb_for_file_names()
-    # except InvalidId as e:
-    #     return HTTPException(
-    #         status_code=400, # Bad Request
-    #        detail=str(e)
-    #     )
-    # except calculations.MissingDataException as e:
-    #     raise HTTPException(
-    #         status_code=404,
-    #         detail=str(e)
-    #         )
+    # First we need to get the files from a MongoDB lookup
+    # calc.query_mongodb_for_file_names()
 
     # Now we are ready to send the calculation to RabbitMQ
