@@ -25,7 +25,7 @@ def add_fasta_filenames(
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--collection', type=str, help="name of collection to update", default='samples')
+    parser.add_argument('--collection', type=str, help="name of collection to update", default='campy_2019')
     args = parser.parse_args()
     connection_string = getenv('BIO_API_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
     print(connection_string)
