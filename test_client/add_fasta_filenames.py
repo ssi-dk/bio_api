@@ -15,13 +15,11 @@ def add_fasta_filenames(
 
     result = db[collection].update_many({}, 
         { 
-            "$set": { "categories.contigs.summary.data" : "test_file.fasta" } 
+            "$set": { "categories.contigs.summary.data" : "test_file.fasta" }
         } 
     )
 
-    assert result.acknowledged == True
-    upserted_ids.append(str(result.upserted_id))
-    return upserted_ids
+    print(result)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -35,5 +33,3 @@ if __name__ == '__main__':
         db,
         collection=args.collection,
         )
-    print("These are the _id strings of the MongoDB documents:")
-    print(json.dumps(updated_ids))
