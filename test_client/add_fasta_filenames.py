@@ -3,8 +3,11 @@ from pandas import read_csv
 import argparse
 import pymongo
 import json
+import string
+import random
 
-from client_functions import dictify_path, recursive_merge
+def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
 
 def add_fasta_filenames(
             db,
@@ -15,7 +18,7 @@ def add_fasta_filenames(
 
     result = db[collection].update_many({}, 
         { 
-            "$set": { "categories.contigs.summary.data" : "test_file.fasta" }
+            "$set": { "categories.contigs.summary.data" : '/some/file/location/' + id_generator(size=10) + '.fasta' }
         } 
     )
 
