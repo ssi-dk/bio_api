@@ -9,10 +9,12 @@ current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 from sofi_messenger.src import sofi_messenger
+
+host = os.getenv("AMQP_HOST")
+print(host)
  
  
 async def main() -> None:
-    host = "amqp://guest:guest@rabbitmq/"
     messenger = sofi_messenger.SOFIMessenger(host)
  
     snp_args = {
