@@ -28,18 +28,8 @@ async def main() -> None:
     snp_calc._id = await snp_calc.insert_document()
     print("Object saved.")
 
-    # try:
-    #     _profile_count, cursor = await snp_calc.query_mongodb_for_filenames()
-    # except InvalidId as e:
-    #     return HTTPException(
-    #         status_code=400, # Bad Request
-    #     detail=str(e)
-    #     )
-    # except MissingDataException as e:
-    #     raise HTTPException(
-    #         status_code=404,
-    #         detail=str(e)
-    #         )
+    
+    profile_count, cursor = await snp_calc.query_mongodb_for_filenames()
 
     await snp_calc.calculate()
 

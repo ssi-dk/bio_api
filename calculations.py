@@ -577,7 +577,7 @@ class SNPCalculation(HPCCalculation):
         # Get the reference filename
         sequence_count, cursor = await mongo_api.get_field_data(
             collection=self.seq_collection,
-            mongo_ids=self.reference_mongo_id,
+            mongo_ids=[ self.reference_mongo_id ],
             field_paths=[ self.filename_field_path ],
             )
 
