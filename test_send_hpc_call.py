@@ -15,15 +15,6 @@ async def main() -> None:
     host = "amqp://guest:guest@rabbitmq/"
     messenger = sofi_messenger.SOFIMessenger(host)
  
-    hpc_resources = {
-        #"args": ["-h"],
-        "cpus": 1,  # Max is 40
-        "memGB": 4,  # Max is 185 (GB)
-        "group": "fvst_ssi",
-        "nodes": "1",
-        # "walltime": "24:00:00",
-    }
- 
     snp_args = {
         "input_files": "/path/to/some/file, /path/to/some/other/file",
         "output_dir": "/path/to_output_dir"
@@ -37,8 +28,7 @@ async def main() -> None:
     await messenger.send_hpc_call(
         uuid=job_uuid,
         job_type="snp",
-        args=snp_args,
-        **hpc_resources,
+        args=snp_args
     )
  
  
