@@ -572,7 +572,16 @@ class SNPCalculation(HPCCalculation):
                 f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(sequence_count)}"
             raise MissingDataException(message)
 
-        self.input_filenames =  [ filename for filename in cursor ]
+        print("filename_field_path:")
+        print(self.filename_field_path)
+        try:
+            while True:
+                self.input_filenames.append(hoist(next(cursor), self.filename_field_path))
+        except StopIteration:
+            pass
+        
+        print("Input filenames:")
+        print(self.input_filenames)
     
         # TODO fix later
         # Get the reference filename
@@ -592,11 +601,15 @@ class SNPCalculation(HPCCalculation):
         self.reference_filename = "myreferencefile.fasta"
     
         # Update myself in MongoDB
-        self.update()
+        await self.update()
 
         return self.input_filenames, self.reference_filename
     
     async def calculate(self):
+        print("Input filenames:")
+        print(self.input_filenames)
+        print("Reference_filename:")
+        print(self.reference_filename)
         calc_input_params =             {
                 'input_files': self.input_filenames,
                 'reference': self.reference_filename,
