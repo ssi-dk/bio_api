@@ -574,23 +574,27 @@ class SNPCalculation(HPCCalculation):
 
         self.input_filenames =  [ filename for filename in cursor ]
     
+        # TODO fix later
         # Get the reference filename
-        sequence_count, cursor = await mongo_api.get_field_data(
-            collection=self.seq_collection,
-            mongo_ids=[ self.reference_mongo_id ],
-            field_paths=[ self.filename_field_path ],
-            )
+        # sequence_count, cursor = await mongo_api.get_field_data(
+        #     collection=self.seq_collection,
+        #     mongo_ids=[ self.reference_mongo_id ],
+        #     field_paths=[ self.filename_field_path ],
+        #     )
 
-        if self.seq_mongo_ids is not None and len(self.seq_mongo_ids) != sequence_count:
-            message = "Could not find the requested number of sequences. " + \
-                f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(sequence_count)}"
-            raise MissingDataException(message)
+        # if self.seq_mongo_ids is not None and len(self.seq_mongo_ids) != sequence_count:
+        #     message = "Could not find the requested number of sequences. " + \
+        #         f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(sequence_count)}"
+        #     raise MissingDataException(message)
         
-        assert sequence_count == 1
-        self.reference_filename = next(cursor)
+        # assert sequence_count == 1
+        # self.reference_filename = next(cursor)
+        self.reference_filename = "myreferencefile.fasta"
     
         # Update myself in MongoDB
         self.update()
+
+        return self.input_filenames, self.reference_filename
     
     async def calculate(self):
         calc_input_params =             {
