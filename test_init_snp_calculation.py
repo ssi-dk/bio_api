@@ -21,7 +21,6 @@ async def main() -> None:
         reference_mongo_id='666febad9871ba945a1a11f3',
         depth='7',
         ignore_hz=False,
-        hpc_resources = hpc_r,
     )
     print("Object created.")
 

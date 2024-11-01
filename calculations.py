@@ -489,26 +489,11 @@ class HPCResources:
 
 
 class HPCCalculation(Calculation):
-    hpc_resources: HPCResources
-    
     @property
     @abstractmethod
     def job_type(self):
         pass
 
-    def __init__(self, hpc_resources: HPCResources |  None = None, **kwargs):
-        if hpc_resources:
-            self.hpc_resources = hpc_resources
-        else:
-            self.hpc_resources = HPCResources()
-        super().__init__(**kwargs)
-
-    async def insert_document(self, **attrs):
-        await super().insert_document(
-            hpc_resources=asdict(self.hpc_resources),
-            **attrs
-        )
-        return self._id
 
 class SNPCalculation(HPCCalculation):
     collection = 'snp'
@@ -620,16 +605,8 @@ class SNPCalculation(HPCCalculation):
         print(calc_input_params)
         print()
 
-        print("hpc_resources:")
-        print(asdict(self.hpc_resources))
-        print()
-
         await messenger.send_hpc_call(
             str(self._id),
             self.job_type,
-            self.hpc_resources.group,
-            cpus=self.hpc_resources.cpus,
-            memGB=self.hpc_resources.memGB,
-            nodes=self.hpc_resources.nodes,
             args=calc_input_params,
         )
