@@ -594,9 +594,8 @@ class SNPCalculation(HPCCalculation):
     
     async def calculate(self):
         calc_input_params =             {
-                'input_files': self.input_files,
-                'output_dir': self.output_dir,
-                'reference': self.reference,
+                'input_files': self.input_filenames,
+                'reference': self.reference_filename,
                 'depth': self.depth,
                 'ignore_heterozygous': 'TRUE' if self.ignore_hz else 'FALSE'
             }
