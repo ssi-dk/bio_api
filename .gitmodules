@@ -2,3 +2,6 @@
 	path = test_client/microreact_integration
 	url = git@github.com:ssi-dk/microreact_integration.git
 	branch = main
+[submodule "sofi_messenger"]
+	path = sofi_messenger
+	url = git@github.com:ssi-dk/sofi_messenger.git
