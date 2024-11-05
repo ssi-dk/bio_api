@@ -2,9 +2,6 @@ import asyncio
 import sys
 import os
 
-from fastapi.exceptions import HTTPException
-from bson.errors import InvalidId
-
 from calculations import SNPCalculation, HPCResources, MissingDataException
 
 current = os.path.dirname(os.path.realpath(__file__))
