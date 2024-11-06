@@ -1,6 +1,5 @@
 from os import getenv
 
-import paramiko
 import sshtunnel
 
 with sshtunnel.open_tunnel(
@@ -10,12 +9,7 @@ with sshtunnel.open_tunnel(
     remote_bind_address=('10.45.129.11', 27017),
     local_bind_address=('0.0.0.0', 27017)
 ) as tunnel:
-    client = paramiko.SSHClient()
-    client.load_system_host_keys()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect('127.0.0.1', 27017)
-    # do some operations with client session
-    client.close()
+    print("Tunnel established.")
 
 print('FINISH!')
 
