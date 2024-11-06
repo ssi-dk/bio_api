@@ -11,11 +11,13 @@ with sshtunnel.open_tunnel(
     local_bind_address=('0.0.0.0', 27017)
 ) as tunnel:
     print("Tunnel established.")
-    connection = pymongo.MongoClient('mongodb://127.0.0.1:27017/sofi_test')
+    mongo_string = getenv("BIO_API_MONGO_CONNECTION")
+    print(mongo_string)
+    connection = pymongo.MongoClient(mongo_string)
     db = connection.get_database()
-    # sample = db.samples.find_one()
-    # print(sample)
-    # connection.close()
+    sample = db.samples.find_one()
+    print(sample)
+    connection.close()
 
 print('FINISH!')
 
