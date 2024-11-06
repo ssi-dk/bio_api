@@ -1,6 +1,7 @@
 from os import getenv
 
 import sshtunnel
+import pymongo
 
 with sshtunnel.open_tunnel(
     ('10.32.244.37', 22),
@@ -10,6 +11,11 @@ with sshtunnel.open_tunnel(
     local_bind_address=('0.0.0.0', 27017)
 ) as tunnel:
     print("Tunnel established.")
+    connection = pymongo.MongoClient('mongodb://127.0.0.1:27017/sofi_test')
+    db = connection.get_database()
+    # sample = db.samples.find_one()
+    # print(sample)
+    # connection.close()
 
 print('FINISH!')
 
