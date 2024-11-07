@@ -147,8 +147,8 @@ class Calculation(metaclass=abc.ABCMeta):
             print(mongo_string)
             connection = pymongo.MongoClient(mongo_string, directConnection=True)
             db = connection.get_database()
-            sample = db.samples.find_one()
-            print(sample)
+            print("Collections:")
+            print(db.list_collection_names())
             connection.close()
 
         print('FINISH!')
