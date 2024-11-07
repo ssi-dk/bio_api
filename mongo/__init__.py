@@ -12,4 +12,7 @@ MONGO_TUNNEL_REMOTE_BIND = getenv('MONGO_TUNNEL_REMOTE_BIND', False)
 MONGO_TUNNEL_LOCAL_BIND = getenv('MONGO_TUNNEL_LOCAL_BIND', False)
 
 print(f"Connection string: {MONGO_CONNECTION_STRING}")
+print(f"Use SSH tunnel:  {MONGO_USE_TUNNEL}")
 mongo_api = MongoAPI(MONGO_CONNECTION_STRING)
+
+sys.exit()
