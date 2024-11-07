@@ -14,7 +14,7 @@ class MongoAPI:
     def __init__(self,
         connection_string: str,
     ):
-        self.connection = pymongo.MongoClient(connection_string)
+        self.connection = pymongo.MongoClient(connection_string, directConnection=True)  # directConnection=True is necessary when connecting through an SSH tunnel
         self.db = self.connection.get_database()
 
     async def get_field_data(
