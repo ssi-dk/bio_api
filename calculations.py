@@ -30,6 +30,20 @@ AMQP_HOST = getenv('AMQP_HOST', "amqp://guest:guest@rabbitmq/")
 
 messenger = sofi_messenger.SOFIMessenger(AMQP_HOST)
 
+with sshtunnel.open_tunnel(
+    (MONGO_TUNNEL_IP, 22),  # IP of dev2.sofi-platform.dk
+    ssh_username=MONGO_TUNNEL_USERNAME,
+    ssh_password=MONGO_TUNNEL_PASSWORD,
+    remote_bind_address=(MONGO_TUNNEL_REMOTE_BIND, 27017),  # IP of dpfvst-002.computerome.local in DELPHI dev/test env
+    local_bind_address=(MONGO_TUNNEL_LOCAL_BIND, 27017)
+) as tunnel:
+    print("Tunnel established.")
+    connection = pymongo.MongoClient(MONGO_CONNECTION_STRING, directConnection=True)
+    db = connection.get_database()
+    print("Collections:")
+    print(db.list_collection_names())
+    connection.close()
+
 
 class MissingDataException(Exception):
     pass
@@ -134,20 +148,6 @@ class Calculation(metaclass=abc.ABCMeta):
         doc_to_save = dict(global_attrs, **attrs)
         print(f"Doc to save: {doc_to_save}")
         coll = mongo_api.db[self.collection]
-        
-        with sshtunnel.open_tunnel(
-            (MONGO_TUNNEL_IP, 22),  # IP of dev2.sofi-platform.dk
-            ssh_username=MONGO_TUNNEL_USERNAME,
-            ssh_password=MONGO_TUNNEL_PASSWORD,
-            remote_bind_address=(MONGO_TUNNEL_REMOTE_BIND, 27017),  # IP of dpfvst-002.computerome.local in DELPHI dev/test env
-            local_bind_address=(MONGO_TUNNEL_LOCAL_BIND, 27017)
-        ) as tunnel:
-            print("Tunnel established.")
-            connection = pymongo.MongoClient(MONGO_CONNECTION_STRING, directConnection=True)
-            db = connection.get_database()
-            print("Collections:")
-            print(db.list_collection_names())
-            connection.close()
 
         print('FINISH!')
 
