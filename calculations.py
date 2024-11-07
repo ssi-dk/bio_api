@@ -15,6 +15,13 @@ from tree_maker import make_tree
 from sofi_messenger.src import sofi_messenger
 
 MONGO_CONNECTION_STRING = getenv('BIO_API_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
+MONGO_USE_TUNNEL = getenv('MONGO_USE_TUNNEL', False)
+MONGO_TUNNEL_IP = getenv('MONGO_TUNNEL_IP', False)
+MONGO_TUNNEL_USERNAME = getenv('MONGO_TUNNEL_USERNAME', False)
+MONGO_TUNNEL_PASSWORD = getenv('MONGO_TUNNEL_PASSWORD', False)
+MONGO_TUNNEL_REMOTE_BIND = getenv('MONGO_TUNNEL_REMOTE_BIND', False)
+MONGO_TUNNEL_LOCAL_BIND = getenv('MONGO_TUNNEL_LOCAL_BIND', False)
+
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 AMQP_HOST = getenv('AMQP_HOST', "amqp://guest:guest@rabbitmq/")
 
