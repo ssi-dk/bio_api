@@ -14,6 +14,7 @@ from tree_maker import make_tree
 
 from sofi_messenger.src import sofi_messenger
 
+MONGO_CONNECTION_STRING = getenv('BIO_API_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 AMQP_HOST = getenv('AMQP_HOST', "amqp://guest:guest@rabbitmq/")
 
@@ -71,9 +72,8 @@ class MongoAPI:
             cursor = self.db[collection].find({}, {field_path: True for field_path in field_paths})
         return document_count, cursor
 
-connection_string = getenv('BIO_API_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
-print(f"Connection string: {connection_string}")
-mongo_api = MongoAPI(connection_string)
+print(f"Connection string: {MONGO_CONNECTION_STRING}")
+mongo_api = MongoAPI(MONGO_CONNECTION_STRING)
 
 
 class Calculation(metaclass=abc.ABCMeta):
