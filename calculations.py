@@ -595,8 +595,8 @@ class SNPCalculation(HPCCalculation):
         print(calc_input_params)
         print()
 
-        await messenger.send_hpc_call(
-            str(self._id),
-            self.job_type,
-            args=calc_input_params,
-        )
+        # await messenger.send_hpc_call(
+        #     str(self._id),
+        #     self.job_type,
+        #     args=calc_input_params,
+        # )
