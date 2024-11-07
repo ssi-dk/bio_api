@@ -54,32 +54,6 @@ def strs2ObjectIds(id_strings: list):
     return output
 
 
-class MongoAPI:
-    def __init__(self,
-        connection_string: str,
-    ):
-        self.connection = pymongo.MongoClient(connection_string, directConnection=True)
-        self.db = self.connection.get_database()
-
-    async def get_field_data(
-            self,
-            collection:str,   # MongoDB collection
-            mongo_ids:list | None,   # List of MongoDB ObjectIds as str
-            field_paths:list, # List of field paths in dotted notation: ['some.example.field1', 'some.other.example.field2']
-        ):
-        if mongo_ids:
-            filter = {'_id': {'$in': strs2ObjectIds(mongo_ids)}}
-            document_count = self.db[collection].count_documents(filter)
-            cursor = self.db[collection].find(filter, {field_path: True for field_path in field_paths})
-        else:
-            document_count = self.db[collection].count_documents({})
-            cursor = self.db[collection].find({}, {field_path: True for field_path in field_paths})
-        return document_count, cursor
-
-print(f"Connection string: {MONGO_CONNECTION_STRING}")
-mongo_api = MongoAPI(MONGO_CONNECTION_STRING)
-
-
 class Calculation(metaclass=abc.ABCMeta):
     # Abstract base class
     created_at: datetime.datetime | None
@@ -89,12 +63,14 @@ class Calculation(metaclass=abc.ABCMeta):
 
     def __init__(
             self,
+            mongo_api,
             status: str = 'init',
             created_at: datetime.datetime | None = None,
             finished_at: datetime.datetime | None = None,
             _id: ObjectId | None = None,
             result = None
             ):
+        self.mongo_api = mongo_api
         self.status = status
         self.created_at = created_at if created_at else datetime.datetime.now(tz=datetime.timezone.utc)
         self.finished_at = finished_at
@@ -127,28 +103,28 @@ class Calculation(metaclass=abc.ABCMeta):
             }
         doc_to_save = dict(global_attrs, **attrs)
         print(f"Doc to save: {doc_to_save}")
-        coll = mongo_api.db[self.collection]
+        coll = self.mongo_api.db[self.collection]
 
         print('FINISH!')
 
-        # mongo_save = mongo_api.db[self.collection].insert_one(doc_to_save)
-        # assert mongo_save.acknowledged == True
-        # self._id = mongo_save.inserted_id
-        # print(f"_id: {self._id}")
-        # return self._id
-        return "sdfgijndlskfug"
+        mongo_save = self.mongo_api.db[self.collection].insert_one(doc_to_save)
+        assert mongo_save.acknowledged == True
+        self._id = mongo_save.inserted_id
+        print(f"_id: {self._id}")
+        return self._id
+
     
     @classmethod
     def find(cls, id: str):
         """Return a class instance based on a particular MongoDB document.
         """
-        doc = mongo_api.db[cls.collection].find_one({'_id': ObjectId(id)})
+        doc = self.mongo_api.db[cls.collection].find_one({'_id': ObjectId(id)})
         if doc is None:
             return None
         return cls(**doc)
     
     async def get_field(self, field):
-        doc = mongo_api.db[self.collection].find_one({'_id': self._id}, {field: True})
+        doc = self.mongo_api.db[self.collection].find_one({'_id': self._id}, {field: True})
         return doc[field]
     
     async def get_result(self):
@@ -162,7 +138,7 @@ class Calculation(metaclass=abc.ABCMeta):
         print(f"My collection: {self.collection}")
         print("My _id:")
         print(self._id)
-        update_result = mongo_api.db[self.collection].update_one(
+        update_result = self.mongo_api.db[self.collection].update_one(
             {'_id': self._id}, {'$set': {
                 'result': result,
                 'finished_at': datetime.datetime.now(tz=datetime.timezone.utc),
@@ -181,7 +157,7 @@ class Calculation(metaclass=abc.ABCMeta):
         print(self._id)
         print("__dict__:")
         print(self.__dict__)
-        update_result = mongo_api.db[self.collection].update_one(
+        update_result = self.mongo_api.db[self.collection].update_one(
             {'_id': self._id}, {'$set': {
                     **vars(self)
                 }
@@ -240,7 +216,7 @@ class NearestNeighbors(Calculation):
 
     async def query_mongodb_for_input_profile(self):
         "Get a the allele profile for the input sequence from MongoDB"
-        profile_count, cursor = await mongo_api.get_field_data(
+        profile_count, cursor = await self.mongo_api.get_field_data(
             collection=self.seq_collection,
             field_paths=[self.profile_field_path],
             mongo_ids=[self.input_mongo_id]
@@ -277,7 +253,7 @@ class NearestNeighbors(Calculation):
     async def calculate(self):
         print(f"Sequence collection: {self.seq_collection}")
         print(f"Profile field path: {self.profile_field_path}")
-        comparable_sequences_count = mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})
+        comparable_sequences_count = self.mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})
         print(f"Comparable sequences found: {str(comparable_sequences_count)}")
         
         pipeline = list()
@@ -311,7 +287,7 @@ class NearestNeighbors(Calculation):
                 }
             }
         )
-        sequences_to_compare_with = mongo_api.db[self.seq_collection].aggregate(pipeline)
+        sequences_to_compare_with = self.mongo_api.db[self.seq_collection].aggregate(pipeline)
 
         nearest_neighbors = list()
         for other_sequence in sequences_to_compare_with:
@@ -385,7 +361,7 @@ class DistanceCalculation(Calculation):
 
     async def query_mongodb_for_allele_profiles(self):
         "Get a MongoDB cursor that represents the allele profiles for the calculation"
-        profile_count, cursor = await mongo_api.get_field_data(
+        profile_count, cursor = await self.mongo_api.get_field_data(
             collection=self.seq_collection,
             field_paths=[self.seqid_field_path, self.profile_field_path],
             mongo_ids=self.seq_mongo_ids
@@ -555,7 +531,7 @@ class SNPCalculation(HPCCalculation):
     
     async def query_mongodb_for_filenames(self):
         # Get the filenames for the calculation
-        sequence_count, cursor = await mongo_api.get_field_data(
+        sequence_count, cursor = await self.mongo_api.get_field_data(
             collection=self.seq_collection,
             mongo_ids=self.seq_mongo_ids,
             field_paths=[ self.filename_field_path ],
@@ -579,7 +555,7 @@ class SNPCalculation(HPCCalculation):
     
         # TODO fix later
         # Get the reference filename
-        # sequence_count, cursor = await mongo_api.get_field_data(
+        # sequence_count, cursor = await self.mongo_api.get_field_data(
         #     collection=self.seq_collection,
         #     mongo_ids=[ self.reference_mongo_id ],
         #     field_paths=[ self.filename_field_path ],
