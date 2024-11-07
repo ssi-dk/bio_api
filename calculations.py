@@ -103,11 +103,12 @@ class Calculation(metaclass=abc.ABCMeta):
             remote_bind_address=(MONGO_TUNNEL_REMOTE_BIND, 27017),  # IP of dpfvst-002.computerome.local in DELPHI dev/test env
             local_bind_address=(MONGO_TUNNEL_LOCAL_BIND, 27017)
         ) as tunnel:
-            print("Tunnel established.")
+            print("Tunnel established:")
+            print(tunnel)
             connection = pymongo.MongoClient(MONGO_CONNECTION_STRING, directConnection=True)
             db = connection.get_database()
-            sample = db.samples.find_one()
-            print(sample)
+            c = db.samples.count_documents({})
+            print(c)
             connection.close()
 
         print('FINISH!')
