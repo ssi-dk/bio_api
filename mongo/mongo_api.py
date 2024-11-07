@@ -1,4 +1,5 @@
 import pymongo
+from bson.objectid import ObjectId
 
 def strs2ObjectIds(id_strings: list):
     """
