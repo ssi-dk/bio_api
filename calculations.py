@@ -11,6 +11,9 @@ from abc import abstractmethod
 import pymongo
 from bson.objectid import ObjectId
 from pandas import DataFrame, read_table, read_csv
+
+import sshtunnel
+
 from tree_maker import make_tree
 
 from mongo import mongo_api
@@ -90,11 +93,32 @@ class Calculation(metaclass=abc.ABCMeta):
             }
         doc_to_save = dict(global_attrs, **attrs)
         print(f"Doc to save: {doc_to_save}")
-        mongo_save = mongo_api.db[self.collection].insert_one(doc_to_save)
-        assert mongo_save.acknowledged == True
-        self._id = mongo_save.inserted_id
-        print(f"_id: {self._id}")
-        return self._id
+        coll = mongo_api.db[self.collection]
+        
+        with sshtunnel.open_tunnel(
+            ('10.32.244.37', 22),  # IP of dev2.sofi-platform.dk
+            ssh_username="fingru",
+            ssh_password=(input("SSH password: ")),
+            remote_bind_address=('10.45.129.11', 27017),  # IP of dpfvst-002.computerome.local in DELPHI dev/test env
+            local_bind_address=('0.0.0.0', 27017)
+        ) as tunnel:
+            print("Tunnel established.")
+            mongo_string = getenv("BIO_API_MONGO_CONNECTION")
+            print(mongo_string)
+            connection = pymongo.MongoClient(mongo_string, directConnection=True)
+            db = connection.get_database()
+            sample = db.samples.find_one()
+            print(sample)
+            connection.close()
+
+        print('FINISH!')
+
+        # mongo_save = mongo_api.db[self.collection].insert_one(doc_to_save)
+        # assert mongo_save.acknowledged == True
+        # self._id = mongo_save.inserted_id
+        # print(f"_id: {self._id}")
+        # return self._id
+        return "sdfgijndlskfug"
     
     @classmethod
     def find(cls, id: str):
