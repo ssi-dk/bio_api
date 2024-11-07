@@ -13,7 +13,7 @@ with sshtunnel.open_tunnel(
     print("Tunnel established.")
     mongo_string = getenv("BIO_API_MONGO_CONNECTION")
     print(mongo_string)
-    connection = pymongo.MongoClient(mongo_string)
+    connection = pymongo.MongoClient(mongo_string, directConnection=True)
     db = connection.get_database()
     sample = db.samples.find_one()
     print(sample)
