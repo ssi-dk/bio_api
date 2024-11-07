@@ -1,5 +1,6 @@
 import datetime
 from os import getenv
+import sys
 from pathlib import Path
 import asyncio
 from io import StringIO
@@ -12,15 +13,9 @@ from bson.objectid import ObjectId
 from pandas import DataFrame, read_table, read_csv
 from tree_maker import make_tree
 
+from mongo import mongo_api
 from sofi_messenger.src import sofi_messenger
 
-MONGO_CONNECTION_STRING = getenv('BIO_API_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
-MONGO_USE_TUNNEL = getenv('MONGO_USE_TUNNEL', False)
-MONGO_TUNNEL_IP = getenv('MONGO_TUNNEL_IP', False)
-MONGO_TUNNEL_USERNAME = getenv('MONGO_TUNNEL_USERNAME', False)
-MONGO_TUNNEL_PASSWORD = getenv('MONGO_TUNNEL_PASSWORD', False)
-MONGO_TUNNEL_REMOTE_BIND = getenv('MONGO_TUNNEL_REMOTE_BIND', False)
-MONGO_TUNNEL_LOCAL_BIND = getenv('MONGO_TUNNEL_LOCAL_BIND', False)
 
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 AMQP_HOST = getenv('AMQP_HOST', "amqp://guest:guest@rabbitmq/")
@@ -55,32 +50,6 @@ def strs2ObjectIds(id_strings: list):
     for id_str in id_strings:
         output.append(ObjectId(id_str))
     return output
-
-
-class MongoAPI:
-    def __init__(self,
-        connection_string: str,
-    ):
-        self.connection = pymongo.MongoClient(connection_string)
-        self.db = self.connection.get_database()
-
-    async def get_field_data(
-            self,
-            collection:str,   # MongoDB collection
-            mongo_ids:list | None,   # List of MongoDB ObjectIds as str
-            field_paths:list, # List of field paths in dotted notation: ['some.example.field1', 'some.other.example.field2']
-        ):
-        if mongo_ids:
-            filter = {'_id': {'$in': strs2ObjectIds(mongo_ids)}}
-            document_count = self.db[collection].count_documents(filter)
-            cursor = self.db[collection].find(filter, {field_path: True for field_path in field_paths})
-        else:
-            document_count = self.db[collection].count_documents({})
-            cursor = self.db[collection].find({}, {field_path: True for field_path in field_paths})
-        return document_count, cursor
-
-print(f"Connection string: {MONGO_CONNECTION_STRING}")
-mongo_api = MongoAPI(MONGO_CONNECTION_STRING)
 
 
 class Calculation(metaclass=abc.ABCMeta):
