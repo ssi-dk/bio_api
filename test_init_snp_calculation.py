@@ -25,7 +25,7 @@ async def main() -> None:
     print("Object saved.")
 
     
-    profile_count, cursor = await snp_calc.query_mongodb_for_filenames()
+    # profile_count, cursor = await snp_calc.query_mongodb_for_filenames()
 
     await snp_calc.calculate()
 
