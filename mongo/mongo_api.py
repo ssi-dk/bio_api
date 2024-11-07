@@ -1,5 +1,15 @@
 import pymongo
 
+def strs2ObjectIds(id_strings: list):
+    """
+    Converts a list of strings to a set of ObjectIds
+    """
+    output = list()
+    for id_str in id_strings:
+        output.append(ObjectId(id_str))
+    return output
+
+
 class MongoAPI:
     def __init__(self,
         connection_string: str,
