@@ -105,8 +105,6 @@ class Calculation(metaclass=abc.ABCMeta):
         print(f"Doc to save: {doc_to_save}")
         coll = self.mongo_api.db[self.collection]
 
-        print('FINISH!')
-
         mongo_save = self.mongo_api.db[self.collection].insert_one(doc_to_save)
         assert mongo_save.acknowledged == True
         self._id = mongo_save.inserted_id
