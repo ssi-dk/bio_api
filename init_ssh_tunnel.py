@@ -3,6 +3,8 @@ from os import getenv
 import sshtunnel
 import pymongo
 import asyncio
+import argparse
+from importlib import import_module
 
 import test_init_snp_calculation
 
@@ -13,6 +15,14 @@ MONGO_TUNNEL_USERNAME = getenv('MONGO_TUNNEL_USERNAME', False)
 MONGO_TUNNEL_PASSWORD = getenv('MONGO_TUNNEL_PASSWORD', False)
 MONGO_TUNNEL_REMOTE_BIND = getenv('MONGO_TUNNEL_REMOTE_BIND', False)
 MONGO_TUNNEL_LOCAL_BIND = getenv('MONGO_TUNNEL_LOCAL_BIND', False)
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('script_name', help="Python script to run with tunnel (without '.py' extension)")
+args = parser.parse_args()
+main_script = import_module(args.script_name)
+print("Main script:")
+print(main_script)
 
 with sshtunnel.open_tunnel(
     (MONGO_TUNNEL_IP, 22),  # IP of dev2.sofi-platform.dk
@@ -30,4 +40,4 @@ with sshtunnel.open_tunnel(
     print(db.list_collection_names())
     connection.close()
     print("Starting main script...")
-    asyncio.run(test_init_snp_calculation.main())
+    asyncio.run(main_script.main())
