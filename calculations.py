@@ -42,15 +42,6 @@ def hoist(var, dotted_field_path:str):
             var = var[path_element]
     return var
 
-def strs2ObjectIds(id_strings: list):
-    """
-    Converts a list of strings to a set of ObjectIds
-    """
-    output = list()
-    for id_str in id_strings:
-        output.append(ObjectId(id_str))
-    return output
-
 
 class Calculation(metaclass=abc.ABCMeta):
     # Abstract base class
