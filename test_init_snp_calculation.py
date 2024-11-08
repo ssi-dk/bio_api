@@ -4,7 +4,6 @@ import os
 from os import getenv
 
 import pymongo
-import sshtunnel
 
 from mongo import MongoAPI
 from calculations import SNPCalculation, HPCResources, MissingDataException

@@ -11,8 +11,6 @@ import pymongo
 from bson.objectid import ObjectId
 from pandas import DataFrame, read_table, read_csv
 
-import sshtunnel
-
 from tree_maker import make_tree
 
 from sofi_messenger.src import sofi_messenger
