@@ -11,6 +11,7 @@ import pymongo
 from bson.objectid import ObjectId
 from pandas import DataFrame, read_table, read_csv
 
+from mongo import MongoAPI
 from tree_maker import make_tree
 
 from sofi_messenger.src import sofi_messenger
@@ -45,6 +46,7 @@ def hoist(var, dotted_field_path:str):
 
 class Calculation(metaclass=abc.ABCMeta):
     # Abstract base class
+    mongo_api: MongoAPI
     created_at: datetime.datetime | None
     finished_at: datetime.datetime | None
     status: str
@@ -518,6 +520,8 @@ class SNPCalculation(HPCCalculation):
     
     async def query_mongodb_for_filenames(self):
         # Get the filenames for the calculation
+        print("Mongo API:")
+        print(self.mongo_api)
         sequence_count, cursor = await self.mongo_api.get_field_data(
             collection=self.seq_collection,
             mongo_ids=self.seq_mongo_ids,
