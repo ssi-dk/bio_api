@@ -23,7 +23,7 @@ with sshtunnel.open_tunnel(
 ) as tunnel:
     print("Tunnel established:")
     print(tunnel)
-    print("Testing MongoClient connection:")
+    print("Testing MongoClient connection...")
     connection = pymongo.MongoClient(MONGO_CONNECTION_STRING, directConnection=True)
     db = connection.get_database()
     print("Collections:")
