@@ -33,8 +33,10 @@ async def main() -> None:
         snp_calc._id = await snp_calc.insert_document()
         print("Object saved.")
 
-        profile_count, cursor = await snp_calc.query_mongodb_for_filenames()
+        # TODO uncomment when we have actual fasta files that are actually referred in the sample docs
+        # profile_count, cursor = await snp_calc.query_mongodb_for_filenames()
 
+        # TODO For this to work we need another SSH tunnel!
         # await snp_calc.calculate()
 
 
