@@ -4,6 +4,7 @@ import os
 from os import getenv
 
 import pymongo
+import sshtunnel
 
 from mongo import MongoAPI
 from calculations import SNPCalculation, HPCResources, MissingDataException
@@ -13,6 +14,13 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 
 MONGO_CONNECTION_STRING = getenv('BIO_API_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
+MONGO_USE_TUNNEL = getenv('MONGO_USE_TUNNEL', False)
+MONGO_TUNNEL_IP = getenv('MONGO_TUNNEL_IP', False)
+MONGO_TUNNEL_USERNAME = getenv('MONGO_TUNNEL_USERNAME', False)
+MONGO_TUNNEL_PASSWORD = getenv('MONGO_TUNNEL_PASSWORD', False)
+MONGO_TUNNEL_REMOTE_BIND = getenv('MONGO_TUNNEL_REMOTE_BIND', False)
+MONGO_TUNNEL_LOCAL_BIND = getenv('MONGO_TUNNEL_LOCAL_BIND', False)
+RABBITMQ_PORT = 5672
 
 async def main() -> None:
         mongo_api = MongoAPI(MONGO_CONNECTION_STRING)
@@ -33,12 +41,27 @@ async def main() -> None:
         # TODO uncomment when we have actual fasta files that are actually referred in the sample docs
         # profile_count, cursor = await snp_calc.query_mongodb_for_filenames()
 
-        #with ...
+        with sshtunnel.open_tunnel(
+            (MONGO_TUNNEL_IP, 22),  # IP of dev2.sofi-platform.dk
+            ssh_username=MONGO_TUNNEL_USERNAME,
+            ssh_password=MONGO_TUNNEL_PASSWORD,
+            remote_bind_address=(MONGO_TUNNEL_REMOTE_BIND, 27017),  # IP of dpfvst-002.computerome.local in DELPHI dev/test env
+            local_bind_address=(MONGO_TUNNEL_LOCAL_BIND, 27017)
+        ) as tunnel:
+            print("Tunnel established:")
+            print(tunnel)
+            print("Testing MongoClient connection...")
+            connection = pymongo.MongoClient(MONGO_CONNECTION_STRING, directConnection=True)
+            db = connection.get_database()
+            print("Collections:")
+            print(db.list_collection_names())
+            connection.close()
         #    snp_calc._id = await snp_calc.insert_document()
         #print("Object saved.")
 
-        # with...
+        # Åbn RabbitMQ tunnel
         #   await snp_calc.calculate()
+        # Luk RabbitMQ tunnel
 
 
 if __name__ == "__main__":
