@@ -53,9 +53,17 @@ async def main() -> None:
             snp_calc._id = await snp_calc.insert_document()
         print("SNP object saved.")
 
-        # Åbn RabbitMQ tunnel
-        #   await snp_calc.calculate()
-        # Luk RabbitMQ tunnel
+        server = sshtunnel.SSHTunnelForwarder(
+            'dev2.sofi-platform.dk',
+            ssh_username=MONGO_TUNNEL_USERNAME,
+            ssh_password=MONGO_TUNNEL_PASSWORD,
+            remote_bind_address=('127.0.0.1', RABBITMQ_PORT),
+            local_bind_address=('0.0.0.0', RABBITMQ_PORT)
+        )
+        server.start()
+        print(server.local_bind_port)  # show assigned local port
+        await snp_calc.calculate()
+        server.stop()
 
 
 if __name__ == "__main__":
