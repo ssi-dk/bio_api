@@ -55,8 +55,8 @@ async def main() -> None:
             db = connection.get_database()
             print("Collections:")
             print(db.list_collection_names())
+            snp_calc._id = await snp_calc.insert_document()
             connection.close()
-        #    snp_calc._id = await snp_calc.insert_document()
         #print("Object saved.")
 
         # Åbn RabbitMQ tunnel
