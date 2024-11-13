@@ -50,14 +50,8 @@ async def main() -> None:
         ) as tunnel:
             print("Tunnel established:")
             print(tunnel)
-            print("Testing MongoClient connection...")
-            connection = pymongo.MongoClient(MONGO_CONNECTION_STRING, directConnection=True)
-            db = connection.get_database()
-            print("Collections:")
-            print(db.list_collection_names())
             snp_calc._id = await snp_calc.insert_document()
-            connection.close()
-        #print("Object saved.")
+        print("SNP object saved.")
 
         # Åbn RabbitMQ tunnel
         #   await snp_calc.calculate()
