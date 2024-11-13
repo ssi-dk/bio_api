@@ -519,44 +519,35 @@ class SNPCalculation(HPCCalculation):
         return self._id
     
     async def query_mongodb_for_filenames(self):
-        # Get the filenames for the calculation
-        print("Mongo API:")
-        print(self.mongo_api)
+    
+        # Get the filenames for the samples
         sequence_count, cursor = await self.mongo_api.get_field_data(
             collection=self.seq_collection,
             mongo_ids=self.seq_mongo_ids,
             field_paths=[ self.filename_field_path ],
             )
 
+        # Check that we found the correct number of sample documents
         if self.seq_mongo_ids is not None and len(self.seq_mongo_ids) != sequence_count:
-            message = "Could not find the requested number of sequences. " + \
+            message = "Could not find the requested number of samples. " + \
                 f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(sequence_count)}"
             raise MissingDataException(message)
 
-        print("filename_field_path:")
-        print(self.filename_field_path)
+        # Add filenames to object
         try:
             while True:
                 self.input_filenames.append(hoist(next(cursor), self.filename_field_path))
         except StopIteration:
             pass
     
-        # TODO fix later
         # Get the reference filename
-        # sequence_count, cursor = await self.mongo_api.get_field_data(
-        #     collection=self.seq_collection,
-        #     mongo_ids=[ self.reference_mongo_id ],
-        #     field_paths=[ self.filename_field_path ],
-        #     )
-
-        # if self.seq_mongo_ids is not None and len(self.seq_mongo_ids) != sequence_count:
-        #     message = "Could not find the requested number of sequences. " + \
-        #         f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(sequence_count)}"
-        #     raise MissingDataException(message)
-        
-        # assert sequence_count == 1
-        # self.reference_filename = next(cursor)
-        self.reference_filename = "myreferencefile.fasta"
+        sequence_count, cursor = await self.mongo_api.get_field_data(
+            collection=self.seq_collection,
+            mongo_ids=[ self.reference_mongo_id ],
+            field_paths=[ self.filename_field_path ],
+            )
+        assert sequence_count == 1
+        self.reference_filename = hoist(next(cursor), self.filename_field_path)
 
         return self.input_filenames, self.reference_filename
     
