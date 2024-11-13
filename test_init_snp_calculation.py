@@ -30,14 +30,15 @@ async def main() -> None:
         )
         print("Object created.")
 
-        snp_calc._id = await snp_calc.insert_document()
-        print("Object saved.")
-
         # TODO uncomment when we have actual fasta files that are actually referred in the sample docs
         # profile_count, cursor = await snp_calc.query_mongodb_for_filenames()
 
-        # TODO For this to work we need another SSH tunnel!
-        # await snp_calc.calculate()
+        #with ...
+        #    snp_calc._id = await snp_calc.insert_document()
+        #print("Object saved.")
+
+        # with...
+        #   await snp_calc.calculate()
 
 
 if __name__ == "__main__":
