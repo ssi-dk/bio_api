@@ -31,8 +31,8 @@ async def main() -> None:
             seq_collection='samples',
             seqid_field_path='categories.sample_info.summary.sofi_sequence_id',
             filename_field_path='categories.contigs.summary.data',
-            seq_mongo_ids=['666febab9871ba945a1a11f0', '666febac9871ba945a1a11f1', '666febad9871ba945a1a11f2'],
-            reference_mongo_id='666febad9871ba945a1a11f3',
+            seq_mongo_ids=['670e646cbd9c2880b477280e', '670e646cbd9c2880b477280f', '670e646cbd9c2880b4772810'],
+            reference_mongo_id='6734756ac37473c3b1204430',
             depth='7',
             ignore_hz=False,
         )
