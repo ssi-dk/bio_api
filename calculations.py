@@ -560,9 +560,6 @@ class SNPCalculation(HPCCalculation):
         # assert sequence_count == 1
         # self.reference_filename = next(cursor)
         self.reference_filename = "myreferencefile.fasta"
-    
-        # Update myself in MongoDB
-        await self.update()
 
         return self.input_filenames, self.reference_filename
     

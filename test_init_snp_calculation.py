@@ -36,10 +36,7 @@ async def main() -> None:
             depth='7',
             ignore_hz=False,
         )
-        print("Object created.")
-
-        # TODO uncomment when we have actual fasta files that are actually referred in the sample docs
-        # profile_count, cursor = await snp_calc.query_mongodb_for_filenames()
+        print("SNP object created.")
 
         with sshtunnel.open_tunnel(
             (MONGO_TUNNEL_IP, 22),  # IP of dev2.sofi-platform.dk
@@ -50,8 +47,15 @@ async def main() -> None:
         ) as tunnel:
             print("Tunnel established:")
             print(tunnel)
-            snp_calc._id = await snp_calc.insert_document()
-        print("SNP object saved.")
+            print("Looking up filenames...")
+            input_filenames, reference_filename = await snp_calc.query_mongodb_for_filenames()
+            print("Filenames added to object.")
+            print("Input filenames:")
+            print(input_filenames)
+            # print("Reference filename:")
+            # print(reference_filename)
+            # snp_calc._id = await snp_calc.insert_document()
+            # print("SNP object saved to MongoDB.")
 
         server = sshtunnel.SSHTunnelForwarder(
             'dev2.sofi-platform.dk',
