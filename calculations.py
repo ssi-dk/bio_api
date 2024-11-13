@@ -540,9 +540,6 @@ class SNPCalculation(HPCCalculation):
                 self.input_filenames.append(hoist(next(cursor), self.filename_field_path))
         except StopIteration:
             pass
-        
-        print("Input filenames:")
-        print(self.input_filenames)
     
         # TODO fix later
         # Get the reference filename
@@ -564,10 +561,6 @@ class SNPCalculation(HPCCalculation):
         return self.input_filenames, self.reference_filename
     
     async def calculate(self):
-        print("Input filenames:")
-        print(self.input_filenames)
-        print("Reference_filename:")
-        print(self.reference_filename)
         calc_input_params =             {
                 'input_files': self.input_filenames,
                 'reference': self.reference_filename,
