@@ -50,12 +50,8 @@ async def main() -> None:
             print("Looking up filenames...")
             input_filenames, reference_filename = await snp_calc.query_mongodb_for_filenames()
             print("Filenames added to object.")
-            print("Input filenames:")
-            print(input_filenames)
-            # print("Reference filename:")
-            # print(reference_filename)
-            # snp_calc._id = await snp_calc.insert_document()
-            # print("SNP object saved to MongoDB.")
+            snp_calc._id = await snp_calc.insert_document()
+            print(f"SNP object saved to MongoDB with _id {str(snp_calc._id)}")
 
         server = sshtunnel.SSHTunnelForwarder(
             'dev2.sofi-platform.dk',
