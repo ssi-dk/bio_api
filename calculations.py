@@ -480,6 +480,7 @@ class SNPCalculation(HPCCalculation):
     ignore_hz: bool
     input_filenames: list = list()
     reference_filename: str | None = None
+    hpc_resources: HPCResources | None = None
 
     def __init__(
             self,
@@ -490,6 +491,7 @@ class SNPCalculation(HPCCalculation):
             reference_mongo_id: str,
             depth: int = 15,
             ignore_hz: bool=True,
+            hpc_resources: HPCResources | None = None,
             **kwargs
             ):
         super().__init__(**kwargs)
@@ -500,6 +502,7 @@ class SNPCalculation(HPCCalculation):
         self.reference_mongo_id = reference_mongo_id
         self.depth = depth
         self.ignore_hz = ignore_hz
+        self.hpc_resources = hpc_resources
 
     @property
     def job_type(self):
