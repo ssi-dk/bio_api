@@ -521,6 +521,7 @@ class SNPCalculation(HPCCalculation):
             ignore_hz=self.ignore_hz,
             input_filenames=self.input_filenames,
             reference_filename=self.reference_filename,
+            hpc_resources = asdict(self.hpc_resources)
         )
         return self._id
     
