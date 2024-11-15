@@ -62,7 +62,6 @@ async def main() -> None:
             local_bind_address=('0.0.0.0', RABBITMQ_PORT)
         )
         server.start()
-        print(server.local_bind_port)  # show assigned local port
         await snp_calc.calculate()
         server.stop()
 
