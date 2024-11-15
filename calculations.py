@@ -44,6 +44,15 @@ def hoist(var, dotted_field_path:str):
     return var
 
 
+@dataclass
+class HPCResources:
+    cpus: int = 1
+    memGB: int = 4
+    group: str = "fvst_ssi"
+    nodes: str = "1"
+    walltime: str = "24:00:00"  #TODO sofi_messenger does not accept this parameter currently?
+
+
 class Calculation(metaclass=abc.ABCMeta):
     # Abstract base class
     mongo_api: MongoAPI
@@ -73,6 +82,8 @@ class Calculation(metaclass=abc.ABCMeta):
         for key, value in vars(self).items():
             if isinstance(value, datetime.datetime):
                 content[key] = value.isoformat()
+            elif isinstance(value, HPCResources):
+                content[key] = asdict[value]
             elif key == '_id':
                 content['job_id'] = str(value)
             else:
@@ -452,14 +463,6 @@ class TreeCalculation(Calculation):
             await self.store_result(tree)
         except ValueError as e:
             await self.store_result(str(e), 'error')
-
-@dataclass
-class HPCResources:
-    cpus: int = 1
-    memGB: int = 4
-    group: str = "fvst_ssi"
-    nodes: str = "1"
-    walltime: str = "24:00:00"  #TODO sofi_messenger does not accept this parameter currently
 
 
 class HPCCalculation(Calculation):

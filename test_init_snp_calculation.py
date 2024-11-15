@@ -35,6 +35,7 @@ async def main() -> None:
             reference_mongo_id='6734756ac37473c3b1204430',
             depth='7',
             ignore_hz=False,
+            hpc_resources=hpc_r
         )
         print("SNP object created.")
 
