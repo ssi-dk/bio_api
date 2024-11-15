@@ -46,11 +46,10 @@ def hoist(var, dotted_field_path:str):
 
 @dataclass
 class HPCResources:
-    cpus: int = 1
-    memGB: int = 4
-    group: str = "fvst_ssi"
-    nodes: str = "1"
-    walltime: str = "24:00:00"  #TODO sofi_messenger does not accept this parameter currently?
+    cpus: int | None = None
+    memGB: int | None = None
+    group: str | None = None
+    nodes: str | None = None
 
 
 class Calculation(metaclass=abc.ABCMeta):
@@ -567,10 +566,13 @@ class SNPCalculation(HPCCalculation):
             }
         print("Calculation input params:")
         print(calc_input_params)
-        print()
+        hpc_resources = asdict(self.hpc_resources)
+        print("HPC resources:")
+        print(hpc_resources)
 
         await messenger.send_hpc_call(
-            str(self._id),
-            self.job_type,
+            uuid=str(self._id),
+            job_type=self.job_type,
             args=calc_input_params,
+            **hpc_resources
         )
