@@ -7,8 +7,8 @@ import client_functions
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-                    prog='calculate_random_dmx',
-                    description="Calculate a random distance matrix for testing."
+                    prog='calculate_dmx',
+                    description="Calculate a istance matrix for testing."
     )
 
     parser.add_argument('mongo_ids', type=str, help="ObjecIDs as strings separated by commas")
