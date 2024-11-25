@@ -75,7 +75,7 @@ class Neighbor(BaseModel):
 
 
 class NearestNeighborsGETResponse(NearestNeighborsRequest, CommonGETResponse):
-    result: typing.Optional[list[Neighbor]]
+    result: typing.Any
 
 
 class DistanceMatrixResult(BaseModel):
@@ -87,4 +87,4 @@ class DistanceMatrixGETResponse(DistanceMatrixRequest, CommonGETResponse):
 
 
 class HCTreeCalcGETResponse(HCTreeCalcRequest, CommonGETResponse):
-    result: typing.Optional[str]
+    result: typing.Any
