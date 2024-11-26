@@ -482,9 +482,12 @@ class HPCCalculation(Calculation):
         self.hpc_resources = hpc_resources
     
     async def calculate(self):
-        #TODO some parts of SNPCalculation.calculate should be moved here
-        pass
-
+        hpc_resources = asdict(self.hpc_resources)
+        await messenger.send_hpc_call(
+            uuid=str(self._id),
+            job_type=self.job_type,
+            **hpc_resources
+        )
 
 class DebugCalculation(HPCCalculation):
     collection = 'debug'
@@ -494,9 +497,8 @@ class DebugCalculation(HPCCalculation):
         return 'debug'
     
     async def calculate(self):
-        #TODO make
         print("Running calculate method on DebugCalculation")
-        pass
+        super().calculate()
 
 class SNPCalculation(HPCCalculation):
     collection = 'snp'
@@ -582,6 +584,7 @@ class SNPCalculation(HPCCalculation):
         return self.input_filenames, self.reference_filename
     
     async def calculate(self):
+        #TODO merge with calculate on HPCCalculation
         calc_input_params =             {
                 'input_files': self.input_filenames,
                 'reference': self.reference_filename,
