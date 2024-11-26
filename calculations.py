@@ -481,7 +481,7 @@ class HPCCalculation(Calculation):
         super().__init__(**kwargs)
         self.hpc_resources = hpc_resources
     
-    async def calculate(self, args, **kwargs):
+    async def calculate(self, args=None):
         hpc_resources = asdict(self.hpc_resources)
         await messenger.send_hpc_call(
             uuid=str(self._id),
