@@ -471,9 +471,13 @@ class HPCCalculation(Calculation):
         pass
 
 
+class DebugCalculation(Calculation):
+    @property
+    def job_type(self):
+        return 'debug'
+
 class SNPCalculation(HPCCalculation):
     collection = 'snp'
-    job_type = 'snp'
     seq_collection: str
     seqid_field_path: str
     seq_mongo_ids: list
