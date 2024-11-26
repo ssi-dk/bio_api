@@ -50,6 +50,7 @@ class HPCResources:
     memGB: int | None = None
     group: str | None = None
     nodes: str | None = None
+    walltime: str | None = None
 
 
 class Calculation(metaclass=abc.ABCMeta):
@@ -472,11 +473,29 @@ class HPCCalculation(Calculation):
 
     hpc_resources: HPCResources | None = None
 
+    def __init__(
+        self,
+        hpc_resources: HPCResources | None = None,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+        self.hpc_resources = hpc_resources
+    
+    async def calculate(self):
+        #TODO some parts of SNPCalculation.calculate should be moved here
+        pass
 
-class DebugCalculation(Calculation):
+
+class DebugCalculation(HPCCalculation):
+    collection = 'debug'
+
     @property
     def job_type(self):
         return 'debug'
+    
+    async def calculate(self):
+        #TODO make
+        pass
 
 class SNPCalculation(HPCCalculation):
     collection = 'snp'
@@ -498,7 +517,6 @@ class SNPCalculation(HPCCalculation):
             reference_mongo_id: str,
             depth: int = 15,
             ignore_hz: bool=True,
-            hpc_resources: HPCResources | None = None,
             **kwargs
             ):
         super().__init__(**kwargs)

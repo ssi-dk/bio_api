@@ -7,7 +7,7 @@ import pymongo
 import sshtunnel
 
 from mongo import MongoAPI
-from calculations import SNPCalculation, HPCResources, MissingDataException
+from calculations import DebugCalculation, HPCResources, MissingDataException
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -25,19 +25,12 @@ RABBITMQ_PORT = 5672
 async def main() -> None:
         mongo_api = MongoAPI(MONGO_CONNECTION_STRING)
 
-        hpc_r: HPCResources = HPCResources(cpus=2, memGB=8, nodes='1, 2')
-        snp_calc = SNPCalculation(
+        hpc_r: HPCResources = HPCResources(cpus=1, memGB=1, walltime=10)
+        debug_calc = DebugCalculation(
             mongo_api=mongo_api,
-            seq_collection='samples',
-            seqid_field_path='categories.sample_info.summary.sofi_sequence_id',
-            filename_field_path='categories.contigs.summary.data',
-            seq_mongo_ids=['670e646cbd9c2880b477280e', '670e646cbd9c2880b477280f', '670e646cbd9c2880b4772810'],
-            reference_mongo_id='6734756ac37473c3b1204430',
-            depth='7',
-            ignore_hz=False,
             hpc_resources=hpc_r
         )
-        print("SNP object created.")
+        print("Debug object created.")
 
         with sshtunnel.open_tunnel(
             (MONGO_TUNNEL_IP, 22),  # IP of dev2.sofi-platform.dk
@@ -48,11 +41,8 @@ async def main() -> None:
         ) as tunnel:
             print("Tunnel established:")
             print(tunnel)
-            print("Looking up filenames...")
-            input_filenames, reference_filename = await snp_calc.query_mongodb_for_filenames()
-            print("Filenames added to object.")
-            snp_calc._id = await snp_calc.insert_document()
-            print(f"SNP object saved to MongoDB with _id {str(snp_calc._id)}")
+            debug_calc._id = await debug_calc.insert_document()
+            print(f"Debug object saved to MongoDB with _id {str(debug_calc._id)}")
 
         server = sshtunnel.SSHTunnelForwarder(
             'dev2.sofi-platform.dk',
@@ -62,7 +52,7 @@ async def main() -> None:
             local_bind_address=('0.0.0.0', RABBITMQ_PORT)
         )
         server.start()
-        await snp_calc.calculate()
+        # await debug_calc.calculate()
         server.stop()
 
 
