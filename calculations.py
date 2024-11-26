@@ -470,6 +470,8 @@ class HPCCalculation(Calculation):
     def job_type(self):
         pass
 
+    hpc_resources: HPCResources | None = None
+
 
 class DebugCalculation(Calculation):
     @property
@@ -486,7 +488,6 @@ class SNPCalculation(HPCCalculation):
     ignore_hz: bool
     input_filenames: list = list()
     reference_filename: str | None = None
-    hpc_resources: HPCResources | None = None
 
     def __init__(
             self,
