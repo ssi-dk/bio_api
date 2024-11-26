@@ -495,6 +495,7 @@ class DebugCalculation(HPCCalculation):
     
     async def calculate(self):
         #TODO make
+        print("Running calculate method on DebugCalculation")
         pass
 
 class SNPCalculation(HPCCalculation):

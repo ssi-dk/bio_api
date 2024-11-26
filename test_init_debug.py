@@ -52,7 +52,7 @@ async def main() -> None:
             local_bind_address=('0.0.0.0', RABBITMQ_PORT)
         )
         server.start()
-        # await debug_calc.calculate()
+        await debug_calc.calculate()
         server.stop()
 
 
