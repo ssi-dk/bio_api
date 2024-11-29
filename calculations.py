@@ -481,7 +481,8 @@ class HPCCalculation(Calculation):
         super().__init__(**kwargs)
         self.hpc_resources = hpc_resources
     
-    async def calculate(self, args=dict()):
+    async def calculate(self, args:str|None=None):
+        print("Running calculate on HPCCalculation")
         hpc_resources = asdict(self.hpc_resources)
         await messenger.send_hpc_call(
             uuid=str(self._id),
@@ -497,9 +498,9 @@ class DebugCalculation(HPCCalculation):
     def job_type(self):
         return 'debug'
     
-    async def calculate(self):
-        print("Running calculate method on DebugCalculation")
-        super().calculate(args={"--sleep": "2"})
+    async def calculate(self, args:str|None=None):
+        print("Running calculate on DebugCalculation")
+        await super().calculate(args="--sleep: 2")
 
 class SNPCalculation(HPCCalculation):
     collection = 'snp'
