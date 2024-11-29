@@ -483,7 +483,13 @@ class HPCCalculation(Calculation):
     
     async def calculate(self, args:dict|None=None):
         print("Running calculate on HPCCalculation")
+        print(f"uuid: {str(self._id)}")
+        print(f"job_type: {self.job_type}")
+        print("args:")
+        print(args)
         hpc_resources = asdict(self.hpc_resources)
+        print("hpc_resources:")
+        print(hpc_resources)
         await messenger.send_hpc_call(
             uuid=str(self._id),
             job_type=self.job_type,
