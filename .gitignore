@@ -166,3 +166,4 @@ data/
 dumps/
 dmx_data/
 test_client/test.csv
+test_client/*.json
