@@ -120,7 +120,7 @@ for row in metadata_values:
         row.append(random_string(10))
 
 print(f"Sending request to {common.MICROREACT_BASE_URL}")
-rest_response = functions.new_project_2(
+functions.new_project_2(
     project_name=args.project_name,
     tree_calcs=[tree_job],
     metadata_url='https://docs.google.com/spreadsheets/d/e/2PACX-1vQt0l5CF2hyN3ajkVS_Lx5zPwi0eZ1bD675FPKyt2tKoYPkNynfSLYw6WOi_j0MQTgSsazlfrxOrGtP/pub?gid=0&single=true&output=csv',

@@ -119,26 +119,16 @@ for row in metadata_values:
     for n in range(6):
         row.append(random_string(10))
 
-if args.file:
-    functions.new_project_file(
-        project_name=args.project_name,
-        tree_calcs=[tree_job],
-        metadata_keys=metadata_keys,
-        metadata_values=metadata_values,
-        file_name = args.file
+
+print(f"Sending request to {common.MICROREACT_BASE_URL}")
+functions.new_project(
+    project_name=args.project_name,
+    tree_calcs=[tree_job],
+    metadata_keys=metadata_keys,
+    metadata_values=metadata_values,
+    raw_matrices=[distances],
+    mr_access_token=common.MICROREACT_ACCESS_TOKEN,
+    mr_base_url=common.MICROREACT_BASE_URL,
+    verify=not args.noverify,
+    file_name=args.file
     )
-else:
-    print(f"Sending request to {common.MICROREACT_BASE_URL}")
-    rest_response = functions.new_project(
-        project_name=args.project_name,
-        tree_calcs=[tree_job],
-        metadata_keys=metadata_keys,
-        metadata_values=metadata_values,
-        raw_matrices=[distances],
-        mr_access_token=common.MICROREACT_ACCESS_TOKEN,
-        mr_base_url=common.MICROREACT_BASE_URL,
-        verify = not args.noverify
-        )
-    print(f"HTTP response code: {str(rest_response)}")
-    print("Response as actual JSON:")
-    print(dumps(rest_response.json()))
