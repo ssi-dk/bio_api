@@ -129,11 +129,11 @@ if args.file:
     )
 else:
     print(f"Sending request to {common.MICROREACT_BASE_URL}")
-    rest_response = functions.new_project(
+    rest_response = functions.new_project_2(
         project_name=args.project_name,
         tree_calcs=[tree_job],
-        metadata_keys=metadata_keys,
-        metadata_values=metadata_values,
+        metadata_url='https://docs.google.com/spreadsheets/d/e/2PACX-1vQt0l5CF2hyN3ajkVS_Lx5zPwi0eZ1bD675FPKyt2tKoYPkNynfSLYw6WOi_j0MQTgSsazlfrxOrGtP/pub?gid=0&single=true&output=csv',
+        columns=['code', 'latitude', 'longitude', 'name'],
         raw_matrices=[distances],
         mr_access_token=common.MICROREACT_ACCESS_TOKEN,
         mr_base_url=common.MICROREACT_BASE_URL,
