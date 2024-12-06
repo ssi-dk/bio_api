@@ -1,5 +1,5 @@
 
-aio-pika==9.3.0
+# aio-pika==9.3.0
 fastapi==0.109.1
 numpy==1.26.3
 pandas==2.2.0
