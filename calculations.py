@@ -5,6 +5,7 @@ from json import dump, load
 import asyncio
 from io import StringIO
 import abc
+from time import sleep
 
 import pymongo
 from bson.objectid import ObjectId
@@ -12,6 +13,7 @@ from pandas import DataFrame, read_table
 from tree_maker import make_tree
 
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
+FAKE_LONG_RUNNING_JOBS = getenv('FAKE_LONG_RUNNING_JOBS', 1)
 
 
 class MissingDataException(Exception):
@@ -136,6 +138,9 @@ class Calculation(metaclass=abc.ABCMeta):
     
     async def get_result(self):
         return await self.get_field('result')
+    
+    async def sleep_5():
+        sleep(5)
 
     async def store_result(self, result, status:str='completed'):
         """Update the MongoDB document that corresponds with the class instance with a result.
@@ -143,9 +148,15 @@ class Calculation(metaclass=abc.ABCMeta):
         """
         # TODO maybe merge with update?
         print("Store result.")
+        print(f"Result type: {type(result)}")
         print(f"My collection: {self.collection}")
         print("My _id:")
         print(self._id)
+        if FAKE_LONG_RUNNING_JOBS:
+            print("FAKE LONG RUNNING JOB")
+            # sleep(5)  # Seems to make everything sleep, not just this method.
+            # TODO Why does this work? Try to use asyncio.sleep instead which is probably the right way to do it?
+            await sleep(5)
         update_result = mongo_api.db[self.collection].update_one(
             {'_id': self._id}, {'$set': {
                 'result': result,

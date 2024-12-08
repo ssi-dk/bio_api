@@ -93,6 +93,7 @@ async def nn_result(nn_id: str, level:str='full'):
             detail=f"A document with id {nn_id} was not found in collection {calculations.DistanceCalculation.collection}."
             )
 
+    print("Get nearest neighbors result.")
     content:dict = calc.to_dict()
     
     if level != 'full' and content['status'] == 'completed':
