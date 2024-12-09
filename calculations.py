@@ -13,8 +13,8 @@ from pandas import DataFrame, read_table
 from tree_maker import make_tree
 
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
-FAKE_LONG_RUNNING_JOBS = getenv('FAKE_LONG_RUNNING_JOBS', 0)
-
+flrj = getenv('FAKE_LONG_RUNNING_JOBS', 0)
+FAKE_LONG_RUNNING_JOBS = int(flrj)
 
 class MissingDataException(Exception):
     pass
