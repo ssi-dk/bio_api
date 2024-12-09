@@ -42,6 +42,8 @@ services:
     #     condition: service_healthy
     #   hpc_dispatcher:
     #     condition: service_started
+    environment:
+     - FAKE_LONG_RUNNING_JOBS=1
 
   test_client:
     build: ./test_client
