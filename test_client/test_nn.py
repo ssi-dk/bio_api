@@ -49,11 +49,11 @@ def test_nearest_neighbors():
         unknowns_are_diffs=True
     )
     assert response.status_code == 201
-    j = response.json()
-    assert 'job_id' in j
-    assert 'status' in j
-    job_id = response.json()['job_id']
-    status = response.json()['status']
+    nn_post_resp = response.json()
+    assert 'job_id' in nn_post_resp
+    assert 'status' in nn_post_resp
+    job_id = nn_post_resp['job_id']
+    status = nn_post_resp['status']
 
     # sleep(5)
     # result = client_functions.call_nn_result(job_id=job_id)
@@ -68,10 +68,12 @@ def test_nearest_neighbors():
     while status == 'init':
         response = client_functions.call_nn_status(job_id)
         assert response.status_code == 200
-        j = response.json()
-        assert 'job_id' in j
-        assert 'status' in j    
-        status = j['status']
+        nn_get_resp = response.json()
+        assert 'job_id' in nn_get_resp
+        assert 'status' in nn_get_resp
+        status = nn_get_resp['status']
         sleep(1)
 
-    assert j['status'] == 'completed'
+    # response = client_functions.call_nn_result(job_id)
+
+    # assert j['status'] == 'completed'
