@@ -30,15 +30,18 @@ def test_dmx_and_tree_from_mongodb():
     assert 'job_id' in r
     assert 'status' in r
     job_id = result.json()['job_id']
-    sleep(1)
+    status = result.json()['status']
 
     # Check status of distance calculation
-    result = client_functions.call_dmx_status(job_id)
-    assert result.status_code == 200
-    j = result.json()
-    assert 'status' in j
+    while status == 'init':
+        result = client_functions.call_dmx_status(job_id)
+        assert result.status_code == 200
+        j = result.json()
+        assert 'job_id' in j
+        assert 'status' in j    
+        status = j['status']
+
     assert j['status'] == 'completed'
-    assert 'job_id' in j
     dmx_job = j['job_id']
 
     # Initiate tree calculation
