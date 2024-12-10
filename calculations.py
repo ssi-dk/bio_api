@@ -137,9 +137,7 @@ class Calculation(metaclass=abc.ABCMeta):
     
     async def get_result(self):
         return await self.get_field('result')
-    
-    async def sleep_5():
-        sleep(5)
+
 
     async def store_result(self, result, status:str='completed'):
         """Update the MongoDB document that corresponds with the class instance with a result.
