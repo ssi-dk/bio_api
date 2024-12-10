@@ -73,7 +73,7 @@ def test_nearest_neighbors():
         assert 'status' in nn_get_resp
         status = nn_get_resp['status']
         sleep(1)
-    
+
     assert status == 'completed'
 
     response = client_functions.call_nn_result(job_id)

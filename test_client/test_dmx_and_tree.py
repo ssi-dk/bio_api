@@ -38,7 +38,7 @@ def test_dmx_and_tree_from_mongodb():
         assert result.status_code == 200
         j = result.json()
         assert 'job_id' in j
-        assert 'status' in j    
+        assert 'status' in j
         status = j['status']
         sleep(1)
 
@@ -60,7 +60,7 @@ def test_dmx_and_tree_from_mongodb():
         assert result.status_code == 200
         j = result.json()
         assert 'job_id' in j
-        assert 'status' in j    
+        assert 'status' in j
         status = j['status']
         sleep(1)
 
