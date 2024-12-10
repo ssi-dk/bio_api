@@ -1,6 +1,5 @@
 from os import getenv
 import pymongo
-from time import sleep
 
 import client_functions
 from profile2mongo import profile2mongo

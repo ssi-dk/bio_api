@@ -26,7 +26,9 @@ def test_dmx_and_tree_from_mongodb():
         mongo_ids=mongo_ids
     )
     assert result.status_code == 201
-    assert 'job_id' in result.json()
+    r = result.json()
+    assert 'job_id' in r
+    assert 'status' in r
     job_id = result.json()['job_id']
     sleep(1)
 
