@@ -45,7 +45,7 @@ def test_nearest_neighbors():
         filtering={},
         input_mongo_id=mongo_ids[0],
         profile_field_path='cgmlst.profile',
-        cutoff=1000,
+        cutoff=30,
         unknowns_are_diffs=True
     )
     assert response.status_code == 201
