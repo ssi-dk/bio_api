@@ -55,14 +55,23 @@ def test_nearest_neighbors():
     job_id = result.json()['job_id']
     status = result.json()['status']
 
-    # # Check status of nn calculation
-    # while status == 'init':
-    #     result = client_functions.call_nn_result(job_id)
-    #     assert result.status_code == 200
-    #     j = result.json()
-    #     assert 'job_id' in j
-    #     assert 'status' in j    
-    #     status = j['status']
-    #     sleep(1)
-
+    # sleep(5)
+    # result = client_functions.call_nn_result(job_id=job_id)
+    # assert result.status_code == 200
+    # j = result.json()
+    # assert 'status' in j
     # assert j['status'] == 'completed'
+    # assert 'result' in j
+    # assert type(j['result']) is list
+
+    # Check status of nn calculation
+    while status == 'init':
+        result = client_functions.call_nn_status(job_id)
+        assert result.status_code == 200
+        j = result.json()
+        assert 'job_id' in j
+        assert 'status' in j    
+        status = j['status']
+        sleep(1)
+
+    assert j['status'] == 'completed'
