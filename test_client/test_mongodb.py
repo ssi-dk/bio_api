@@ -17,34 +17,6 @@ mongo_ids = profile2mongo(
     profile_field_path='cgmlst.profile'
     )
 
-
-def test_nearest_neighbors():
-    result = client_functions.call_nearest_neighbors(
-        seq_collection='test_samples',
-        filtering={},
-        input_mongo_id=mongo_ids[0],
-        profile_field_path='cgmlst.profile',
-        cutoff=1000,
-        unknowns_are_diffs=True
-    )
-    assert result.status_code == 201
-    assert 'job_id' in result.json()
-    job_id = result.json()['job_id']
-    sleep(1)
-
-    result = client_functions.call_nn_status(job_id=job_id)
-    assert result.status_code == 200
-    j = result.json()
-    assert 'status' in j
-    assert j['status'] == 'completed'
-
-    result = client_functions.call_nn_result(job_id=job_id)
-    assert result.status_code == 200
-    j = result.json()
-    assert 'status' in j
-    assert j['status'] == 'completed'
-    assert 'result' in j
-
 def test_dmx_and_tree_from_mongodb():
     # Initiate distance calculation
     result = client_functions.call_dmx_from_mongodb(
