@@ -5,7 +5,6 @@ from json import dump, load
 import asyncio
 from io import StringIO
 import abc
-from time import sleep
 
 import pymongo
 from bson.objectid import ObjectId
@@ -151,9 +150,7 @@ class Calculation(metaclass=abc.ABCMeta):
         print(self._id)
         if FAKE_LONG_RUNNING_JOBS:
             print("FAKE LONG RUNNING JOB")
-            # sleep(5)  # Seems to make everything sleep, not just this method.
-            # TODO Why does this work? Try to use asyncio.sleep instead which is probably the right way to do it?
-            await sleep(5)
+            asyncio.sleep(5)
         update_result = mongo_api.db[self.collection].update_one(
             {'_id': self._id}, {'$set': {
                 'result': result,
