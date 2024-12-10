@@ -31,14 +31,6 @@ def test_nearest_neighbors():
     assert 'job_id' in result.json()
     job_id = result.json()['job_id']
 
-    # result = client_functions.call_nn_status(job_id=job_id)
-    # assert result.status_code == 200
-    # j = result.json()
-    # assert 'status' in j
-    # assert j['status'] == 'completed'
-    # assert 'result' in j
-    # assert type(j['result']) is list
-
     result = client_functions.call_nn_result(job_id=job_id)
     assert result.status_code == 200
     j = result.json()
