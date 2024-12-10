@@ -62,5 +62,3 @@ def test_dmx_and_tree_from_mongodb():
         status = j['status']
 
     assert j['status'] == 'completed'
-
-# db['test_samples'].drop()
