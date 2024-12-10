@@ -313,7 +313,7 @@ class NearestNeighbors(Calculation):
     
     def to_dict(self):
         content = super().to_dict()
-        if 'result' in content:
+        if 'result' in content and type(content['result']) is dict:
             # Add id, remove _id from result
             r: dict
             for r in content['result']:
