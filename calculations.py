@@ -150,7 +150,7 @@ class Calculation(metaclass=abc.ABCMeta):
         print(self._id)
         if FAKE_LONG_RUNNING_JOBS:
             print("FAKE LONG RUNNING JOB")
-            asyncio.sleep(5)
+            await asyncio.sleep(3)
         update_result = mongo_api.db[self.collection].update_one(
             {'_id': self._id}, {'$set': {
                 'result': result,

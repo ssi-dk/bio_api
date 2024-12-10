@@ -1,5 +1,6 @@
 from os import getenv
 import pymongo
+from time import sleep
 
 import client_functions
 from profile2mongo import profile2mongo
@@ -39,6 +40,7 @@ def test_dmx_and_tree_from_mongodb():
         assert 'job_id' in j
         assert 'status' in j    
         status = j['status']
+        sleep(1)
 
     assert j['status'] == 'completed'
     dmx_job = j['job_id']
@@ -60,5 +62,6 @@ def test_dmx_and_tree_from_mongodb():
         assert 'job_id' in j
         assert 'status' in j    
         status = j['status']
+        sleep(1)
 
     assert j['status'] == 'completed'
