@@ -40,7 +40,7 @@ def test_nearest_neighbors():
     # assert type(j['result']) is list
 
     # Initiate nn calculation
-    result = client_functions.call_nearest_neighbors(
+    response = client_functions.call_nearest_neighbors(
         seq_collection='test_samples',
         filtering={},
         input_mongo_id=mongo_ids[0],
@@ -48,12 +48,12 @@ def test_nearest_neighbors():
         cutoff=1000,
         unknowns_are_diffs=True
     )
-    assert result.status_code == 201
-    j = result.json()
+    assert response.status_code == 201
+    j = response.json()
     assert 'job_id' in j
     assert 'status' in j
-    job_id = result.json()['job_id']
-    status = result.json()['status']
+    job_id = response.json()['job_id']
+    status = response.json()['status']
 
     # sleep(5)
     # result = client_functions.call_nn_result(job_id=job_id)
@@ -66,9 +66,9 @@ def test_nearest_neighbors():
 
     # Check status of nn calculation
     while status == 'init':
-        result = client_functions.call_nn_status(job_id)
-        assert result.status_code == 200
-        j = result.json()
+        response = client_functions.call_nn_status(job_id)
+        assert response.status_code == 200
+        j = response.json()
         assert 'job_id' in j
         assert 'status' in j    
         status = j['status']
