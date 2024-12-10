@@ -76,6 +76,7 @@ def test_nearest_neighbors():
     
     assert status == 'completed'
 
-    # response = client_functions.call_nn_result(job_id)
-
-    # assert j['status'] == 'completed'
+    response = client_functions.call_nn_result(job_id)
+    assert response.status_code == 200
+    # nn_get_resp = response.json()
+    # assert 'result' in nn_get_resp
