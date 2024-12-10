@@ -19,27 +19,6 @@ mongo_ids = profile2mongo(
 
 
 def test_nearest_neighbors():
-    result = client_functions.call_nearest_neighbors(
-        seq_collection='test_samples',
-        filtering={},
-        input_mongo_id=mongo_ids[0],
-        profile_field_path='cgmlst.profile',
-        cutoff=1000,
-        unknowns_are_diffs=True
-    )
-    assert result.status_code == 201
-    assert 'job_id' in result.json()
-    job_id = result.json()['job_id']
-
-    result = client_functions.call_nn_result(job_id=job_id)
-    assert result.status_code == 200
-    j = result.json()
-    assert 'status' in j
-    assert j['status'] == 'completed'
-    assert 'result' in j
-    assert type(j['result']) is list
-
-    # Initiate nn calculation
     # result = client_functions.call_nearest_neighbors(
     #     seq_collection='test_samples',
     #     filtering={},
@@ -49,11 +28,32 @@ def test_nearest_neighbors():
     #     unknowns_are_diffs=True
     # )
     # assert result.status_code == 201
-    # j = result.json()
-    # assert 'job_id' in j
-    # assert 'status' in j
+    # assert 'job_id' in result.json()
     # job_id = result.json()['job_id']
-    # status = result.json()['status']
+
+    # result = client_functions.call_nn_result(job_id=job_id)
+    # assert result.status_code == 200
+    # j = result.json()
+    # assert 'status' in j
+    # assert j['status'] == 'completed'
+    # assert 'result' in j
+    # assert type(j['result']) is list
+
+    # Initiate nn calculation
+    result = client_functions.call_nearest_neighbors(
+        seq_collection='test_samples',
+        filtering={},
+        input_mongo_id=mongo_ids[0],
+        profile_field_path='cgmlst.profile',
+        cutoff=1000,
+        unknowns_are_diffs=True
+    )
+    assert result.status_code == 201
+    j = result.json()
+    assert 'job_id' in j
+    assert 'status' in j
+    job_id = result.json()['job_id']
+    status = result.json()['status']
 
     # # Check status of nn calculation
     # while status == 'init':
