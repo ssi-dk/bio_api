@@ -76,6 +76,7 @@ class Calculation(metaclass=abc.ABCMeta):
     finished_at: datetime.datetime | None
     status: str
     result: str | None = None
+    error_msg: str | None = None
 
     def __init__(
             self,
@@ -83,13 +84,15 @@ class Calculation(metaclass=abc.ABCMeta):
             created_at: datetime.datetime | None = None,
             finished_at: datetime.datetime | None = None,
             _id: ObjectId | None = None,
-            result = None
+            result = None,
+            error_msg: str | None = None
             ):
         self.status = status
         self.created_at = created_at if created_at else datetime.datetime.now(tz=datetime.timezone.utc)
         self.finished_at = finished_at
         self._id = _id
         self.result = result
+        self.error_msg = error_msg
     
     def to_dict(self):
         content = dict()
@@ -138,7 +141,7 @@ class Calculation(metaclass=abc.ABCMeta):
         return await self.get_field('result')
 
 
-    async def store_result(self, result, status:str='completed'):
+    async def store_result(self, result, status:str='completed', error_msg:str|None=None):
         """Update the MongoDB document that corresponds with the class instance with a result.
         Also insert a timestamp for when the calculation was completed and mark the calculation as completed.
         """
@@ -155,24 +158,8 @@ class Calculation(metaclass=abc.ABCMeta):
             {'_id': self._id}, {'$set': {
                 'result': result,
                 'finished_at': datetime.datetime.now(tz=datetime.timezone.utc),
-                'status': status
-                }
-            }
-        )
-        assert update_result.acknowledged == True
-
-    async def update(self):
-        """Update the MongoDB document that corresponds with the class instance.
-        """
-        print("Update.")
-        print(f"My collection: {self.collection}")
-        print("My _id:")
-        print(self._id)
-        print("__dict__:")
-        print(self.__dict__)
-        update_result = mongo_api.db[self.collection].update_one(
-            {'_id': self._id}, {'$set': {
-                    **vars(self)
+                'status': status,
+                'error_msg': error_msg
                 }
             }
         )
@@ -308,12 +295,20 @@ class NearestNeighbors(Calculation):
                 try:
                     diff_count = self.profile_diffs(hoist(other_sequence, self.profile_field_path))
                 except MissingDataException as e:
+                    print("ERROR when running nearest neighbors:")
                     error_msg = str(e) + f". Other sequence _id: {other_sequence['_id']}"
                     print(error_msg)
+                    print("You can also find the above message in the MongoDB document for the job.")
+                    self.error_msg = error_msg
+                    self.status = 'error'
+                    break
                 if diff_count <= self.cutoff:
                     nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
-        self.result = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
-        await self.store_result(self.result)
+        if self.status == 'error':
+            await self.store_result(self.result, status='error', error_msg=self.error_msg)
+        else:
+            self.result = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
+            await self.store_result(self.result)
     
     def to_dict(self):
         content = super().to_dict()
