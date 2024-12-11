@@ -308,8 +308,8 @@ class NearestNeighbors(Calculation):
                 try:
                     diff_count = self.profile_diffs(hoist(other_sequence, self.profile_field_path))
                 except MissingDataException as e:
-                    print(e)
-                    print(f"Other sequence _id: {other_sequence['_id']}")
+                    error_msg = str(e) + f". Other sequence _id: {other_sequence['_id']}"
+                    print(error_msg)
                 if diff_count <= self.cutoff:
                     nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
         self.result = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
