@@ -257,6 +257,8 @@ class NearestNeighbors(Calculation):
                 if ref_allele != other_allele:
                     # Both are intable but they are not equal - counting a difference.
                     diff_count += 1
+            except KeyError:
+                raise MissingDataException(f"Could not find locus {locus} in allele profile")
             except ValueError:
                 if self.unknowns_are_diffs:
                     # Other allele not intable - counting as difference.
@@ -266,8 +268,6 @@ class NearestNeighbors(Calculation):
     async def calculate(self):
         print(f"Sequence collection: {self.seq_collection}")
         print(f"Profile field path: {self.profile_field_path}")
-        comparable_sequences_count = mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})
-        print(f"Comparable sequences found: {str(comparable_sequences_count)}")
         
         pipeline = list()
 
@@ -305,7 +305,11 @@ class NearestNeighbors(Calculation):
         nearest_neighbors = list()
         for other_sequence in sequences_to_compare_with:
             if not other_sequence['_id'] == self.input_sequence['_id']:
-                diff_count = self.profile_diffs(hoist(other_sequence, self.profile_field_path))
+                try:
+                    diff_count = self.profile_diffs(hoist(other_sequence, self.profile_field_path))
+                except MissingDataException as e:
+                    print(e)
+                    print(f"Other sequence _id: {other_sequence['_id']}")
                 if diff_count <= self.cutoff:
                     nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
         self.result = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
