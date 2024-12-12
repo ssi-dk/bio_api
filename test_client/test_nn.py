@@ -52,6 +52,7 @@ def test_nearest_neighbors():
     nn_post_resp = response.json()
     assert 'job_id' in nn_post_resp
     assert 'status' in nn_post_resp
+    assert nn_post_resp['status'] == 'init'
     job_id = nn_post_resp['job_id']
     status = nn_post_resp['status']
 
