@@ -22,6 +22,7 @@ additional_responses = {
     404: {"model": pc.Message}
     }
 
+#SOFI code working as a browser (client) calls the URL within app.post to start a NN job
 @app.post("/v1/nearest_neighbors",
     tags=["Nearest Neighbors"],
     status_code=201,
@@ -29,6 +30,10 @@ additional_responses = {
     responses=additional_responses
     )
 async def nearest_neighbors(rq: pc.NearestNeighborsRequest, background_tasks: BackgroundTasks):
+    # rq is the parameters SOFI sends with the call
+    # background_tasks - SOFI can send the HTTP responds and then do calculatiosn as a background as opposed to task and then responds
+    #  SOFI can make several calculations without waiting for the others
+    # instanciate the calculate classe
     calc = calculations.NearestNeighbors(
         seq_collection=rq.seq_collection,
         filtering = rq.filtering,
@@ -62,15 +67,19 @@ async def nearest_neighbors(rq: pc.NearestNeighborsRequest, background_tasks: Ba
             status_code=404,
             detail=f"Input sequence {calc.input_sequence['_id']} does not have a field named '{calc.profile_field_path}'."
             )
-    calc._id = await calc.insert_document()
-    background_tasks.add_task(calc.calculate)
+    
+    calc._id = await calc.insert_document() # we cannot add this to background, as we need ID before sending a responds
+    
+    background_tasks.add_task(calc.calculate) #FASTAPI add task (calculation) to background - e.g. calc.calculate 
 
     return pc.CommonPOSTResponse(
-        job_id=str(calc._id),
+        job_id=str(calc._id), #we need a job ID when we send a responds for the client
         created_at=calc.created_at.isoformat(),
         status=calc.status
     )
 
+#once a caluclation has inititated - SOFI needs to extract the calculation with nn_id which is know once the request has been made
+# SOFI uses a loop and every 2nd second "ask what is the status with job nn_id" 
 @app.get("/v1/nearest_neighbors/{nn_id}",
     tags=["Nearest Neighbors"],
     response_model=pc.NearestNeighborsGETResponse,
@@ -95,11 +104,15 @@ async def nn_result(nn_id: str, level:str='full'):
 
     content:dict = calc.to_dict()
     
+    # level : 'full' responds gives both status and results (e.g distance matrix)
+    # level : 'basic' bioAPI will only return status and not result
+    # level is specified by client depending on the amount of information they need
     if level != 'full' and content['status'] == 'completed':
         content['result'] = None
 
     return pc.NearestNeighborsGETResponse(**content)
 
+#use post to 'order' calculation and get 'to extract' calculation result
 @app.post("/v1/distance_calculations",
     response_model=pc.CommonPOSTResponse,
     tags=["Distances"],

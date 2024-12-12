@@ -1,9 +1,9 @@
 import typing
 from enum import Enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel #creates instances of classes ensuring the correct parameters and type
 
-
+# the parameters SOFI specifies when it creates the call (client)
 
 # Request classes
 
