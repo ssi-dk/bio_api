@@ -12,7 +12,7 @@ from pandas import DataFrame, read_table
 from tree_maker import make_tree
 
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
-
+FAKE_LONG_RUNNING_JOBS = int(getenv('FAKE_LONG_RUNNING_JOBS', 0))
 
 class MissingDataException(Exception):
     pass
@@ -76,6 +76,7 @@ class Calculation(metaclass=abc.ABCMeta):
     finished_at: datetime.datetime | None
     status: str
     result: str | None = None
+    error_msg: str | None = None
 
     def __init__(
             self,
@@ -83,13 +84,15 @@ class Calculation(metaclass=abc.ABCMeta):
             created_at: datetime.datetime | None = None,
             finished_at: datetime.datetime | None = None,
             _id: ObjectId | None = None,
-            result = None
+            result = None,
+            error_msg: str | None = None
             ):
         self.status = status
         self.created_at = created_at if created_at else datetime.datetime.now(tz=datetime.timezone.utc)
         self.finished_at = finished_at
         self._id = _id
         self.result = result
+        self.error_msg = error_msg
     
     def to_dict(self):
         content = dict()
@@ -137,37 +140,26 @@ class Calculation(metaclass=abc.ABCMeta):
     async def get_result(self):
         return await self.get_field('result')
 
-    async def store_result(self, result, status:str='completed'):
+
+    async def store_result(self, result, status:str='completed', error_msg:str|None=None):
         """Update the MongoDB document that corresponds with the class instance with a result.
         Also insert a timestamp for when the calculation was completed and mark the calculation as completed.
         """
         # TODO maybe merge with update?
         print("Store result.")
+        print(f"Result type: {type(result)}")
         print(f"My collection: {self.collection}")
         print("My _id:")
         print(self._id)
+        if FAKE_LONG_RUNNING_JOBS:
+            print("FAKE LONG RUNNING JOB")
+            await asyncio.sleep(3)
         update_result = mongo_api.db[self.collection].update_one(
             {'_id': self._id}, {'$set': {
                 'result': result,
                 'finished_at': datetime.datetime.now(tz=datetime.timezone.utc),
-                'status': status
-                }
-            }
-        )
-        assert update_result.acknowledged == True
-
-    async def update(self):
-        """Update the MongoDB document that corresponds with the class instance.
-        """
-        print("Update.")
-        print(f"My collection: {self.collection}")
-        print("My _id:")
-        print(self._id)
-        print("__dict__:")
-        print(self.__dict__)
-        update_result = mongo_api.db[self.collection].update_one(
-            {'_id': self._id}, {'$set': {
-                    **vars(self)
+                'status': status,
+                'error_msg': error_msg
                 }
             }
         )
@@ -252,6 +244,8 @@ class NearestNeighbors(Calculation):
                 if ref_allele != other_allele:
                     # Both are intable but they are not equal - counting a difference.
                     diff_count += 1
+            except KeyError:
+                raise MissingDataException(f"Could not find locus {locus} in allele profile")
             except ValueError:
                 if self.unknowns_are_diffs:
                     # Other allele not intable - counting as difference.
@@ -261,8 +255,6 @@ class NearestNeighbors(Calculation):
     async def calculate(self):
         print(f"Sequence collection: {self.seq_collection}")
         print(f"Profile field path: {self.profile_field_path}")
-        comparable_sequences_count = mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})
-        print(f"Comparable sequences found: {str(comparable_sequences_count)}")
         
         pipeline = list()
 
@@ -300,11 +292,23 @@ class NearestNeighbors(Calculation):
         nearest_neighbors = list()
         for other_sequence in sequences_to_compare_with:
             if not other_sequence['_id'] == self.input_sequence['_id']:
-                diff_count = self.profile_diffs(hoist(other_sequence, self.profile_field_path))
+                try:
+                    diff_count = self.profile_diffs(hoist(other_sequence, self.profile_field_path))
+                except MissingDataException as e:
+                    print("ERROR when running nearest neighbors:")
+                    error_msg = str(e) + f". Other sequence _id: {other_sequence['_id']}"
+                    print(error_msg)
+                    print("You can also find the above message in the MongoDB document for the job.")
+                    self.error_msg = error_msg
+                    self.status = 'error'
+                    break
                 if diff_count <= self.cutoff:
                     nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
-        self.result = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
-        await self.store_result(self.result)
+        if self.status == 'error':
+            await self.store_result(self.result, status='error', error_msg=self.error_msg)
+        else:
+            self.result = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
+            await self.store_result(self.result)
     
     def to_dict(self):
         content = super().to_dict()
