@@ -25,7 +25,10 @@ RUN git clone https://github.com/tseemann/cgmlst-dists.git
 
 # Navigate into the cloned repository and build using make
 WORKDIR /app/cgmlst-dists
-RUN make
+RUN make    
+
+# Go back to the main application directory
+WORKDIR /app
 
 # Install Python dependencies via mamba or conda
 # Install general Python dependencies first

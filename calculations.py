@@ -623,7 +623,8 @@ class DistanceCalculation(Calculation):
                 try:
                     allele_profile = hoist(mongo_item, self.profile_field_path)
                     full_dict[sequence_id] = allele_profile
-                    mongo_ids[sequence_id] = mongo_item['_id']
+                    mongo_ids[sequence_id] = mongo_item['_id'] 
+                    #mongo_ids[sequence_id] = str(mongo_item['_id']) # Use str because older MongoDB versions cannot store ObjectId's? - might solve issues with older mongoDB versions
                 except KeyError:
                     raise MissingDataException(f"Sequence document with id {str(mongo_item['_id'])} does not contain profile field path '{self.profile_field_path}'.")
         except StopIteration:
