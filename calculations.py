@@ -8,7 +8,7 @@ import abc
 
 import pymongo
 from bson.objectid import ObjectId
-from pandas import DataFrame, read_table, read_csv
+from pandas import DataFrame, read_table
 from tree_maker import make_tree
 
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
@@ -358,14 +358,10 @@ class DistanceCalculation(Calculation):
         "Return the filepath for the allele matrix file corresponding with the class instance"
         return str(Path(self.folder, 'allele_matrix.tsv'))
     
-    @classmethod
-    def get_dist_mx_filename(cls):
-        return 'distance_matrix.csv'
-
     @property
     def dist_mx_filepath(self):
         "Return the filepath for the distance matrix file corresponding with the class instance"
-        return str(Path(self.folder, self.get_dist_mx_filename()))
+        return str(Path(self.folder, 'distance_matrix.json'))
 
     async def query_mongodb_for_allele_profiles(self):
         "Get a MongoDB cursor that represents the allele profiles for the calculation"
@@ -429,13 +425,18 @@ class DistanceCalculation(Calculation):
         df = df.set_index('ids')
         return df
 
+    async def _save_dmx_as_json(self, dist_mx_dict):
+        "Save distance matrix dataframe as JSON file"
+        with open(self.dist_mx_filepath, 'w') as dist_mx_file_obj:
+            dump(dist_mx_dict, dist_mx_file_obj)
+
     async def calculate(self, cursor):
         try:
             allele_mx_df, mongo_ids_dict = await self._amx_df_from_mongodb_cursor(cursor)
-            await self._save_amx_df_as_tsv(allele_mx_df)  # The allele mx is only saved as documentation
+            await self._save_amx_df_as_tsv(allele_mx_df)
             dist_mx_df: DataFrame = await self._dmx_df_from_amx_tsv()
-            dist_mx_df.to_csv(path_or_buf=self.dist_mx_filepath)
-
+            dist_mx_dict = dist_mx_df.to_dict(orient='index')
+            await self._save_dmx_as_json(dist_mx_dict)
             # We do not store the distance matrix in MongoDB because it might grow to more than 16 MB.
             # Instead we just store a dictionary of sequence IDs and their related mongo IDs.
             await self.store_result({'seq_to_mongo': mongo_ids_dict})
@@ -463,11 +464,11 @@ class TreeCalculation(Calculation):
 
     async def calculate(self):
         dc = DistanceCalculation.find(self.dmx_job)
+        with open(Path(dc.folder, 'distance_matrix.json')) as f:
+            distances = load(f)
         try:
-            dist_df: DataFrame = read_csv(Path(dc.folder, DistanceCalculation.get_dist_mx_filename()), index_col=0)
+            dist_df: DataFrame = DataFrame.from_dict(distances, orient='index')
             tree = make_tree(dist_df, self.method)
-            print("Newick:")
-            print(tree)
             await self.store_result(tree)
         except ValueError as e:
             await self.store_result(str(e), 'error')

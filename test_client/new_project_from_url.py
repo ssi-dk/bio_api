@@ -11,7 +11,6 @@ parser.add_argument("metadata_url", help="URL with metadata")
 parser.add_argument("metadata_columns", help="Comma-separated list with column names to import")
 parser.add_argument("--hidden", help="Comma-separated list of columns to be hidden")
 parser.add_argument("--tree", help="Path to a Newick file containing the initial tree")
-parser.add_argument("--distances", help="Path to a CSV file with a distance matrix")
 parser.add_argument(
     "--project_name",
     help="Project name (can be changed later in web interface)",
@@ -31,11 +30,6 @@ if args.tree:
 else:
         tree_calcs = list()
 
-raw_matrices = list()
-if args.distances:
-    with open(Path(args.distances), 'r') as dist_file:
-        raw_matrices.append(dist_file.read())
-
 print(f"Name of created project will be {args.project_name}")
 columns = args.metadata_columns.split(',')
 
@@ -45,7 +39,6 @@ rest_response = new_project_2(
     columns=columns,
     tree_calcs=tree_calcs,
     hidden=args.hidden,
-    raw_matrices=raw_matrices,
     mr_access_token=common.MICROREACT_ACCESS_TOKEN,
     mr_base_url=common.MICROREACT_BASE_URL,
     verify = not args.noverify
