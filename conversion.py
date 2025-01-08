@@ -1,3 +1,0 @@
-colname2path = dict{
-    
-}

@@ -17,23 +17,33 @@ app = FastAPI(title="Bio API", description="REST API for controlling bioinformat
 MANUAL_MX_DIR = getenv('BIO_API_TEST_INPUT_DIR', '/test_input')
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 
+# standardize the error responses
 additional_responses = {
-    400: {"model": pc.Message},
-    404: {"model": pc.Message}
+    400: {"model": pc.Message}, #Bad Request (invalid input).
+    404: {"model": pc.Message} #Not Found (missing resource).
     }
 
 #SOFI code working as a browser (client) calls the URL within app.post to start a NN job
-@app.post("/v1/nearest_neighbors",
-    tags=["Nearest Neighbors"],
-    status_code=201,
-    response_model=pc.CommonPOSTResponse,
-    responses=additional_responses
+
+@app.post("/v1/nearest_neighbors", #registers when client sends a data or request its handled by nearest_neighbors function
+    tags=["Nearest Neighbors"], 
+    status_code=201, # succesfull creating the nearest_neighbors job
+    response_model=pc.CommonPOSTResponse, #response of the pydantic class (pc) -> see further down, like job_id, created_at, status
+    responses=additional_responses # errors 400,404 or additional definitions
     )
+
+
+
 async def nearest_neighbors(rq: pc.NearestNeighborsRequest, background_tasks: BackgroundTasks):
     # rq is the parameters SOFI sends with the call
     # background_tasks - SOFI can send the HTTP responds and then do calculatiosn as a background as opposed to task and then responds
     #  SOFI can make several calculations without waiting for the others
-    # instanciate the calculate classe
+    # instanciate the calculate class
+
+    """
+    rq: pc.NearestNeighborsReques -> the structure of the request (in a json format??) should fit with that of 
+        NearestNeighborsRequest defined in the pydantic_classes.py -> request passes validation, FastAPI calls the nearest_neighbors function
+    """
     calc = calculations.NearestNeighbors(
         seq_collection=rq.seq_collection,
         filtering = rq.filtering,
