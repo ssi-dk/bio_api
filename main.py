@@ -181,7 +181,8 @@ async def dmx_result(dc_id: str, level:str='full'):
         if level == 'full':
             # Add result from file
             with open(Path(calc.folder, 'distance_matrix.json')) as f:
-                content['result']['distances'] = load(f)
+                json = load(f)
+                content['result']['distances'] = calc.dmx_tsv_from_dict(json)
 
     return pc.DistanceMatrixGETResponse(**content)
 

@@ -448,6 +448,16 @@ class DistanceCalculation(Calculation):
         except MissingDataException as e:
             await self.store_result(str(e), 'error')
 
+    def dmx_tsv_from_dict(self, dist_mx_df, sep='\t'):
+        "Convert distance matrix dataframe to tsv"
+        df = DataFrame.from_dict(dist_mx_df, orient='index').fillna("")
+        tsv = StringIO()
+        tsv.write("ID")
+        df.to_csv(tsv, sep=sep, index=True, index_label="")
+        return tsv.getvalue()
+
+        
+
 
 class TreeCalculation(Calculation):
     dmx_job: str
