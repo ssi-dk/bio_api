@@ -79,7 +79,7 @@ Nearest Neighbors will output its result as a list of {"id": "string", "diff_cou
 
 ### Distance matrices
 
-The main input for generating a distance matrix is a list of mongo ids for the sequences which must be compared. The output is in essence a classic distance matrix with the same ID's on both axis; however, the format is adapted to fit within the JSON standard.
+The main input for generating a distance matrix is a list of mongo ids for the sequences which must be compared. The output is in essence a classic distance matrix with the same ID's on both axis.
 
 #### Distance matrix POST request input fields
 
@@ -90,7 +90,8 @@ The main input for generating a distance matrix is a list of mongo ids for the s
 
 #### Distance matrix GET request output structure
 
-The "result" field contains a dictionary of dictionaries containing the 'sequence IDs' as keys in both the inner and outer dictionaries, and the distance between each individual sequence pair as value.
+The "result" field contains a string with the distance matrix in tsv format.
+/*The "result" field contains a dictionary of dictionaries containing the 'sequence IDs' as keys in both the inner and outer dictionaries, and the distance between each individual sequence pair as value.*/
 
 ### Trees
 
