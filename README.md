@@ -91,7 +91,6 @@ The main input for generating a distance matrix is a list of mongo ids for the s
 #### Distance matrix GET request output structure
 
 The "result" field contains a string with the distance matrix in tsv format.
-/*The "result" field contains a dictionary of dictionaries containing the 'sequence IDs' as keys in both the inner and outer dictionaries, and the distance between each individual sequence pair as value.*/
 
 ### Trees
 
