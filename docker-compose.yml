@@ -6,23 +6,37 @@ services:
       - ./dumps/mongodb:/dumps
     ports:
       - "27017:27017"
-#    rabbitmq:
-#      image: rabbitmq
-#      healthcheck:
-#        test: [ "CMD", "rabbitmqctl", "status"]
-#        interval: 5s
-#        timeout: 20s
-#        retries: 5
-  
-#    hpc_dispatcher:
-#      volumes:
-#        - ./hpc_dispatcher:/app
-#      build: hpc_dispatcher
-#      stdin_open: true
-#      tty: true
-#      depends_on:
-#        rabbitmq:
-#          condition: service_healthy
+    
+  # https://stackoverflow.com/questions/63116838/rabbitmq-doesnt-start-with-docker-compose
+  # https://x-team.com/magazine/set-up-rabbitmq-with-docker-compose
+  # https://gist.github.com/sayganov/470c5029f51a5278a9b335f0c087989c
+  # https://stackoverflow.com/questions/53031439/connecting-to-rabbitmq-container-with-docker-compose
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    hostname: rabbitmq
+    ports:
+      - 5672:5672 # AMQP Port for messaging
+      - 15672:15672 # Management UI (can access at http://localhost:15672)
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ] # https://stackoverflow.com/questions/5250664/whats-the-best-way-to-monitor-rabbitmq-to-make-sure-everything-is-running-smoot # [ "CMD", "nc", "-z", "localhost", "5672" ] other suggestions 
+      interval: 5s
+      timeout: 20s
+      retries: 5
+    environment: #explicetly set our guest (which should be default) - to accomodate the connection we're making in the rabbitmq_runner_dockertest "amqp://guest:guest@rabbitmq/"
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+#  hpc_dispatcher:
+#    build: ./hpc_dispatcher
+#    container_name: hpc_dispatcher
+#    volumes:
+#      - ./hpc_dispatcher:/app
+#    stdin_open: true
+#    tty: true
+#    depends_on:
+#      rabbitmq:
+#        condition: service_healthy
 
   bio_api:
     build: .
@@ -33,15 +47,19 @@ services:
     ports:
       - "8000:8000"
     tty: true
-    entrypoint: ["uvicorn"]
-    command: ["main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    environment:
+      AMQP_HOST: "amqp://guest:guest@rabbitmq/"
+      MONGO_CONNECTION: "mongodb://mongo:27017/bifrost_test"
     depends_on:
-        mongodb:
-          condition: service_started
-    #   rabbitmq:
-    #     condition: service_healthy
-    #   hpc_dispatcher:
-    #     condition: service_started
+      mongodb:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+#      hpc_dispatcher:
+#         condition: service_started
+    command: ["python", "rabbitmq_runner_dockertest.py"] #ill try with the python script i have made
+    #entrypoint: ["uvicorn"]
+    #command: ["main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
   test_client:
     build: ./test_client
@@ -51,8 +69,8 @@ services:
     depends_on:
       bio_api:
         condition: service_started
-      # mongodb:
-      #   condition: service_started
-      # rabbitmq:
-      #   condition: service_healthy
+      mongodb:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
 

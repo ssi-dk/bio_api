@@ -115,7 +115,7 @@ class Calculation(metaclass=abc.ABCMeta):
     Abstract base class for defining calculations.
     
     This class provides a structure for performing computations and persisting their state in MongoDB.
-    """
+    """       
     created_at: datetime.datetime | None # Timestamp for when the calculation was created
     finished_at: datetime.datetime | None
     status: str
