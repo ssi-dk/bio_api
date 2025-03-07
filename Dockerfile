@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y \
 # install the sofi_messenger submodule
 
 RUN git submodule update --init --recursive
-RUN ls -la sofi_messenger/
+
 RUN pip install -e /app/sofi_messenger
 
 # Clone cgmlst-dists repository from GitHub
