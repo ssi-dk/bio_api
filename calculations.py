@@ -14,7 +14,7 @@ from pandas import DataFrame, read_table, read_csv
 from mongo import MongoAPI
 from tree_maker import make_tree
 
-from sofi_messenger.src import sofi_messenger
+import sofi_messenger
 
 MONGO_CONNECTION_STRING = getenv('BIO_API_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
 
