@@ -8,11 +8,17 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import HTTPException
 from bson.errors import InvalidId
 
+from mongo import MongoAPI
 import calculations
 
 import pydantic_classes as pc
 
 app = FastAPI(title="Bio API", description="REST API for controlling bioinformatic calculations", version="0.2.0")
+
+MONGO_CONNECTION_STRING = getenv('BIFROST_DB_KEY', 'mongodb://mongodb:27017/bio_api_test')
+
+mongo_api = MongoAPI(MONGO_CONNECTION_STRING)
+calculations.Calculation.set_mongo_api(mongo_api)
 
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 
@@ -247,12 +253,12 @@ async def snp(rq: pc.SNPRequest):
 
     # Initialize SNPCalculation object
     calc = calculations.SNPCalculation(
-            rq.seq_collection,
-            rq.seqid_field_path,
-            rq.seq_mongo_ids,
-            rq.reference_mongo_id,
-            rq.depth,
-            rq.ignore_hz
+            seq_collection=rq.seq_collection,
+            seqid_field_path=rq.seqid_field_path,
+            seq_mongo_ids=rq.seq_mongo_ids,
+            reference_mongo_id=rq.reference_mongo_id,
+            depth=rq.depth,
+            ignore_hz=rq.ignore_hz
     )
 
     # Save object in MongoDB, so at least we have something even if filename lookup fails
