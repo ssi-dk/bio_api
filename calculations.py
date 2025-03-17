@@ -7,7 +7,6 @@ import abc
 from dataclasses import dataclass, field, asdict
 from abc import abstractmethod
 
-import pymongo
 from bson.objectid import ObjectId
 from pandas import DataFrame, read_table, read_csv
 
