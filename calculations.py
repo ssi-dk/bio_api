@@ -197,15 +197,20 @@ class NearestNeighbors(Calculation):
     def __init__(
             self,
             input_mongo_id: str | None = None,
+            cutoff: int | None = None,
+            unknowns_are_diffs: bool | None = None,
             **kwargs):
         super().__init__(**kwargs)
 
         #NN_config = self.config.get_section(self.collection)  
         self.seq_collection = self.get_config_value("seq_collection")
+        
+        ## Should be set based on input document
         self.filtering = self.get_config_value("filtering", {})  # Default to empty dict
+
         self.profile_field_path = self.get_config_value("profile_field_path")
-        self.cutoff = self.get_config_value("cutoff")  
-        self.unknowns_are_diffs = self.get_config_value("unknowns_are_diffs")  
+        self.cutoff = cutoff if cutoff is not None else self.get_config_value("cutoff") 
+        self.unknowns_are_diffs = unknowns_are_diffs if unknowns_are_diffs is not None else self.get_config_value("unknowns_are_diffs")
         self.input_mongo_id = input_mongo_id
 
     async def insert_document(self):
@@ -495,8 +500,7 @@ class HPCCalculation(Calculation):
         print(f"job_type: {self.job_type}")
         print("args:")
         print(args)
-        hpc_resources = asdict(self.hpc_resources) #but if we define it in the yaml it alerady is a dict...
-        #hpc_resources = asdict(self.hpc_resources) if isinstance(self.hpc_resources, HPCResources) else self.hpc_resources
+        hpc_resources = asdict(self.hpc_resources) if len(asdict(self.hpc_resources)) != 0 else self.get_config_value("hpc_resources")
         
         print("hpc_resources:")
         print(hpc_resources)
@@ -533,26 +537,25 @@ class SNPCalculation(HPCCalculation):
             self,
             seq_mongo_ids: list,
             reference_mongo_id: str,
+            depth: int | None = None,
+            ignore_hz: bool | None = None,
             **kwargs
             ):
         super().__init__(**kwargs)
 
 
-        #SNP_config = self.config.get_section(self.collection)     
-        #self.seq_collection = SNP_config.get("seq_collection")
         self.seq_collection = self.get_config_value("seq_collection")
         self.seqid_field_path = self.get_config_value("seqid_field_path")
         self.fastq_field_path = self.get_config_value("fastq_field_path")
         self.contigs_field_path = self.get_config_value("contigs_field_path")
 
         self.hpc_resources = self.get_config_value("hpc_resources", {})
-        self.depth = self.get_config_value("depth")
-        self.ignore_hz = self.get_config_value("ignore_hz")
+        self.depth = depth if depth is not None else self.get_config_value("depth") 
+        self.ignore_hz = ignore_hz if ignore_hz is not None else self.get_config_value("ignore_hz")
 
         self.seq_mongo_ids = seq_mongo_ids
         self.reference_mongo_id = reference_mongo_id
-        self.hpc_resources = hpc_resources #its not defined
- 
+
     @property
     def job_type(self):
         return 'snp'

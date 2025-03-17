@@ -11,10 +11,8 @@ class NearestNeighborsRequest(BaseModel):
     """
     Parameters for a REST request for a nearest neighbors calculation.
     """
-    seq_collection: str
     # The filtering dict must exist, at there must at least be a filter on species
     filtering: dict
-    profile_field_path: str
     input_mongo_id: str
     cutoff: int
     unknowns_are_diffs: bool

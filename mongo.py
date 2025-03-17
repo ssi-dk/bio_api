@@ -43,7 +43,7 @@ class Config:
         return self.mongoapi.db[self.collection_name].replace_one(
             {'section': section},
             config,
-            'upsert': True) 
+            upsert = True) 
     def load(self, config: dict):
         self.mongoapi.db[self.collection_name].insert_many(config)
     

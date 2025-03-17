@@ -35,9 +35,6 @@ additional_responses = {
     )
 async def nearest_neighbors(rq: pc.NearestNeighborsRequest, background_tasks: BackgroundTasks):
     calc = calculations.NearestNeighbors(
-        seq_collection=rq.seq_collection,
-        filtering = rq.filtering,
-        profile_field_path=rq.profile_field_path,
         input_mongo_id=rq.input_mongo_id,
         cutoff=rq.cutoff,
         unknowns_are_diffs=rq.unknowns_are_diffs
@@ -253,8 +250,6 @@ async def snp(rq: pc.SNPRequest):
 
     # Initialize SNPCalculation object
     calc = calculations.SNPCalculation(
-            seq_collection=rq.seq_collection,
-            seqid_field_path=rq.seqid_field_path,
             seq_mongo_ids=rq.seq_mongo_ids,
             reference_mongo_id=rq.reference_mongo_id,
             depth=rq.depth,
