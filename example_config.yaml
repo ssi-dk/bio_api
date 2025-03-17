@@ -1,0 +1,22 @@
+[
+    {
+        "section":"nearest_neighbors",
+        "seq_collection": "samples",
+        "filtering":{"categories.cgmlst.report.schema.digest":1},
+        "profile_field_path":"categories.cgmlst.report.alleles"
+    },
+    {
+        "section":"dist_calculations",
+        "seq_collection": "samples",
+        "seqid_field_path":"categories.sample_info.summary.sofi_sequence_id",
+        "profile_field_path":"categories.cgmlst.report.alleles",
+    },
+    {
+        "section":"snp",
+        "seq_collection": "samples",
+        "seqid_field_path":"categories.sample_info.summary.sofi_sequence_id",
+        "fastq_field_path":"categories.paired_reads.summary.data",
+        "contigs_field_path":"categories.contigs.summary.data",
+        "hpc_ressources":{},
+    }
+]
