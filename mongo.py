@@ -37,13 +37,13 @@ class Config:
     def __init__(self, mongoapi: MongoAPI):
         self.mongoapi = mongoapi
         self.collection_name = "BioAPI_config"
-    def get(self, section):
+    def get_section(self, section):
         return self.mongoapi.db[self.collection_name].find_one({'section':section})
-    def set(self, section: str, config: dict):
+    def set_section(self, section: str, config: dict):
         return self.mongoapi.db[self.collection_name].replace_one(
             {'section': section},
             config,
-            {'upsert': True})
+            'upsert': True) 
     def load(self, config: dict):
         self.mongoapi.db[self.collection_name].insert_many(config)
     

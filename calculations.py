@@ -14,6 +14,7 @@ from mongo import MongoAPI
 from tree_maker import make_tree
 
 import sofi_messenger
+from mongo import Config
 
 MONGO_CONNECTION_STRING = getenv('BIO_API_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
 
@@ -22,10 +23,8 @@ AMQP_HOST = getenv('AMQP_HOST', "amqp://guest:guest@rabbitmq/")
 
 messenger = sofi_messenger.SOFIMessenger(AMQP_HOST)
 
-
 class MissingDataException(Exception):
     pass
-
 
 def hoist(var, dotted_field_path:str):
     """
@@ -73,6 +72,7 @@ class Calculation(metaclass=abc.ABCMeta):
         self.finished_at = finished_at
         self._id = _id
         self.result = result
+        self.config = Config(Calculation.mongo_api)
 
     @classmethod
     def set_mongo_api(cls,mongo_api):
@@ -92,11 +92,12 @@ class Calculation(metaclass=abc.ABCMeta):
         return content
     
     # https://stackoverflow.com/questions/2736255/abstract-attributes-in-python
+    
     @property
     @abc.abstractmethod
-    def collection(self):
-        return 'my_collection'
-    
+    def collection(self) -> str:
+        ...
+
     async def insert_document(self, **attrs):
         global_attrs = {
             'status': self.status,
@@ -188,21 +189,19 @@ class NearestNeighbors(Calculation):
 
     def __init__(
             self,
-            seq_collection: str | None = None,
-            filtering: dict | None = None,
-            profile_field_path: str | None = None,
             input_mongo_id: str | None = None,
             cutoff: int | None=None,
             unknowns_are_diffs: bool = True,
             **kwargs):
         super().__init__(**kwargs)
-        self.seq_collection = seq_collection
-        self.filtering = filtering
-        self.profile_field_path = profile_field_path
+        NN_config = self.config.get_section(self.collection)     
+        self.seq_collection = NN_config.get("seq_collection")
+        self.filtering = NN_config.get("filtering")
+        self.profile_field_path = NN_config.get("profile_field_path")
         self.input_mongo_id = input_mongo_id
         self.unknowns_are_diffs = unknowns_are_diffs
-        self.cutoff = cutoff
-    
+        self.cutoff = cutoff #NN_config.get("cutoff",cutoff)
+
     async def insert_document(self):
         await super().insert_document(
             seq_collection=self.seq_collection,
@@ -320,15 +319,14 @@ class DistanceCalculation(Calculation):
 
     def __init__(
             self,
-            seq_collection: str | None=None,
-            seqid_field_path: str | None = None,
-            profile_field_path: str | None = None,
             seq_mongo_ids: list | None = None,
             **kwargs):
         super().__init__(**kwargs)
-        self.seq_collection = seq_collection
-        self.seqid_field_path = seqid_field_path
-        self.profile_field_path = profile_field_path
+
+        Dist_config = self.config.get_section(self.collection)     
+        self.seq_collection = Dist_config.get("seq_collection")
+        self.seqid_field_path = Dist_config.get("seqid_field_path")
+        self.profile_field_path = Dist_config.get("profile_field_path")
         self.seq_mongo_ids = seq_mongo_ids
     
     async def insert_document(self):
@@ -522,9 +520,6 @@ class SNPCalculation(HPCCalculation):
 
     def __init__(
             self,
-            seq_collection: str,
-            seqid_field_path: str,
-            filename_field_path: str,
             seq_mongo_ids: list,
             reference_mongo_id: str,
             depth: int = 15,
@@ -532,9 +527,14 @@ class SNPCalculation(HPCCalculation):
             **kwargs
             ):
         super().__init__(**kwargs)
-        self.seq_collection = seq_collection
-        self.seqid_field_path = seqid_field_path
-        self.filename_field_path = filename_field_path
+
+        SNP_config = self.config.get_section(self.collection)     
+        self.seq_collection = SNP_config.get("seq_collection")
+        self.seqid_field_path = SNP_config.get("seqid_field_path")
+        self.fastq_field_path = SNP_config.get("fastq_field_path")
+        self.contigs_field_path = SNP_config.get("contigs_field_path")
+        self.hpc_resources = SNP_config.get("hpc_resources",{})
+        
         self.seq_mongo_ids = seq_mongo_ids
         self.reference_mongo_id = reference_mongo_id
         self.depth = depth
@@ -565,7 +565,7 @@ class SNPCalculation(HPCCalculation):
         sequence_count, cursor = await Calculation.mongo_api.get_field_data(
             collection=self.seq_collection,
             mongo_ids=self.seq_mongo_ids,
-            field_paths=[ self.filename_field_path ],
+            field_paths=[ self.fastq_field_path ],
             )
 
         # Check that we found the correct number of sample documents
@@ -577,7 +577,7 @@ class SNPCalculation(HPCCalculation):
         # Add filenames to object
         try:
             while True:
-                self.input_filenames.append(hoist(next(cursor), self.filename_field_path))
+                self.input_filenames.append(hoist(next(cursor), self.fastq_field_path))
         except StopIteration:
             pass
     
@@ -585,10 +585,10 @@ class SNPCalculation(HPCCalculation):
         sequence_count, cursor = await self.mongo_api.get_field_data(
             collection=self.seq_collection,
             mongo_ids=[ self.reference_mongo_id ],
-            field_paths=[ self.filename_field_path ],
+            field_paths=[ self.contigs_field_path ],
             )
         assert sequence_count == 1
-        self.reference_filename = hoist(next(cursor), self.filename_field_path)
+        self.reference_filename = hoist(next(cursor), self.contigs_field_path)
 
         return self.input_filenames, self.reference_filename
     

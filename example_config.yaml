@@ -17,6 +17,6 @@
         "seqid_field_path":"categories.sample_info.summary.sofi_sequence_id",
         "fastq_field_path":"categories.paired_reads.summary.data",
         "contigs_field_path":"categories.contigs.summary.data",
-        "hpc_ressources":{},
+        "hpc_resources":{},
     }
 ]
