@@ -78,6 +78,13 @@ class Calculation(metaclass=abc.ABCMeta):
     def set_mongo_api(cls,mongo_api):
         cls.mongo_api = mongo_api
 
+    def get_config_value(self, key, default=None):
+        """
+        extract config values for collection defined in subclasses
+        """
+        config_section = self.config.get_section(self.collection)
+        return config_section.get(key, default)
+    
     def to_dict(self):
         content = dict()
         for key, value in vars(self).items():
@@ -190,17 +197,16 @@ class NearestNeighbors(Calculation):
     def __init__(
             self,
             input_mongo_id: str | None = None,
-            cutoff: int | None=None,
-            unknowns_are_diffs: bool = True,
             **kwargs):
         super().__init__(**kwargs)
-        NN_config = self.config.get_section(self.collection)     
-        self.seq_collection = NN_config.get("seq_collection")
-        self.filtering = NN_config.get("filtering")
-        self.profile_field_path = NN_config.get("profile_field_path")
+
+        #NN_config = self.config.get_section(self.collection)  
+        self.seq_collection = self.get_config_value("seq_collection")
+        self.filtering = self.get_config_value("filtering", {})  # Default to empty dict
+        self.profile_field_path = self.get_config_value("profile_field_path")
+        self.cutoff = self.get_config_value("cutoff")  
+        self.unknowns_are_diffs = self.get_config_value("unknowns_are_diffs")  
         self.input_mongo_id = input_mongo_id
-        self.unknowns_are_diffs = unknowns_are_diffs
-        self.cutoff = cutoff #NN_config.get("cutoff",cutoff)
 
     async def insert_document(self):
         await super().insert_document(
@@ -323,12 +329,12 @@ class DistanceCalculation(Calculation):
             **kwargs):
         super().__init__(**kwargs)
 
-        Dist_config = self.config.get_section(self.collection)     
-        self.seq_collection = Dist_config.get("seq_collection")
-        self.seqid_field_path = Dist_config.get("seqid_field_path")
-        self.profile_field_path = Dist_config.get("profile_field_path")
+        #Dist_config = self.config.get_section(self.collection)     
+        self.seq_collection = self.get_config_value("seq_collection")
+        self.seqid_field_path = self.get_config_value("seqid_field_path")
+        self.profile_field_path = self.get_config_value("profile_field_path")
         self.seq_mongo_ids = seq_mongo_ids
-    
+
     async def insert_document(self):
         await super().insert_document(
             seq_collection=self.seq_collection,
@@ -479,6 +485,9 @@ class HPCCalculation(Calculation):
     ):
         super().__init__(**kwargs)
         self.hpc_resources = hpc_resources
+
+        #self.hpc_resources = hpc_resources if hpc_resources is not None else self.get_config_value("hpc_resources", {})
+        #
     
     async def calculate(self, args:dict|None=None):
         print("Running calculate on HPCCalculation")
@@ -486,7 +495,9 @@ class HPCCalculation(Calculation):
         print(f"job_type: {self.job_type}")
         print("args:")
         print(args)
-        hpc_resources = asdict(self.hpc_resources)
+        hpc_resources = asdict(self.hpc_resources) #but if we define it in the yaml it alerady is a dict...
+        #hpc_resources = asdict(self.hpc_resources) if isinstance(self.hpc_resources, HPCResources) else self.hpc_resources
+        
         print("hpc_resources:")
         print(hpc_resources)
         await messenger.send_hpc_call(
@@ -513,7 +524,7 @@ class SNPCalculation(HPCCalculation):
     seqid_field_path: str
     seq_mongo_ids: list
     reference_mongo_id: str
-    depth: int = 15
+    depth: int
     ignore_hz: bool
     input_filenames: list = list()
     reference_filename: str | None = None
@@ -522,25 +533,26 @@ class SNPCalculation(HPCCalculation):
             self,
             seq_mongo_ids: list,
             reference_mongo_id: str,
-            depth: int = 15,
-            ignore_hz: bool=True,
             **kwargs
             ):
         super().__init__(**kwargs)
 
-        SNP_config = self.config.get_section(self.collection)     
-        self.seq_collection = SNP_config.get("seq_collection")
-        self.seqid_field_path = SNP_config.get("seqid_field_path")
-        self.fastq_field_path = SNP_config.get("fastq_field_path")
-        self.contigs_field_path = SNP_config.get("contigs_field_path")
-        self.hpc_resources = SNP_config.get("hpc_resources",{})
-        
+
+        #SNP_config = self.config.get_section(self.collection)     
+        #self.seq_collection = SNP_config.get("seq_collection")
+        self.seq_collection = self.get_config_value("seq_collection")
+        self.seqid_field_path = self.get_config_value("seqid_field_path")
+        self.fastq_field_path = self.get_config_value("fastq_field_path")
+        self.contigs_field_path = self.get_config_value("contigs_field_path")
+
+        self.hpc_resources = self.get_config_value("hpc_resources", {})
+        self.depth = self.get_config_value("depth")
+        self.ignore_hz = self.get_config_value("ignore_hz")
+
         self.seq_mongo_ids = seq_mongo_ids
         self.reference_mongo_id = reference_mongo_id
-        self.depth = depth
-        self.ignore_hz = ignore_hz
-        self.hpc_resources = hpc_resources
-
+        self.hpc_resources = hpc_resources #its not defined
+ 
     @property
     def job_type(self):
         return 'snp'
