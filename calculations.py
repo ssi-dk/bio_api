@@ -116,7 +116,7 @@ class Calculation(metaclass=abc.ABCMeta):
         return self._id
 
     @classmethod
-    def find(cls, id: str):
+    def recall(cls, id: str):
         """Return a class instance based on a particular MongoDB document.
         """
         doc = cls.mongo_api.db[cls.collection].find_one({'_id': ObjectId(id)})
@@ -456,7 +456,7 @@ class TreeCalculation(Calculation):
         return self._id
 
     async def calculate(self):
-        dc = DistanceCalculation.find(self.dmx_job)
+        dc = DistanceCalculation.recall(self.dmx_job)
         try:
             dist_df: DataFrame = read_csv(Path(dc.folder, DistanceCalculation.get_dist_mx_filename()), index_col=0)
             tree = make_tree(dist_df, self.method)

@@ -86,7 +86,7 @@ async def nn_result(nn_id: str, level:str='full'):
     Get result of a nearest neighbors calculation
     """
     try:
-        calc = calculations.NearestNeighbors.find(nn_id)
+        calc = calculations.NearestNeighbors.recall(nn_id)
     except InvalidId as e:
         raise HTTPException(
             status_code=400,
@@ -159,7 +159,7 @@ async def dmx_result(dc_id: str, level:str='full'):
     Get result of a distance calculation
     """
     try:
-        calc = calculations.DistanceCalculation.find(dc_id)
+        calc = calculations.DistanceCalculation.recall(dc_id)
     except InvalidId as e:
         raise HTTPException(
             status_code=400,
@@ -199,7 +199,7 @@ async def dmx_result(dc_id: str, level:str='full'):
     responses=additional_responses
     )
 async def hc_tree_from_dmx_job(rq: pc.HCTreeCalcRequest, background_tasks: BackgroundTasks):
-    calc = calculations.DistanceCalculation.find(rq.dmx_job)
+    calc = calculations.DistanceCalculation.recall(rq.dmx_job)
     if calc is None:
         return HTTPException(
             status_code=404,
@@ -226,7 +226,7 @@ async def hc_tree_from_dmx_job(rq: pc.HCTreeCalcRequest, background_tasks: Backg
     )
 async def hc_tree_result(tc_id:str, level:str='full'):
     try:
-        calc = calculations.TreeCalculation.find(tc_id)
+        calc = calculations.TreeCalculation.recall(tc_id)
     except InvalidId as e:
         return HTTPException(status_code=400, detail=str(e))
     if calc is None:
