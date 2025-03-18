@@ -7,5 +7,5 @@ pydantic==2.6.0
 pymongo==4.6.3
 scipy==1.12.0
 uvicorn==0.27.0.post1
-requests==2.32.0
+requests
 pyarrow==15.0.0
