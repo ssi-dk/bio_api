@@ -13,7 +13,13 @@ import calculations
 
 import pydantic_classes as pc
 
-app = FastAPI(title="Bio API", description="REST API for controlling bioinformatic calculations", version="0.2.0")
+app = FastAPI(
+    title="Bio API", 
+    description="REST API for controlling bioinformatic calculations", 
+    version="0.2.0",
+    root_path="/bioapi"
+
+)
 
 MONGO_CONNECTION_STRING = getenv('BIFROST_DB_KEY', 'mongodb://mongodb:27017/bio_api_test')
 

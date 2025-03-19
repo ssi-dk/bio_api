@@ -200,6 +200,8 @@ class NearestNeighbors(Calculation):
             cutoff: int | None = None,
             filtering: dict | None = None,
             unknowns_are_diffs: bool | None = None,
+            seq_collection: str | None = None,
+            profile_field_path: str | None = None,
             **kwargs):
         super().__init__(**kwargs)
 
@@ -331,6 +333,9 @@ class DistanceCalculation(Calculation):
     def __init__(
             self,
             seq_mongo_ids: list | None = None,
+            seq_collection: str | None = None,
+            seqid_field_path: str | None = None,
+            profile_field_path: str | None = None,
             **kwargs):
         super().__init__(**kwargs)
 
@@ -539,6 +544,10 @@ class SNPCalculation(HPCCalculation):
             reference_mongo_id: str,
             depth: int | None = None,
             ignore_hz: bool | None = None,
+            seq_collection: str | None = None,
+            seqid_field_path: str | None = None,
+            fastq_field_path: str | None = None,
+            contigs_field_path: str | None = None,
             **kwargs
             ):
         super().__init__(**kwargs)
