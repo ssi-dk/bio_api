@@ -34,9 +34,18 @@ additional_responses = {
     responses=additional_responses
     )
 async def nearest_neighbors(rq: pc.NearestNeighborsRequest, background_tasks: BackgroundTasks):
+    # Load defaults from Config if rq.cutoff, rq.filtering, or rq.unknowns_are_diffs are not provided -> defined in mongo.py 
+    # self.collection_name = "BioAPI_config"
+    
+    #config_values = mongo_api.db['BioAPI_config'].find_one({'section': 'nearest_neighbors'}) or {}
+    #cutoff=rq.cutoff if rq.cutoff is not None else config_values.get("cutoff"),
+    #filtering=rq.filtering if rq.filtering is not None else config_values.get("filtering", {}),
+    #unknowns_are_diffs=rq.unknowns_are_diffs if rq.unknowns_are_diffs is not None else config_values.get("unknowns_are_diffs")
+    
     calc = calculations.NearestNeighbors(
         input_mongo_id=rq.input_mongo_id,
         cutoff=rq.cutoff,
+        filtering=rq.filtering,
         unknowns_are_diffs=rq.unknowns_are_diffs
     )
 
@@ -115,14 +124,13 @@ async def dmx_from_mongodb(rq: pc.DistanceMatrixRequest, background_tasks: Backg
     
     # Initialize DistanceCalculation object
     calc = calculations.DistanceCalculation(
-            seq_collection=rq.seq_collection,
-            seqid_field_path=rq.seqid_field_path,
-            profile_field_path=rq.profile_field_path,
             seq_mongo_ids=rq.seq_mongo_ids,
-            created_at=datetime.now(),
-            finished_at=None,
     )
-    
+
+    #i dont think the created_at and finished_at here is necessary - they are in Calculation __init__
+    #created_at=datetime.now(),
+    #finished_at=None,
+
     # Query MongoDB for the allele profiles
     try:
         _profile_count, cursor = await calc.query_mongodb_for_allele_profiles()
@@ -248,13 +256,20 @@ async def snp(rq: pc.SNPRequest):
     Initialize a new SNP calculation
     """
 
-    # Initialize SNPCalculation object
+    # After - Load from config if not provided
+    #config_values = mongo_api.db['BioAPI_config'].find_one({'section': 'snp'}) or {}
+    #depth=rq.depth if rq.depth is not None else config_values.get("depth"),
+    #ignore_hz=rq.ignore_hz if rq.ignore_hz is not None else config_values.get("ignore_hz"),
+    #hpc_resources=rq.hpc_resources if rq.hpc_resources is not None else config_values.get("hpc_resources", {})
+    
     calc = calculations.SNPCalculation(
-            seq_mongo_ids=rq.seq_mongo_ids,
-            reference_mongo_id=rq.reference_mongo_id,
-            depth=rq.depth,
-            ignore_hz=rq.ignore_hz
+        seq_mongo_ids=rq.seq_mongo_ids,
+        reference_mongo_id=rq.reference_mongo_id,
+        depth=rq.depth,
+        ignore_hz=rq.ignore_hz,
+        hpc_resources=rq.hpc_resources
     )
+
 
     # Save object in MongoDB, so at least we have something even if filename lookup fails
     await calc.insert_document()

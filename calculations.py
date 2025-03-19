@@ -198,6 +198,7 @@ class NearestNeighbors(Calculation):
             self,
             input_mongo_id: str | None = None,
             cutoff: int | None = None,
+            filtering: dict | None = None,
             unknowns_are_diffs: bool | None = None,
             **kwargs):
         super().__init__(**kwargs)
@@ -206,8 +207,7 @@ class NearestNeighbors(Calculation):
         self.seq_collection = self.get_config_value("seq_collection")
         
         ## Should be set based on input document
-        self.filtering = self.get_config_value("filtering", {})  # Default to empty dict
-
+        self.filtering = filtering if filtering is not None else self.get_config_value("filtering", {})
         self.profile_field_path = self.get_config_value("profile_field_path")
         self.cutoff = cutoff if cutoff is not None else self.get_config_value("cutoff") 
         self.unknowns_are_diffs = unknowns_are_diffs if unknowns_are_diffs is not None else self.get_config_value("unknowns_are_diffs")
@@ -489,10 +489,9 @@ class HPCCalculation(Calculation):
         **kwargs
     ):
         super().__init__(**kwargs)
-        self.hpc_resources = hpc_resources
 
-        #self.hpc_resources = hpc_resources if hpc_resources is not None else self.get_config_value("hpc_resources", {})
-        #
+        self.hpc_resources = hpc_resources if hpc_resources is not None else self.get_config_value("hpc_resources", {})
+        
     
     async def calculate(self, args:dict|None=None):
         print("Running calculate on HPCCalculation")
@@ -549,8 +548,10 @@ class SNPCalculation(HPCCalculation):
         self.fastq_field_path = self.get_config_value("fastq_field_path")
         self.contigs_field_path = self.get_config_value("contigs_field_path")
 
-        self.hpc_resources = self.get_config_value("hpc_resources", {})
-        self.depth = depth if depth is not None else self.get_config_value("depth") 
+        #self.hpc_resources = self.get_config_value("hpc_resources", {})
+        self.hpc_resources = hpc_resources if hpc_resources is not None else self.get_config_value("hpc_resources", section="hpc")
+
+        self.depth = depth if depth is not None else self.get_config_value("depth")
         self.ignore_hz = ignore_hz if ignore_hz is not None else self.get_config_value("ignore_hz")
 
         self.seq_mongo_ids = seq_mongo_ids

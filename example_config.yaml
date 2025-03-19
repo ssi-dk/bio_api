@@ -30,11 +30,3 @@
         }
     }
 ]
-
-#        "hpc_resources": {
-#            "cpus": 1,
-#            "memGB": 4,
-#            "group": "fvst_ssi",
-#            "nodes": ""????"",
-#            "walltime": "1:00:00"
-#        }
