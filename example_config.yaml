@@ -21,6 +21,9 @@
         "contigs_field_path": "categories.contigs.summary.data",
         "depth": 15,  
         "ignore_hz": true,  
+    },
+    {
+        "section": "hpc",
         "hpc_resources": {
             "cpus": 1,
             "memGB": 4,

@@ -483,6 +483,7 @@ class HPCCalculation(Calculation):
 
     hpc_resources: HPCResources | None = None
 
+    collection = 'hpc'
     def __init__(
         self,
         hpc_resources: HPCResources | None = None,
@@ -549,8 +550,8 @@ class SNPCalculation(HPCCalculation):
         self.contigs_field_path = self.get_config_value("contigs_field_path")
 
         #self.hpc_resources = self.get_config_value("hpc_resources", {})
-        self.hpc_resources = hpc_resources if hpc_resources is not None else self.get_config_value("hpc_resources", section="hpc")
-
+        #self.hpc_resources = hpc_resources if hpc_resources is not None else self.get_config_value("hpc_resources", section="hpc")
+        # so should extract HPC_resources and additional parameters from the super().__init__(**kwargs)
         self.depth = depth if depth is not None else self.get_config_value("depth")
         self.ignore_hz = ignore_hz if ignore_hz is not None else self.get_config_value("ignore_hz")
 
