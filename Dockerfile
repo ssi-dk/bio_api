@@ -7,8 +7,12 @@ ENV MONGO_CONNECTION='mongodb://mongo:27017/bifrost_test'
 COPY . /app/
 WORKDIR /app
 
-RUN mamba install --file requirements_general.txt
-RUN mamba install -c bioconda --file requirements_bioconda.txt
+RUN mamba install -y --file requirements_general.txt
+RUN mamba install -y -c bioconda --file requirements_bioconda.txt
+
+# install the sofi_messenger submodule
+RUN git submodule update --init --recursive
+RUN pip install -e /app/sofi_messenger
 
 VOLUME /dmx_data
 

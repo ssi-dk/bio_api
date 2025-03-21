@@ -1,5 +1,4 @@
-
-# aio-pika==9.3.0
+aio-pika>=9.4.3
 fastapi==0.109.1
 numpy==1.26.3
 pandas==2.2.0
@@ -9,3 +8,4 @@ scipy==1.12.0
 uvicorn==0.27.0.post1
 requests
 pyarrow==15.0.0
+sshtunnel==0.4.0

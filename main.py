@@ -8,13 +8,24 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import HTTPException
 from bson.errors import InvalidId
 
+from mongo import MongoAPI
 import calculations
 
 import pydantic_classes as pc
 
-app = FastAPI(title="Bio API", description="REST API for controlling bioinformatic calculations", version="0.2.0")
+app = FastAPI(
+    title="Bio API", 
+    description="REST API for controlling bioinformatic calculations", 
+    version="0.2.0",
+    root_path="/bioapi"
 
-MANUAL_MX_DIR = getenv('BIO_API_TEST_INPUT_DIR', '/test_input')
+)
+
+MONGO_CONNECTION_STRING = getenv('BIFROST_DB_KEY', 'mongodb://mongodb:27017/bio_api_test')
+
+mongo_api = MongoAPI(MONGO_CONNECTION_STRING)
+calculations.Calculation.set_mongo_api(mongo_api)
+
 DMX_DIR = getenv('DMX_DIR', '/dmx_data')
 
 additional_responses = {
@@ -29,12 +40,18 @@ additional_responses = {
     responses=additional_responses
     )
 async def nearest_neighbors(rq: pc.NearestNeighborsRequest, background_tasks: BackgroundTasks):
+    # Load defaults from Config if rq.cutoff, rq.filtering, or rq.unknowns_are_diffs are not provided -> defined in mongo.py 
+    # self.collection_name = "BioAPI_config"
+    
+    #config_values = mongo_api.db['BioAPI_config'].find_one({'section': 'nearest_neighbors'}) or {}
+    #cutoff=rq.cutoff if rq.cutoff is not None else config_values.get("cutoff"),
+    #filtering=rq.filtering if rq.filtering is not None else config_values.get("filtering", {}),
+    #unknowns_are_diffs=rq.unknowns_are_diffs if rq.unknowns_are_diffs is not None else config_values.get("unknowns_are_diffs")
+    
     calc = calculations.NearestNeighbors(
-        seq_collection=rq.seq_collection,
-        filtering = rq.filtering,
-        profile_field_path=rq.profile_field_path,
         input_mongo_id=rq.input_mongo_id,
         cutoff=rq.cutoff,
+        filtering=rq.filtering,
         unknowns_are_diffs=rq.unknowns_are_diffs
     )
 
@@ -81,7 +98,7 @@ async def nn_result(nn_id: str, level:str='full'):
     Get result of a nearest neighbors calculation
     """
     try:
-        calc = calculations.NearestNeighbors.find(nn_id)
+        calc = calculations.NearestNeighbors.recall(nn_id)
     except InvalidId as e:
         raise HTTPException(
             status_code=400,
@@ -114,14 +131,13 @@ async def dmx_from_mongodb(rq: pc.DistanceMatrixRequest, background_tasks: Backg
     
     # Initialize DistanceCalculation object
     calc = calculations.DistanceCalculation(
-            seq_collection=rq.seq_collection,
-            seqid_field_path=rq.seqid_field_path,
-            profile_field_path=rq.profile_field_path,
             seq_mongo_ids=rq.seq_mongo_ids,
-            created_at=datetime.now(),
-            finished_at=None,
     )
-    
+
+    #i dont think the created_at and finished_at here is necessary - they are in Calculation __init__
+    #created_at=datetime.now(),
+    #finished_at=None,
+
     # Query MongoDB for the allele profiles
     try:
         _profile_count, cursor = await calc.query_mongodb_for_allele_profiles()
@@ -155,7 +171,7 @@ async def dmx_result(dc_id: str, level:str='full'):
     Get result of a distance calculation
     """
     try:
-        calc = calculations.DistanceCalculation.find(dc_id)
+        calc = calculations.DistanceCalculation.recall(dc_id)
     except InvalidId as e:
         raise HTTPException(
             status_code=400,
@@ -193,7 +209,7 @@ async def dmx_result(dc_id: str, level:str='full'):
     responses=additional_responses
     )
 async def hc_tree_from_dmx_job(rq: pc.HCTreeCalcRequest, background_tasks: BackgroundTasks):
-    calc = calculations.DistanceCalculation.find(rq.dmx_job)
+    calc = calculations.DistanceCalculation.recall(rq.dmx_job)
     if calc is None:
         return HTTPException(
             status_code=404,
@@ -220,7 +236,7 @@ async def hc_tree_from_dmx_job(rq: pc.HCTreeCalcRequest, background_tasks: Backg
     )
 async def hc_tree_result(tc_id:str, level:str='full'):
     try:
-        calc = calculations.TreeCalculation.find(tc_id)
+        calc = calculations.TreeCalculation.recall(tc_id)
     except InvalidId as e:
         return HTTPException(status_code=400, detail=str(e))
     if calc is None:
@@ -233,3 +249,37 @@ async def hc_tree_result(tc_id:str, level:str='full'):
         content['result'] = None
 
     return pc.HCTreeCalcGETResponse(**content)
+
+@app.post("/v1/snp_calculations",
+    response_model=pc.CommonPOSTResponse,
+    tags=["SNP"],
+    status_code=201,
+    responses=additional_responses
+    )
+async def snp(rq: pc.SNPRequest):
+    """
+    Initialize a new SNP calculation
+    """
+
+    # After - Load from config if not provided
+    #config_values = mongo_api.db['BioAPI_config'].find_one({'section': 'snp'}) or {}
+    #depth=rq.depth if rq.depth is not None else config_values.get("depth"),
+    #ignore_hz=rq.ignore_hz if rq.ignore_hz is not None else config_values.get("ignore_hz"),
+    #hpc_resources=rq.hpc_resources if rq.hpc_resources is not None else config_values.get("hpc_resources", {})
+    
+    calc = calculations.SNPCalculation(
+        seq_mongo_ids=rq.seq_mongo_ids,
+        reference_mongo_id=rq.reference_mongo_id,
+        depth=rq.depth,
+        ignore_hz=rq.ignore_hz,
+        hpc_resources=rq.hpc_resources
+    )
+
+
+    # Save object in MongoDB, so at least we have something even if filename lookup fails
+    await calc.insert_document()
+
+    # First we need to get the files from a MongoDB lookup
+    # calc.query_mongodb_for_file_names()
+
+    # Now we are ready to send the calculation to RabbitMQ
