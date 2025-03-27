@@ -93,7 +93,7 @@ def test_sequence_insertion(mock_db):
     logger.info("===== test_sequence_insertion =====")
 
     mongoapi = MongoAPI(db=mock_db)
-    collection = mongoapi.db["sequences"]
+    collection = mongoapi.db["samples"]
     result = collection.insert_one(MOCK_INPUT_SEQUENCE)
     logger.info(f"Insertion result: acknowledged={result.acknowledged}")
     assert result.acknowledged is True
@@ -104,13 +104,13 @@ def test_sequence_retrival(mock_db):
     logger.info("===== test_sequence_retrival =====")
     
     mongoapi = MongoAPI(db=mock_db)
-    collection = mongoapi.db["sequences"]
+    collection = mongoapi.db["samples"]
     collection.insert_one(MOCK_INPUT_SEQUENCE)
 
     result = collection.find_one({"_id": MOCK_INPUT_ID})
     logger.info(f"Retrieved document: {result}")
     assert result is not None
-    assert result["cgmlst"]["profile"]["locus1"] == "1"
+    assert result["categories"]["cgmlst"]["report"]["alleles"]["locus1"] == "1"
 
 # --- Test: Config Set & Update ---
 
@@ -198,7 +198,7 @@ def test_export_sequence_collection_to_json(mock_db):
     logger.info("===== test_export_sequence_collection_to_json =====")
 
     mongoapi = MongoAPI(db=mock_db)
-    collection = mongoapi.db["sequences"]
+    collection = mongoapi.db["samples"]
 
     collection.insert_one(MOCK_INPUT_SEQUENCE)
     docs = list(collection.find({}))
@@ -210,7 +210,8 @@ def test_export_sequence_collection_to_json(mock_db):
 
     with open("mocked_collection.json") as f:
         exported_data = json.load(f)
-        assert exported_data[0]["cgmlst"]["profile"]["locus1"] == "1"
+        assert exported_data[0]["categories"]["cgmlst"]["report"]["alleles"]["locus1"] == "1"
+
 
 # --- Test: Async Field Projection ---
 
@@ -220,16 +221,16 @@ async def test_get_field_data_projection_for_specific_id(mock_db):
     logger.info("===== test_get_field_data_projection_for_specific_id =====")
 
     mongoapi = MongoAPI(db=mock_db)
-    mongoapi.db["sequences"].insert_one(MOCK_INPUT_SEQUENCE)
+    mongoapi.db["samples"].insert_one(MOCK_INPUT_SEQUENCE)
 
     count, cursor = await mongoapi.get_field_data(
-        collection="sequences",
+        collection="samples",
         mongo_ids=[str(MOCK_INPUT_ID)],
-        field_paths=["cgmlst.profile"]
+        field_paths=["categories.cgmlst.report.alleles"]
     )
     docs = list(cursor)
     assert count == 1
-    assert docs[0]["cgmlst"]["profile"]["locus1"] == "1"
+    assert docs[0]["categories"]["cgmlst"]["report"]["alleles"]["locus1"] == "1"
 
 @pytest.mark.asyncio
 async def test_get_field_data_projection_all_documents(mock_db):
@@ -237,13 +238,13 @@ async def test_get_field_data_projection_all_documents(mock_db):
     logger.info("===== test_get_field_data_projection_all_documents =====")
 
     mongoapi = MongoAPI(db=mock_db)
-    mongoapi.db["sequences"].insert_one(MOCK_INPUT_SEQUENCE)
+    mongoapi.db["samples"].insert_one(MOCK_INPUT_SEQUENCE)
 
     count, cursor = await mongoapi.get_field_data(
-        collection="sequences",
+        collection="samples",
         mongo_ids=None,
-        field_paths=["cgmlst.profile"]
+        field_paths=["categories.cgmlst.report.alleles"]
     )
     docs = list(cursor)
     assert count == 1
-    assert docs[0]["cgmlst"]["profile"]["locus1"] == "1"
+    assert docs[0]["categories"]["cgmlst"]["report"]["alleles"]["locus1"] == "1"
