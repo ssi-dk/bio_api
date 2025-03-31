@@ -1,0 +1,20 @@
+[
+    {
+        "_id": {
+            "$oid": "65f000abc123abc123abc111"
+        },
+        "categories": {
+            "cgmlst": {
+                "report": {
+                    "alleles": {
+                        "locus1": "1",
+                        "locus2": "2"
+                    },
+                    "schema": {
+                        "digest": 1
+                    }
+                }
+            }
+        }
+    }
+]

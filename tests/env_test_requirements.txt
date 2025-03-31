@@ -1,0 +1,9 @@
+pytest
+pytest-asyncio
+aio-pika
+mongomock
+pymongo
+fastapi
+uvicorn
+pydantic
+httpx
