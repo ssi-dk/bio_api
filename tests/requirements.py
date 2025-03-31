@@ -9,6 +9,7 @@ MOCK_JOB_ID = ObjectId("65f000abc123abc123abc123")
 
 MOCK_NEIGHBOR_ID_1 = ObjectId("65f000abc123abc123abc222")
 MOCK_NEIGHBOR_ID_2 = ObjectId("65f000abc123abc123abc333")
+MOCK_NEIGHBOR_ID_missing = ObjectId("65f000abc123abc123abc999")
 
 # === Correct NN Config === #
 

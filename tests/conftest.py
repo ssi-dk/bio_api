@@ -8,7 +8,20 @@ from unittest.mock import AsyncMock, patch
 import uuid
 from bson import ObjectId
 from aio_pika.exceptions import AMQPConnectionError
-from . import requirements
+from calculations import NearestNeighbors, Calculation, MissingDataException
+from httpx import AsyncClient
+from main import app
+from .requirements import (
+    MOCK_INPUT_SEQUENCE,
+    MOCK_MONGO_CONFIG, 
+    MOCK_INPUT_ID, 
+    MOCK_NEIGHBOR_SEQUENCE, 
+    MOCK_NEIGHBOR_SEQUENCE_2
+)
+from .mongo_mock import (
+    MongoAPI, 
+    MongoConfig
+)
 
 # --- MongoDB Fixture --- #
 
@@ -58,9 +71,9 @@ async def mock_failed_rabbitmq_connection():
 @pytest.fixture
 def prepopulated_mock_db(mock_db):
     # Insert input sequence
-    mock_db["samples"].insert_one(requirements.MOCK_INPUT_SEQUENCE)
-    mock_db["samples"].insert_one(requirements.MOCK_NEIGHBOR_SEQUENCE)
-    mock_db["BioAPI_config"].insert_one(dict(requirements.MOCK_MONGO_CONFIG, section="nearest_neighbors"))
+    mock_db["samples"].insert_one(MOCK_INPUT_SEQUENCE)
+    mock_db["samples"].insert_one(MOCK_NEIGHBOR_SEQUENCE)
+    mock_db["BioAPI_config"].insert_one(dict(MOCK_MONGO_CONFIG, section="nearest_neighbors"))
     return mock_db
 
 @pytest.fixture
@@ -68,12 +81,26 @@ def fully_mocked_mongo(mock_db):
     """
     Prepopulate mock MongoDB with input and neighbor sequences + config.
     """
-    mock_db["samples"].insert_one(requirements.MOCK_INPUT_SEQUENCE)
-    mock_db["samples"].insert_one(requirements.MOCK_NEIGHBOR_SEQUENCE)
-    mock_db["samples"].insert_one(requirements.MOCK_NEIGHBOR_SEQUENCE_2)
+    mock_db["samples"].insert_one(MOCK_INPUT_SEQUENCE)
+    mock_db["samples"].insert_one(MOCK_NEIGHBOR_SEQUENCE)
+    mock_db["samples"].insert_one(MOCK_NEIGHBOR_SEQUENCE_2)
 
-    mock_config = dict(requirements.MOCK_MONGO_CONFIG)
+    mock_config = dict(MOCK_MONGO_CONFIG)
     mock_config["section"] = "nearest_neighbors"
     mock_db["BioAPI_config"].insert_one(mock_config)
 
     return mock_db
+
+# set the API for calculations 
+@pytest.fixture
+def prepared_mongo(mock_db):
+    """Inject mocked MongoAPI and insert required documents for unit tests."""
+    mongo_api = MongoAPI(db=mock_db)
+    Calculation.set_mongo_api(mongo_api)
+    mock_db["samples"].insert_one(MOCK_INPUT_SEQUENCE)
+    return mock_db
+
+@pytest_asyncio.fixture
+async def test_client():
+    async with AsyncClient(app=app, base_url="http://test") as client:
+        yield client
