@@ -73,6 +73,14 @@ async def test_mock_send_hpc_call(mock_messenger):
     
     logger.info(f"Mocked send_hpc_call called with job_uuid: {job_uuid}")
 
+@pytest.mark.asyncio
+async def test_send_hpc_call_failure(monkeypatch, mock_messenger):
+    async def failing_send(*args, **kwargs):
+        raise RuntimeError("Simulated failure")
+    mock_messenger.send_hpc_call = AsyncMock(side_effect=failing_send)
+
+    with pytest.raises(RuntimeError):
+        await mock_messenger.send_hpc_call(uuid="fake", job_type="snp", args={})
 
 @pytest.mark.asyncio
 async def test_mock_consume_response(mock_messenger):

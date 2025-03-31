@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pytest
 import mongomock
 import pymongo
@@ -5,11 +8,8 @@ import json
 import os
 import logging
 from bson import ObjectId, json_util
-from Config import (
-    MOCK_INPUT_SEQUENCE,
-    MOCK_MONGO_CONFIG,
-    MOCK_INPUT_ID
-)
+from .requirements import MOCK_INPUT_SEQUENCE, MOCK_MONGO_CONFIG, MOCK_INPUT_ID
+from .mongo_mock import MongoAPI, MongoConfig
 
 # --- Logging Setup ---
 logger = logging.getLogger(__name__)
@@ -21,70 +21,6 @@ file_handler.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
-
-# --- Helper Functions ---
-
-def strs2ObjectIds(id_strings: list):
-    """Convert string list to ObjectId list"""
-    return [ObjectId(id_str) for id_str in id_strings]
-
-# --- MongoDB Mock---
-
-class MongoAPI:
-    """
-    Provides access to general MongoDB collections with optional ObjectId filtering and field projections.
-    Used for reading and querying data across collections.
-
-    Return cursor to iterate through mongo query results
-    """
-    def __init__(self, connection_string: str = None, db=None):
-        if db is not None:
-            self.db = db  # Use injected test/mock DB
-        else:
-            self.connection = pymongo.MongoClient(connection_string, directConnection=True)
-            self.db = self.connection.get_database()
-
-    async def get_field_data(self, collection: str, mongo_ids: list | None, field_paths: list):
-        """
-        Return (document count, cursor) from a collection, with optional filtering by ObjectIds and field projection.
-        """
-        if mongo_ids:
-            filter = {'_id': {'$in': strs2ObjectIds(mongo_ids)}}
-            document_count = self.db[collection].count_documents(filter)
-            cursor = self.db[collection].find(filter, {field_path: True for field_path in field_paths})
-        else:
-            document_count = self.db[collection].count_documents({})
-            cursor = self.db[collection].find({}, {field_path: True for field_path in field_paths})
-        return document_count, cursor
-
-class MongoConfig:
-    """
-    Makes it possible to extract information from the mock mongo, insert, update
-    """
-    def __init__(self, mongoapi: MongoAPI):
-        self.mongoapi = mongoapi
-        self.collection_name = "BioAPI_config"
-
-    def get_section(self, section):
-        """Retrieve a config section by name"""
-        return self.mongoapi.db[self.collection_name].find_one({'section': section})
-
-    def set_section(self, section: str, config: dict):
-        """Insert or update a config section with upsert"""
-        return self.mongoapi.db[self.collection_name].replace_one(
-            {'section': section}, config, upsert=True)
-
-    def load(self, config: list):
-        """Bulk-insert a list of config documents"""
-        self.mongoapi.db[self.collection_name].insert_many(config)
-
-# --- Pytest Fixture ---
-
-@pytest.fixture
-def mock_db():
-    """Creates an in-memory mock MongoDB database"""
-    client = mongomock.MongoClient()
-    return client["testdb"]
 
 # --- Test: Insert Logic ---
 
