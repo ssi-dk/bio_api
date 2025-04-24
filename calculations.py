@@ -9,6 +9,7 @@ from abc import abstractmethod
 
 from bson.objectid import ObjectId
 from pandas import DataFrame, read_table, read_csv
+from json import dump, load
 
 from mongo import MongoAPI
 from tree_maker import make_tree
