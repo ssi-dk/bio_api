@@ -1,6 +1,75 @@
+
+
+# Python cache and compiled files
 __pycache__/
-.pytest_cache/
+*.py[cod]
+*.so
+
+# Conda & pip artifacts
+*.egg-info/
+*.eggs/
+.env/
 .venv/
+env/
+venv/
+*.conda
+*.ipynb
+
+# Package/build artifacts
+build/
+dist/
+*.log
+pip-wheel-metadata/
+
+# Git and version control
+# .git/  # Needed for git submodule 
+.gitignore
+.gitattributes
+*.patch
+
+# Submodule metadata (already handled in Dockerfile)
+.gitmodules
+
+# OS and editor files
+.DS_Store
+*.swp
+*.swo
+*.bak
+*.tmp
+*.orig
+
+# VSCode/IDE
+.vscode/
+.idea/
+
+# Docker-specific
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Test & CI
+tests/
+test/
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+.nox/
+.coveragerc
+*.log
+
+# Data
+*.db
+*.sqlite
+*.h5
+*.csv
+*.tsv
+*.gz
+*.zip
+*.tar
+*.tar.gz
+.dm/
+
 data/
 dmx_data/
 dumps/
