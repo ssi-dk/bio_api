@@ -21,7 +21,7 @@ app = FastAPI(
 
 )
 
-MONGO_CONNECTION_STRING = getenv('BIFROST_DB_KEY', 'mongodb://mongodb:27017/bio_api_test')
+MONGO_CONNECTION_STRING = getenv('BIO_API_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
 
 mongo_api = MongoAPI(MONGO_CONNECTION_STRING)
 calculations.Calculation.set_mongo_api(mongo_api)
@@ -198,7 +198,7 @@ async def dmx_result(dc_id: str, level:str='full'):
             # Add result from file
             with open(Path(calc.folder, 'distance_matrix.json')) as f:
                 json = load(f)
-                content['result']['distances'] = calc.dmx_tsv_from_dict(json)
+                content['result']['distances'] = [calc.dmx_tsv_from_dict(json)]
 
     return pc.DistanceMatrixGETResponse(**content)
 

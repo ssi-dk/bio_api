@@ -5,6 +5,7 @@ import asyncio
 import uuid
 import logging
 from aio_pika.exceptions import AMQPConnectionError
+from unittest.mock import AsyncMock
 
 # --- Logging Setup ---
 logger = logging.getLogger(__name__)

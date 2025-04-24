@@ -9,3 +9,4 @@ uvicorn==0.27.0.post1
 requests
 pyarrow==15.0.0
 sshtunnel==0.4.0
+pyyaml==6.0.2
