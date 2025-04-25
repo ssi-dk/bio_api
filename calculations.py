@@ -217,6 +217,10 @@ class NearestNeighbors(Calculation):
 
         #NN_config = self.config.get_section(self.collection)  
         self.seq_collection = self.get_config_value("seq_collection")
+
+        ## Hardcoding paths initially
+        self.allele_path = "categories.cgmlst.report.allele_array"
+        self.digest_path = "categories.cgmlst.report.schema.digest"
         
         ## Should be set based on input document
         self.filtering = filtering if filtering is not None else self.get_config_value("filtering", {})
@@ -241,7 +245,7 @@ class NearestNeighbors(Calculation):
         "Get a the allele profile for the input sequence from MongoDB"
         profile_count, cursor = await Calculation.mongo_api.get_field_data(
             collection=self.seq_collection,
-            field_paths=[self.profile_field_path],
+            field_paths=[self.allele_path,self.digest_path],
             mongo_ids=[self.input_mongo_id]
             )
         if profile_count == 0:
@@ -282,57 +286,73 @@ class NearestNeighbors(Calculation):
         print(f"Comparable sequences found: {str(comparable_sequences_count)}")
         
         pipeline = list()
+        filters = [{'_id':{'$ne':self.input_sequence['_id']}}, # don't match self
+                   {self.digest_path:{'$eq':hoist(self.input_sequence,self.digest_path)}}, # Only compare matching schemas
+                   ]
 
         print("Filters to apply to sequences before running nearest neighbors:")
         # There must always be a filter on species as different species have different cgMLST schemas
         try:
-            for k, v in self.filtering.items():
-                print(f"{k} must be {v}")
+            for filter in filters:
+                print(f"{filter}")
                 pipeline.append(
                 {'$match':
                     {
-                        k: {'$eq': v},
+                        filter,
                     }
                 }
             )
-        except KeyError as e:
+        except Exception as e:
             await self.store_result(str(e), 'error')
 
-        pipeline.append(
-            {'$match':
-                {
-                    self.profile_field_path: {'$exists': True},
+        query_allele_profile = hoist(self.input_sequence, self.allele_path)
+        ignored_values = ["NIPH","NIPHEM","LNF"]
+        compute_distances = {
+                "$addFields": {
+                    "diff_count": {
+                        "$size": {
+                            "$filter": {
+                                "input": {
+                                    "$zip": {"inputs": [f"${self.allele_path}", query_allele_profile]}
+                                },
+                                "as": "pair",
+                                "cond": {
+                                    "$and": [
+                                        {"$ne": [
+                                            {"$arrayElemAt": ["$$pair", 0]},
+                                            {"$arrayElemAt": ["$$pair", 1]}
+                                        ]},  # Values are different
+                                        {"$not": {"$in": [{"$arrayElemAt": ["$$pair", 0]}, ignored_values]}},  # First value not ignored
+                                        {"$not": {"$in": [{"$arrayElemAt": ["$$pair", 1]}, ignored_values]}}   # Second value not ignored
+                                    ]
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        )
-        pipeline.append(
-            {'$project':
-                {
-                    self.profile_field_path: 1,
+        filter_distances = {
+                "$match": {
+                    "diff_count": {"$lt": self.cutoff}
                 }
             }
-        )
-        sequences_to_compare_with = Calculation.mongo_api.db[self.seq_collection].aggregate(pipeline)
+        projection = {
+                "$project": { "_id": 1, "diff_count": 1}
+            }
+        
+        pipeline.extend([
+            compute_distances,
+            filter_distances,
+            projection,
+        ])
 
-        nearest_neighbors = list()
-        for other_sequence in sequences_to_compare_with:
-            if not other_sequence['_id'] == self.input_sequence['_id']:
-                try:
-                    diff_count = self.profile_diffs(hoist(other_sequence, self.profile_field_path))
-                except MissingDataException as e:
-                    print("ERROR when running nearest neighbors:")
-                    error_msg = str(e) + f". Other sequence _id: {other_sequence['_id']}"
-                    print(error_msg)
-                    print("You can also find the above message in the MongoDB document for the job.")
-                    self.error_msg = error_msg
-                    self.status = 'error'
-                    break
-                if diff_count <= self.cutoff:
-                    nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
+        neighbors = Calculation.mongo_api.db[self.seq_collection].aggregate(pipeline)
+        
+        
         if self.status == 'error':
             await self.store_result(self.result, status='error', error_msg=self.error_msg)
         else:
-            self.result = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
+            self.result = sorted(neighbors, key=lambda x : x['diff_count'])
             await self.store_result(self.result)
     
     def to_dict(self):
