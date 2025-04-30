@@ -221,6 +221,7 @@ class NearestNeighbors(Calculation):
         ## Hardcoding paths initially
         self.allele_path = "categories.cgmlst.report.allele_array"
         self.digest_path = "categories.cgmlst.report.schema.digest"
+        self.call_pct_path = "categories.cgmlst.summary.call_percent"
         
         ## Should be set based on input document
         self.filtering = filtering if filtering is not None else self.get_config_value("filtering", {})
@@ -288,6 +289,7 @@ class NearestNeighbors(Calculation):
         pipeline = list()
         filters = [{'_id':{'$ne':self.input_sequence['_id']}}, # don't match self
                    {self.digest_path:{'$eq':hoist(self.input_sequence,self.digest_path)}}, # Only compare matching schemas
+                   {self.call_pct_path: {'$gt': 85}}, # Discard low quality sequences
                    ]
 
         print("Filters to apply to sequences before running nearest neighbors:")
