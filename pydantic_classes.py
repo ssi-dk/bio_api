@@ -5,9 +5,14 @@ from pydantic import BaseModel
 
 
 
+class DeprecatedFields(BaseModel):
+    seq_collection: Optional[str] = None
+    seqid_field_path: Optional[str] = None
+    profile_field_path: Optional[str] = None
+
 # Request classes
 
-class NearestNeighborsRequest(BaseModel):
+class NearestNeighborsRequest(DeprecatedFields):
     """
     Parameters for a REST request for a nearest neighbors calculation.
     """
@@ -18,7 +23,7 @@ class NearestNeighborsRequest(BaseModel):
     cutoff: Optional[int] = None
     unknowns_are_diffs: Optional[bool] = None
 
-class DistanceMatrixRequest(BaseModel):
+class DistanceMatrixRequest(DeprecatedFields):
     """
     Parameters for a REST request for a distance calculation.
 
@@ -28,9 +33,6 @@ class DistanceMatrixRequest(BaseModel):
     seq_mongo_ids: the  _id strings for the desired sequence documents
     """
     seq_mongo_ids: list | None
-    seq_collection: Optional[str] = None
-    seqid_field_path: Optional[str] = None
-    profile_field_path: Optional[str] = None
 
 
 class HCTreeCalcRequest(BaseModel):

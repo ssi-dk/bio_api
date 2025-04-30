@@ -77,7 +77,7 @@ async def nearest_neighbors(rq: pc.NearestNeighborsRequest, background_tasks: Ba
     except KeyError:
         raise HTTPException(
             status_code=404,
-            detail=f"Input sequence {calc.input_sequence['_id']} does not have a field named '{calc.profile_field_path}'."
+            detail=f"Input sequence {calc.input_sequence['_id']} does not have a field named '{calc.allele_path}'."
             )
     calc._id = await calc.insert_document()
     background_tasks.add_task(calc.calculate)

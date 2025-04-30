@@ -202,7 +202,7 @@ class NearestNeighbors(Calculation):
 
     @property
     def input_profile(self):
-        return hoist(self.input_sequence, self.profile_field_path)
+        return hoist(self.input_sequence, self.allele_path)
 
     def __init__(
             self,
@@ -245,7 +245,7 @@ class NearestNeighbors(Calculation):
         "Get a the allele profile for the input sequence from MongoDB"
         profile_count, cursor = await Calculation.mongo_api.get_field_data(
             collection=self.seq_collection,
-            field_paths=[self.allele_path,self.digest_path],
+            field_paths=[self.allele_path, self.digest_path],
             mongo_ids=[self.input_mongo_id]
             )
         if profile_count == 0:
