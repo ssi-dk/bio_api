@@ -283,10 +283,12 @@ class NearestNeighbors(Calculation):
     
     def pipeline(self):
         pipeline = list()
-        filters = [{'_id':{'$ne':self.input_sequence['_id']}}, # don't match self
-                   {self.digest_path:{'$eq':hoist(self.input_sequence,self.digest_path)}}, # Only compare matching schemas
-                   {self.call_pct_path: {'$gt': 85}}, # Discard low quality sequences
-                   ]
+        cgmlst_digest = hoist(self.input_sequence,self.digest_path)
+        filters = [
+            {'_id': {'$ne': self.input_sequence['_id']}}, # don't match self
+            {self.digest_path:{'$eq': cgmlst_digest}}, # Only compare matching schemas
+            {self.call_pct_path: {'$gt': 85}}, # Discard low quality sequences
+        ]
 
         print("Filters to apply to sequences before running nearest neighbors:")
         # There must always be a filter on species as different species have different cgMLST schemas
@@ -359,7 +361,6 @@ class NearestNeighbors(Calculation):
         pipeline.extend([
             zip_alleles,
             filter_diffs,
-            preview_filtered_results,
             compute_distances,
             filter_distances,
             projection,
@@ -372,10 +373,11 @@ class NearestNeighbors(Calculation):
         comparable_sequences_count = Calculation.mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})
         print(f"Comparable sequences found: {str(comparable_sequences_count)}")
         
-        pipeline = list()
-
-        neighbors = Calculation.mongo_api.db[self.seq_collection].aggregate(pipeline)
-        
+        pipeline = self.pipeline()
+        try:
+            neighbors = Calculation.mongo_api.db[self.seq_collection].aggregate(pipeline)
+        except Exception as e:
+            self.store_result(str(e), 'error')
         
         if self.status == 'error':
             await self.store_result(self.result, status='error', error_msg=self.error_msg)
