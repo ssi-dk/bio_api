@@ -281,7 +281,7 @@ class NearestNeighbors(Calculation):
                     diff_count += 1
         return diff_count
     
-    def pipeline(self):
+    def pipeline_debug(self):
         pipeline = list()
         cgmlst_digest = hoist(self.input_sequence,self.digest_path)
         filters = [
@@ -290,23 +290,20 @@ class NearestNeighbors(Calculation):
             {self.call_pct_path: {'$gt': 85}}, # Discard low quality sequences
         ]
 
-        print("Filters to apply to sequences before running nearest neighbors:")
+        print(f"Filters ({len(filters)}) to apply to sequences before running nearest neighbors:")
         # There must always be a filter on species as different species have different cgMLST schemas
         try:
             for filter in filters:
                 print(f"{filter}")
                 pipeline.append(
-                {'$match':
-                    {
-                        filter,
-                    }
-                }
+                {'$match': filter,}
             )
         except Exception as e:
             self.store_result(str(e), 'error')
+            raise
 
         query_allele_profile = hoist(self.input_sequence, self.allele_path)
-        pprint(query_allele_profile)
+        #print(query_allele_profile)
         ignored_values = ["NIPH","NIPHEM","LNF"]
         zip_alleles = {
                 "$addFields": {
@@ -365,6 +362,7 @@ class NearestNeighbors(Calculation):
             filter_distances,
             projection,
         ])
+        pprint(pipeline)
         return pipeline
 
     async def calculate(self):
@@ -373,12 +371,13 @@ class NearestNeighbors(Calculation):
         comparable_sequences_count = Calculation.mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})
         print(f"Comparable sequences found: {str(comparable_sequences_count)}")
         
-        pipeline = self.pipeline()
+        pipeline = self.pipeline_debug()
+
         try:
             neighbors = Calculation.mongo_api.db[self.seq_collection].aggregate(pipeline)
         except Exception as e:
-            self.store_result(str(e), 'error')
-        
+            await self.store_result(str(e), 'error')
+            raise
         if self.status == 'error':
             await self.store_result(self.result, status='error', error_msg=self.error_msg)
         else:
@@ -533,9 +532,6 @@ class DistanceCalculation(Calculation):
         df.to_csv(tsv, sep=sep, index=True, index_label="")
         return tsv.getvalue()
 
-        
-
-
 class TreeCalculation(Calculation):
     dmx_job: str
     method: str
@@ -563,7 +559,6 @@ class TreeCalculation(Calculation):
             await self.store_result(tree)
         except ValueError as e:
             await self.store_result(str(e), 'error')
-
 
 class HPCCalculation(Calculation):
     @property
