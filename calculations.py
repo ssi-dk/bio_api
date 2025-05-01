@@ -6,6 +6,7 @@ from io import StringIO
 import abc
 from dataclasses import dataclass, field, asdict
 from abc import abstractmethod
+from pprint import pprint
 
 from bson.objectid import ObjectId
 from pandas import DataFrame, read_table, read_csv
@@ -280,12 +281,7 @@ class NearestNeighbors(Calculation):
                     diff_count += 1
         return diff_count
     
-    async def calculate(self):
-        print(f"Sequence collection: {self.seq_collection}")
-        print(f"Profile field path: {self.profile_field_path}")
-        comparable_sequences_count = Calculation.mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})
-        print(f"Comparable sequences found: {str(comparable_sequences_count)}")
-        
+    def pipeline(self):
         pipeline = list()
         filters = [{'_id':{'$ne':self.input_sequence['_id']}}, # don't match self
                    {self.digest_path:{'$eq':hoist(self.input_sequence,self.digest_path)}}, # Only compare matching schemas
@@ -305,31 +301,44 @@ class NearestNeighbors(Calculation):
                 }
             )
         except Exception as e:
-            await self.store_result(str(e), 'error')
+            self.store_result(str(e), 'error')
 
         query_allele_profile = hoist(self.input_sequence, self.allele_path)
+        pprint(query_allele_profile)
         ignored_values = ["NIPH","NIPHEM","LNF"]
+        zip_alleles = {
+                "$addFields": {
+                    "zipped_pairs": {
+                        "$zip": {
+                            "inputs": [f"${self.allele_path}", query_allele_profile]
+                        }
+                    }
+                }
+            }
+        filter_diffs = {
+                "$addFields": {
+                    "filtered_pairs": {
+                        "$filter": {
+                            "input": "$zipped_pairs",
+                            "as": "pair",
+                            "cond": {
+                                "$and": [
+                                    {"$ne": [
+                                        {"$arrayElemAt": ["$$pair", 0]},
+                                        {"$arrayElemAt": ["$$pair", 1]}
+                                    ]},  # Values are different
+                                    {"$not": {"$in": [{"$arrayElemAt": ["$$pair", 0]}, ignored_values]}},  # First value not ignored
+                                    {"$not": {"$in": [{"$arrayElemAt": ["$$pair", 1]}, ignored_values]}}   # Second value not ignored
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
         compute_distances = {
                 "$addFields": {
                     "diff_count": {
-                        "$size": {
-                            "$filter": {
-                                "input": {
-                                    "$zip": {"inputs": [f"${self.allele_path}", query_allele_profile]}
-                                },
-                                "as": "pair",
-                                "cond": {
-                                    "$and": [
-                                        {"$ne": [
-                                            {"$arrayElemAt": ["$$pair", 0]},
-                                            {"$arrayElemAt": ["$$pair", 1]}
-                                        ]},  # Values are different
-                                        {"$not": {"$in": [{"$arrayElemAt": ["$$pair", 0]}, ignored_values]}},  # First value not ignored
-                                        {"$not": {"$in": [{"$arrayElemAt": ["$$pair", 1]}, ignored_values]}}   # Second value not ignored
-                                    ]
-                                }
-                            }
-                        }
+                        "$size": "$filtered_pairs"
                     }
                 }
             }
@@ -341,12 +350,29 @@ class NearestNeighbors(Calculation):
         projection = {
                 "$project": { "_id": 1, "diff_count": 1}
             }
-        
+        preview_filtered_results = {
+            "$project": {
+                "_id": 0,
+                "filtered_pairs": 1
+            }
+        },
         pipeline.extend([
+            zip_alleles,
+            filter_diffs,
+            preview_filtered_results,
             compute_distances,
             filter_distances,
             projection,
         ])
+        return pipeline
+
+    async def calculate(self):
+        print(f"Sequence collection: {self.seq_collection}")
+        print(f"Profile field path: {self.profile_field_path}")
+        comparable_sequences_count = Calculation.mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})
+        print(f"Comparable sequences found: {str(comparable_sequences_count)}")
+        
+        pipeline = list()
 
         neighbors = Calculation.mongo_api.db[self.seq_collection].aggregate(pipeline)
         
