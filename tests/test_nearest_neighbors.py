@@ -118,7 +118,6 @@ async def test_nearest_neighbors_calculate(mock_get_section, prepared_populated_
     await calc.calculate()
     logger.info(f"Result: {calc.result}")
     assert len(calc.result) == 1
-    
 
 """
 

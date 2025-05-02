@@ -289,12 +289,8 @@ class NearestNeighbors(Calculation):
             {self.digest_path:{'$eq': cgmlst_digest}}, # Only compare matching schemas
             {self.call_pct_path: {'$gt': 85}}, # Discard low quality sequences
         ]
-
-        print(f"Filters ({len(filters)}) to apply to sequences before running nearest neighbors:")
-        # There must always be a filter on species as different species have different cgMLST schemas
         try:
             for filter in filters:
-                print(f"{filter}")
                 pipeline.append(
                 {'$match': filter,}
             )
@@ -302,6 +298,11 @@ class NearestNeighbors(Calculation):
             self.store_result(str(e), 'error')
             raise
         pprint(pipeline)
+        count = pipeline + [{
+            "$count": "matched_docs"
+        }]
+        matched_docs = Calculation.mongo_api.db[self.seq_collection].aggregate(count)
+        print(list(matched_docs))
         query_allele_profile = hoist(self.input_sequence, self.allele_path)
         add_allele_profile = {"$addFields": {"query": query_allele_profile}}
         ignored_values = ["NIPH","NIPHEM","LNF"]
@@ -349,12 +350,6 @@ class NearestNeighbors(Calculation):
         projection = {
                 "$project": { "_id": 1, "diff_count": 1}
             }
-        preview_filtered_results = {
-            "$project": {
-                "_id": 0,
-                "filtered_pairs": 1
-            }
-        },
         pipeline.extend([
             add_allele_profile,
             zip_alleles,
@@ -369,7 +364,7 @@ class NearestNeighbors(Calculation):
         print(f"Sequence collection: {self.seq_collection}")
         print(f"Profile field path: {self.profile_field_path}")
         comparable_sequences_count = Calculation.mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})
-        print(f"Comparable sequences found: {str(comparable_sequences_count)}")
+        print(f"Total number of profiles found found: {str(comparable_sequences_count)}")
         
         pipeline = self.pipeline_debug()
 
