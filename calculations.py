@@ -301,15 +301,15 @@ class NearestNeighbors(Calculation):
         except Exception as e:
             self.store_result(str(e), 'error')
             raise
-
+        pprint(pipeline)
         query_allele_profile = hoist(self.input_sequence, self.allele_path)
-        #print(query_allele_profile)
+        add_allele_profile = {"$addFields": {"query": query_allele_profile}}
         ignored_values = ["NIPH","NIPHEM","LNF"]
         zip_alleles = {
                 "$addFields": {
                     "zipped_pairs": {
                         "$zip": {
-                            "inputs": [f"${self.allele_path}", query_allele_profile]
+                            "inputs": [f"${self.allele_path}", "$query"]
                         }
                     }
                 }
@@ -356,13 +356,13 @@ class NearestNeighbors(Calculation):
             }
         },
         pipeline.extend([
+            add_allele_profile,
             zip_alleles,
             filter_diffs,
             compute_distances,
             filter_distances,
             projection,
         ])
-        pprint(pipeline)
         return pipeline
 
     async def calculate(self):
@@ -382,6 +382,7 @@ class NearestNeighbors(Calculation):
             await self.store_result(self.result, status='error', error_msg=self.error_msg)
         else:
             self.result = sorted(neighbors, key=lambda x : x['diff_count'])
+            pprint(self.result)
             await self.store_result(self.result)
     
     def to_dict(self):

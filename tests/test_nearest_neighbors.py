@@ -94,7 +94,7 @@ async def test_no_objectID_found_404(mock_get_section, mock_db):
 
 @pytest.mark.asyncio
 @patch("calculations.Config.get_section")
-async def test_nearest_neighbors_calculate(mock_get_section, prepared_mongo):
+async def test_nearest_neighbors_calculate(mock_get_section, prepared_populated_mongo):
     ### CODE 200
     logger.info("===== test_nearest_neighbors_calculate =====")
 
@@ -106,14 +106,18 @@ async def test_nearest_neighbors_calculate(mock_get_section, prepared_mongo):
         filtering=MOCK_MONGO_CONFIG["filtering"],
         unknowns_are_diffs=MOCK_MONGO_CONFIG["unknowns_are_diffs"]
     )
-
-    calc.input_sequence = await calc.query_mongodb_for_input_profile()
+    try:
+        calc.input_sequence = await calc.query_mongodb_for_input_profile()
+    except MissingDataException:
+        print(list(prepared_populated_mongo["samples"].find({})))
+        raise
     logger.info(f"Input sequence retrieved: {calc.input_sequence}")
 
     assert calc.input_sequence["_id"] == MOCK_INPUT_ID
     assert "categories" in calc.input_sequence
-
     await calc.calculate()
+    logger.info(f"Result: {calc.result}")
+    assert len(calc.result) == 1
     
 
 """
