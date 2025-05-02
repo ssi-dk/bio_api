@@ -297,12 +297,11 @@ class NearestNeighbors(Calculation):
         except Exception as e:
             self.store_result(str(e), 'error')
             raise
-        pprint(pipeline)
         count = pipeline + [{
             "$count": "matched_docs"
         }]
         matched_docs = Calculation.mongo_api.db[self.seq_collection].aggregate(count)
-        print(list(matched_docs))
+        print(f"{list(matched_docs)[0]}\nUsing cutoff {self.cutoff}")
         query_allele_profile = hoist(self.input_sequence, self.allele_path)
         add_allele_profile = {"$addFields": {"query": query_allele_profile}}
         ignored_values = ["NIPH","NIPHEM","LNF"]
@@ -350,6 +349,19 @@ class NearestNeighbors(Calculation):
         projection = {
                 "$project": { "_id": 1, "diff_count": 1}
             }
+
+
+        peek = pipeline + [
+            add_allele_profile,
+            zip_alleles,
+            filter_diffs,
+            compute_distances,
+            projection
+        ]
+
+        matched_docs = list(Calculation.mongo_api.db[self.seq_collection].aggregate(peek))
+        print(f"Retained docs: {len(matched_docs)}\nSample:\n{matched_docs[:5]}")
+
         pipeline.extend([
             add_allele_profile,
             zip_alleles,
