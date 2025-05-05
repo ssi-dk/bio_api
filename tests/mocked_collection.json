@@ -5,7 +5,14 @@
         },
         "categories": {
             "cgmlst": {
+                "summary": {
+                    "call_percent": 100
+                },
                 "report": {
+                    "allele_array": [
+                        1,
+                        2
+                    ],
                     "alleles": {
                         "locus1": "1",
                         "locus2": "2"

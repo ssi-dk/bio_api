@@ -50,8 +50,9 @@ async def test_nearest_neighbors_creation_and_profile_retrieval(mock_get_section
     profile = calc.input_profile
     logger.info(f"Input profile hoisted: {profile}")
 
-    assert profile["locus1"] == "1"
-    assert profile["locus2"] == "2"
+    assert profile[0] == 1
+    assert profile[1] == 2
+
 
 
 @pytest.mark.asyncio
@@ -89,6 +90,34 @@ async def test_no_objectID_found_404(mock_get_section, mock_db):
     )
     with pytest.raises(MissingDataException):
         await calc.query_mongodb_for_input_profile()
+
+
+@pytest.mark.asyncio
+@patch("calculations.Config.get_section")
+async def test_nearest_neighbors_calculate(mock_get_section, prepared_populated_mongo):
+    ### CODE 200
+    logger.info("===== test_nearest_neighbors_calculate =====")
+
+    mock_get_section.return_value = MOCK_MONGO_CONFIG
+
+    calc = NearestNeighbors(
+        input_mongo_id=str(MOCK_INPUT_ID),
+        cutoff=MOCK_MONGO_CONFIG["cutoff"],
+        filtering=MOCK_MONGO_CONFIG["filtering"],
+        unknowns_are_diffs=MOCK_MONGO_CONFIG["unknowns_are_diffs"]
+    )
+    try:
+        calc.input_sequence = await calc.query_mongodb_for_input_profile()
+    except MissingDataException:
+        print(list(prepared_populated_mongo["samples"].find({})))
+        raise
+    logger.info(f"Input sequence retrieved: {calc.input_sequence}")
+
+    assert calc.input_sequence["_id"] == MOCK_INPUT_ID
+    assert "categories" in calc.input_sequence
+    await calc.calculate()
+    logger.info(f"Result: {calc.result}")
+    assert len(calc.result) == 1
 
 """
 

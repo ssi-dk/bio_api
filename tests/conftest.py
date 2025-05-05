@@ -1,8 +1,10 @@
 # conftest.py
 
+from os import getenv
 import pytest
 import pytest_asyncio
 import mongomock
+import pymongo
 import asyncio
 from unittest.mock import AsyncMock, patch
 import uuid
@@ -24,6 +26,15 @@ from .mongo_mock import (
 )
 
 # --- MongoDB Fixture --- #
+TEST_MONGO_CONNECTION_STRING = getenv('BIO_API_TEST_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
+@pytest.fixture
+def test_db():
+    """Connects to an empty MongoDB database"""
+    client = pymongo.MongoClient(TEST_MONGO_CONNECTION_STRING)
+    client["bio_api_test"].create_collection("samples")
+    yield client["bio_api_test"]
+    client["bio_api_test"].drop_collection("samples")
+
 
 @pytest.fixture
 def mock_db():
@@ -99,6 +110,27 @@ def prepared_mongo(mock_db):
     Calculation.set_mongo_api(mongo_api)
     mock_db["samples"].insert_one(MOCK_INPUT_SEQUENCE)
     return mock_db
+
+# @pytest.fixture
+# def prepared_populated_mongo(mock_db):
+#     """Inject mocked MongoAPI and insert required documents for unit tests."""
+#     mongo_api = MongoAPI(db=mock_db)
+#     Calculation.set_mongo_api(mongo_api)
+#     mock_db["samples"].insert_one(MOCK_INPUT_SEQUENCE)
+#     mock_db["samples"].insert_one(MOCK_NEIGHBOR_SEQUENCE)
+#     mock_db["samples"].insert_one(MOCK_NEIGHBOR_SEQUENCE_2)
+#     return mock_db
+
+@pytest.fixture
+def prepared_populated_mongo(test_db):
+    """Inject mocked MongoAPI and insert required documents for unit tests."""
+    mongo_api = MongoAPI(db=test_db)
+    Calculation.set_mongo_api(mongo_api)
+    test_db["samples"].insert_one(MOCK_INPUT_SEQUENCE)
+    test_db["samples"].insert_one(MOCK_NEIGHBOR_SEQUENCE)
+    test_db["samples"].insert_one(MOCK_NEIGHBOR_SEQUENCE_2)
+    return test_db
+
 
 @pytest_asyncio.fixture
 async def test_client():
