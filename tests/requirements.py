@@ -16,10 +16,11 @@ MOCK_NEIGHBOR_ID_missing = ObjectId("65f000abc123abc123abc999")
 MOCK_MONGO_CONFIG = {
     "seq_collection": "samples",
     "profile_field_path": "categories.cgmlst.report.alleles",
+    "allele_path": "categories.cgmlst.report.allele_array",
+    "digest_path": "categories.cgmlst.report.schema.digest",
+    "call_pct_path": "categories.cgmlst.summary.call_percent",
     "cutoff": 2,
-    "filtering": {
-        "categories.cgmlst.report.schema.digest": 1
-    },
+    "filtering": {},
     "unknowns_are_diffs": True
 }
 
