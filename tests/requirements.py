@@ -29,7 +29,9 @@ MOCK_INPUT_SEQUENCE = {
     "_id": MOCK_INPUT_ID,
     "categories": {
         "cgmlst": {
+            "summary": {"call_percent": 100},
             "report": {
+                "allele_array": [1,2],
                 "alleles": {
                     "locus1": "1",
                     "locus2": "2"
@@ -48,7 +50,9 @@ MOCK_NEIGHBOR_SEQUENCE = {
     "_id": MOCK_NEIGHBOR_ID_1,
     "categories": {
         "cgmlst": {
+            "summary": {"call_percent": 100},
             "report": {
+                "allele_array": [1,3],
                 "alleles": {
                     "locus1": "1",
                     "locus2": "3"
@@ -67,7 +71,9 @@ MOCK_NEIGHBOR_SEQUENCE_2 = {
     "_id": MOCK_NEIGHBOR_ID_2,
     "categories": {
         "cgmlst": {
+            "summary": {"call_percent": 100},
             "report": {
+                "allele_array": [9,3],
                 "alleles": {
                     "locus1": "9",
                     "locus2": "3"

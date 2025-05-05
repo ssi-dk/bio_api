@@ -6,6 +6,7 @@ from io import StringIO
 import abc
 from dataclasses import dataclass, field, asdict
 from abc import abstractmethod
+from pprint import pprint
 
 from bson.objectid import ObjectId
 from pandas import DataFrame, read_table, read_csv
@@ -202,7 +203,7 @@ class NearestNeighbors(Calculation):
 
     @property
     def input_profile(self):
-        return hoist(self.input_sequence, self.profile_field_path)
+        return hoist(self.input_sequence, self.allele_path)
 
     def __init__(
             self,
@@ -217,6 +218,11 @@ class NearestNeighbors(Calculation):
 
         #NN_config = self.config.get_section(self.collection)  
         self.seq_collection = self.get_config_value("seq_collection")
+
+        ## Hardcoding paths initially
+        self.allele_path = "categories.cgmlst.report.allele_array"
+        self.digest_path = "categories.cgmlst.report.schema.digest"
+        self.call_pct_path = "categories.cgmlst.summary.call_percent"
         
         ## Should be set based on input document
         self.filtering = filtering if filtering is not None else self.get_config_value("filtering", {})
@@ -241,7 +247,7 @@ class NearestNeighbors(Calculation):
         "Get a the allele profile for the input sequence from MongoDB"
         profile_count, cursor = await Calculation.mongo_api.get_field_data(
             collection=self.seq_collection,
-            field_paths=[self.profile_field_path],
+            field_paths=[self.allele_path, self.digest_path],
             mongo_ids=[self.input_mongo_id]
             )
         if profile_count == 0:
@@ -275,64 +281,115 @@ class NearestNeighbors(Calculation):
                     diff_count += 1
         return diff_count
     
+    def pipeline_debug(self):
+        pipeline = list()
+        cgmlst_digest = hoist(self.input_sequence,self.digest_path)
+        filters = [
+            {'_id': {'$ne': self.input_sequence['_id']}}, # don't match self
+            {self.digest_path:{'$eq': cgmlst_digest}}, # Only compare matching schemas
+            {self.call_pct_path: {'$gt': 85}}, # Discard low quality sequences
+        ]
+        try:
+            for filter in filters:
+                pipeline.append(
+                {'$match': filter,}
+            )
+        except Exception as e:
+            self.store_result(str(e), 'error')
+            raise
+        count = pipeline + [{
+            "$count": "matched_docs"
+        }]
+        matched_docs = Calculation.mongo_api.db[self.seq_collection].aggregate(count)
+        print(f"{list(matched_docs)[0]}\nUsing cutoff {self.cutoff}")
+        query_allele_profile = hoist(self.input_sequence, self.allele_path)
+        add_allele_profile = {"$addFields": {"query": query_allele_profile}}
+        ignored_values = ["NIPH","NIPHEM","LNF"]
+        zip_alleles = {
+                "$addFields": {
+                    "zipped_pairs": {
+                        "$zip": {
+                            "inputs": [f"${self.allele_path}", "$query"]
+                        }
+                    }
+                }
+            }
+        filter_diffs = {
+                "$addFields": {
+                    "filtered_pairs": {
+                        "$filter": {
+                            "input": "$zipped_pairs",
+                            "as": "pair",
+                            "cond": {
+                                "$and": [
+                                    {"$ne": [
+                                        {"$arrayElemAt": ["$$pair", 0]},
+                                        {"$arrayElemAt": ["$$pair", 1]}
+                                    ]},  # Values are different
+                                    {"$not": {"$in": [{"$arrayElemAt": ["$$pair", 0]}, ignored_values]}},  # First value not ignored
+                                    {"$not": {"$in": [{"$arrayElemAt": ["$$pair", 1]}, ignored_values]}}   # Second value not ignored
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        compute_distances = {
+                "$addFields": {
+                    "diff_count": {
+                        "$size": "$filtered_pairs"
+                    }
+                }
+            }
+        filter_distances = {
+                "$match": {
+                    "diff_count": {"$lt": self.cutoff}
+                }
+            }
+        projection = {
+                "$project": { "_id": 1, "diff_count": 1}
+            }
+
+
+        peek = pipeline + [
+            add_allele_profile,
+            zip_alleles,
+            filter_diffs,
+            compute_distances,
+            projection
+        ]
+
+        matched_docs = list(Calculation.mongo_api.db[self.seq_collection].aggregate(peek))
+        print(f"Retained docs: {len(matched_docs)}\nSample:\n{matched_docs[:5]}")
+
+        pipeline.extend([
+            add_allele_profile,
+            zip_alleles,
+            filter_diffs,
+            compute_distances,
+            filter_distances,
+            projection,
+        ])
+        return pipeline
+
     async def calculate(self):
         print(f"Sequence collection: {self.seq_collection}")
         print(f"Profile field path: {self.profile_field_path}")
         comparable_sequences_count = Calculation.mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})
-        print(f"Comparable sequences found: {str(comparable_sequences_count)}")
+        print(f"Total number of profiles found found: {str(comparable_sequences_count)}")
         
-        pipeline = list()
+        pipeline = self.pipeline_debug()
 
-        print("Filters to apply to sequences before running nearest neighbors:")
-        # There must always be a filter on species as different species have different cgMLST schemas
         try:
-            for k, v in self.filtering.items():
-                print(f"{k} must be {v}")
-                pipeline.append(
-                {'$match':
-                    {
-                        k: {'$eq': v},
-                    }
-                }
-            )
-        except KeyError as e:
+            neighbors = Calculation.mongo_api.db[self.seq_collection].aggregate(pipeline)
+        except Exception as e:
             await self.store_result(str(e), 'error')
-
-        pipeline.append(
-            {'$match':
-                {
-                    self.profile_field_path: {'$exists': True},
-                }
-            }
-        )
-        pipeline.append(
-            {'$project':
-                {
-                    self.profile_field_path: 1,
-                }
-            }
-        )
-        sequences_to_compare_with = Calculation.mongo_api.db[self.seq_collection].aggregate(pipeline)
-
-        nearest_neighbors = list()
-        for other_sequence in sequences_to_compare_with:
-            if not other_sequence['_id'] == self.input_sequence['_id']:
-                try:
-                    diff_count = self.profile_diffs(hoist(other_sequence, self.profile_field_path))
-                except MissingDataException as e:
-                    print("ERROR when running nearest neighbors:")
-                    error_msg = str(e) + f". Other sequence _id: {other_sequence['_id']}"
-                    print(error_msg)
-                    print("You can also find the above message in the MongoDB document for the job.")
-                    self.error_msg = error_msg
-                    self.status = 'error'
-                    break
-                if diff_count <= self.cutoff:
-                    nearest_neighbors.append({'_id': other_sequence['_id'], 'diff_count': diff_count})
+            raise
         if self.status == 'error':
             await self.store_result(self.result, status='error', error_msg=self.error_msg)
         else:
-            self.result = sorted(nearest_neighbors, key=lambda x : x['diff_count'])
+            self.result = sorted(neighbors, key=lambda x : x['diff_count'])
+            pprint(self.result)
             await self.store_result(self.result)
     
     def to_dict(self):
@@ -483,9 +540,6 @@ class DistanceCalculation(Calculation):
         df.to_csv(tsv, sep=sep, index=True, index_label="")
         return tsv.getvalue()
 
-        
-
-
 class TreeCalculation(Calculation):
     dmx_job: str
     method: str
@@ -513,7 +567,6 @@ class TreeCalculation(Calculation):
             await self.store_result(tree)
         except ValueError as e:
             await self.store_result(str(e), 'error')
-
 
 class HPCCalculation(Calculation):
     @property
