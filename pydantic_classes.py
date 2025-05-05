@@ -33,9 +33,6 @@ class DistanceMatrixRequest(DeprecatedFields):
     seq_mongo_ids: the  _id strings for the desired sequence documents
     """
     seq_mongo_ids: list | None
-    seq_collection: Optional[str] = None
-    seqid_field_path: Optional[str] = None
-    profile_field_path: Optional[str] = None
 
 
 class HCTreeCalcRequest(BaseModel):

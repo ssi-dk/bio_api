@@ -281,6 +281,65 @@ class NearestNeighbors(Calculation):
                     diff_count += 1
         return diff_count
     
+    def pipeline_prod(self):
+        pipeline = list()
+        cgmlst_digest = hoist(self.input_sequence,self.digest_path)
+        filters = [
+            {'_id': {'$ne': self.input_sequence['_id']}}, # don't match self
+            {self.digest_path:{'$eq': cgmlst_digest}}, # Only compare matching schemas
+            {self.call_pct_path: {'$gt': 85}}, # Discard low quality sequences
+        ]
+        try:
+            for filter in filters:
+                pipeline.append(
+                {'$match': filter,}
+            )
+        except Exception as e:
+            self.store_result(str(e), 'error')
+            raise
+        query_allele_profile = hoist(self.input_sequence, self.allele_path)
+        ignored_values = ["NIPH","NIPHEM","LNF"]
+        compute_distances = {
+            "$addFields": {
+                "diff_count": {
+                    "$size": {
+                        "$filter": {
+                            "input": {
+                                "$zip": {
+                                    "inputs": [f"${self.allele_path}", query_allele_profile]
+                                }
+                            },
+                            "as": "pair",
+                            "cond": {
+                                "$and": [
+                                    {"$ne": [
+                                        {"$arrayElemAt": ["$$pair", 0]},
+                                        {"$arrayElemAt": ["$$pair", 1]}
+                                    ]},  # Values are different
+                                    {"$not": {"$in": [{"$arrayElemAt": ["$$pair", 0]}, ignored_values]}},  # First value not ignored
+                                    {"$not": {"$in": [{"$arrayElemAt": ["$$pair", 1]}, ignored_values]}}   # Second value not ignored
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        filter_distances = {
+            "$match": {
+                "diff_count": {"$lt": self.cutoff}
+            }
+        }
+        projection = {
+            "$project": { "_id": 1, "diff_count": 1}
+        }
+        pipeline.extend([
+            compute_distances,
+            filter_distances,
+            projection,
+        ])
+        return pipeline
+        
     def pipeline_debug(self):
         pipeline = list()
         cgmlst_digest = hoist(self.input_sequence,self.digest_path)
@@ -378,7 +437,7 @@ class NearestNeighbors(Calculation):
         comparable_sequences_count = Calculation.mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})
         print(f"Total number of profiles found found: {str(comparable_sequences_count)}")
         
-        pipeline = self.pipeline_debug()
+        pipeline = self.pipeline_prod()
 
         try:
             neighbors = Calculation.mongo_api.db[self.seq_collection].aggregate(pipeline)
