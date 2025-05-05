@@ -46,4 +46,5 @@ class Config:
             upsert = True) 
     def load(self, config: dict):
         self.mongoapi.db[self.collection_name].insert_many(config)
-    
+    def clear(self):
+        self.mongoapi.db[self.collection_name].remove({})

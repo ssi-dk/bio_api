@@ -21,6 +21,7 @@ def main():
     #pprint(yaml_config)
     #pprint([x['section'] for x in yaml_config if x["section"]=="snp"])
     config = Config(mongoapi)
+    config.clear()
     config.load(yaml_config)
 
 if __name__ == "__main__":

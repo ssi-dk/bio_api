@@ -4,6 +4,9 @@
         "seq_collection": "samples",
         "filtering": { "categories.cgmlst.report.schema.digest": 1 },
         "profile_field_path": "categories.cgmlst.report.alleles",
+        "allele_path": "categories.cgmlst.report.allele_array",
+        "digest_path": "categories.cgmlst.report.schema.digest",
+        "call_pct_path": "categories.cgmlst.summary.call_percent",
         "cutoff": 15,  
         "unknowns_are_diffs": true  
     },

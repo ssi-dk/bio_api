@@ -189,7 +189,6 @@ class Calculation(metaclass=abc.ABCMeta):
     async def calculate(self, cursor):
         pass
 
-
 class NearestNeighbors(Calculation):
     collection = 'nearest_neighbors'
 
@@ -218,15 +217,13 @@ class NearestNeighbors(Calculation):
 
         #NN_config = self.config.get_section(self.collection)  
         self.seq_collection = self.get_config_value("seq_collection")
+        self.profile_field_path = self.get_config_value("profile_field_path")
+        self.allele_path = self.get_config_value("allele_path")
+        self.digest_path = self.get_config_value("digest_path")
+        self.call_pct_path = self.get_config_value("call_pct_path")
 
-        ## Hardcoding paths initially
-        self.allele_path = "categories.cgmlst.report.allele_array"
-        self.digest_path = "categories.cgmlst.report.schema.digest"
-        self.call_pct_path = "categories.cgmlst.summary.call_percent"
-        
         ## Should be set based on input document
         self.filtering = filtering if filtering is not None else self.get_config_value("filtering", {})
-        self.profile_field_path = self.get_config_value("profile_field_path")
         self.cutoff = cutoff if cutoff is not None else self.get_config_value("cutoff") 
         self.unknowns_are_diffs = unknowns_are_diffs if unknowns_are_diffs is not None else self.get_config_value("unknowns_are_diffs")
         self.input_mongo_id = input_mongo_id
