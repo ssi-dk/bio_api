@@ -295,7 +295,7 @@ class NearestNeighbors(Calculation):
             self.store_result(str(e), 'error')
             raise
         query_allele_profile = hoist(self.input_sequence, self.allele_path)
-        ignored_values = ["NIPH","NIPHEM","LNF"]
+        ignored_values = ["NIPH","NIPHEM","LNF","PLNF","PLOT3","PLOT5","LOTSC","PAMA","ASM","ALM"]
         compute_distances = {
             "$addFields": {
                 "diff_count": {
