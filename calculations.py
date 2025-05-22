@@ -16,7 +16,7 @@ from mongo import MongoAPI
 from tree_maker import make_tree
 
 import sofi_messenger
-from mongo import Config
+from mongo import Config, extractIds
 
 MONGO_CONNECTION_STRING = getenv('BIO_API_MONGO_CONNECTION', 'mongodb://mongodb:27017/bio_api_test')
 
@@ -506,6 +506,12 @@ class DistanceCalculation(Calculation):
     def dist_mx_filepath(self):
         "Return the filepath for the distance matrix file corresponding with the class instance"
         return str(Path(self.folder, 'distance_matrix.json'))
+    
+    def compare_mongo_ids(self,cursor):
+        "Returns a set of the missing IDs"
+        foundIds = set(extractIds(cursor))
+        expectedIds = set(self.seq_mongo_ids)
+        return expectedIds.difference(foundIds)
 
     async def query_mongodb_for_allele_profiles(self):
         "Get a MongoDB cursor that represents the allele profiles for the calculation"
@@ -516,7 +522,8 @@ class DistanceCalculation(Calculation):
             )
         if self.seq_mongo_ids is not None and len(self.seq_mongo_ids) != profile_count:
             message = "Could not find the requested number of sequences. " + \
-                f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(profile_count)}"
+                f"Requested: {str(len(self.seq_mongo_ids))}, found: {str(profile_count)}, " + \
+                f"Missing IDs: {str(self.compare_mongo_ids(cursor))}"
             raise MissingDataException(message)
         return profile_count, cursor
 

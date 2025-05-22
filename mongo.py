@@ -10,6 +10,11 @@ def strs2ObjectIds(id_strings: list):
         output.append(ObjectId(id_str))
     return output
 
+def extractIds(cursor):
+    ids = list()
+    for item in cursor:
+        ids.append(str(item['_id']))
+    return ids
 
 class MongoAPI:
     def __init__(self,
