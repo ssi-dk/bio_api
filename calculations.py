@@ -378,7 +378,7 @@ class NearestNeighbors(Calculation):
                 }
             }
         projection = {
-                "$project": { "_id": 1, "diff_count": 1, "filtered_pairs":1}
+                "$project": { "_id": 1, "diff_count": 1, "filtered_pairs": 1}
             }
 
 
@@ -431,8 +431,18 @@ class NearestNeighbors(Calculation):
             for r in content['result']:
                 r['id'] = str(r['_id'])
                 r.pop('_id')
-
         return content
+
+    def remove_filtered_pairs_from_self(self):
+        if self.result and type(self.result) is list:
+            # Add id, remove _id from result
+            r: dict
+            for r in self.result:
+                try:
+                    r.pop('filtered_pairs')
+                except KeyError:
+                    pass
+        return self
 
 class DistanceCalculation(Calculation):
     collection = 'dist_calculations'

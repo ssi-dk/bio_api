@@ -111,6 +111,7 @@ async def nn_result(nn_id: str, level:str='full'):
             )
 
     print("Get nearest neighbors result.")
+    calc.remove_filtered_pairs_from_self()
     content:dict = calc.to_dict()
     
     if level != 'full' and content['status'] == 'completed':
