@@ -253,31 +253,6 @@ class NearestNeighbors(Calculation):
         reference_profile = next(cursor)
         return reference_profile
     
-    def profile_diffs(self, other_profile:dict):
-        """Count the number of differences between two allele profiles."""
-        diff_count = 0
-        for locus in self.input_profile.keys():
-            try:
-                ref_allele = int(self.input_profile[locus])
-            except ValueError:
-                if self.unknowns_are_diffs:
-                    # Ref allele not intable - counting a difference.
-                    diff_count += 1
-                # No reason to compare alleles if ref allele is not intable
-                continue
-            try:
-                other_allele = int(other_profile[locus])
-                if ref_allele != other_allele:
-                    # Both are intable but they are not equal - counting a difference.
-                    diff_count += 1
-            except KeyError:
-                raise MissingDataException(f"Could not find locus {locus} in allele profile")
-            except ValueError:
-                if self.unknowns_are_diffs:
-                    # Other allele not intable - counting as difference.
-                    diff_count += 1
-        return diff_count
-    
     def pipeline_prod(self):
         pipeline = list()
         cgmlst_digest = hoist(self.input_sequence,self.digest_path)
@@ -360,7 +335,7 @@ class NearestNeighbors(Calculation):
         print(f"{list(matched_docs)[0]}\nUsing cutoff {self.cutoff}")
         query_allele_profile = hoist(self.input_sequence, self.allele_path)
         add_allele_profile = {"$addFields": {"query": query_allele_profile}}
-        ignored_values = ["NIPH","NIPHEM","LNF"]
+        ignored_values = ["NIPH","NIPHEM","LNF","PLNF","PLOT3","PLOT5","LOTSC","PAMA","ASM","ALM"]
         zip_alleles = {
                 "$addFields": {
                     "zipped_pairs": {
@@ -403,7 +378,7 @@ class NearestNeighbors(Calculation):
                 }
             }
         projection = {
-                "$project": { "_id": 1, "diff_count": 1}
+                "$project": { "_id": 1, "diff_count": 1, "filtered_pairs":1}
             }
 
 
@@ -432,9 +407,9 @@ class NearestNeighbors(Calculation):
         print(f"Sequence collection: {self.seq_collection}")
         print(f"Profile field path: {self.profile_field_path}")
         comparable_sequences_count = Calculation.mongo_api.db[self.seq_collection].count_documents({self.profile_field_path: {"$exists":True}})
-        print(f"Total number of profiles found found: {str(comparable_sequences_count)}")
+        print(f"Total number of profiles found: {str(comparable_sequences_count)}")
         
-        pipeline = self.pipeline_prod()
+        pipeline = self.pipeline_debug()
 
         try:
             neighbors = Calculation.mongo_api.db[self.seq_collection].aggregate(pipeline)
